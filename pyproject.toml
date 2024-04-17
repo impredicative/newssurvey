@@ -39,7 +39,7 @@ fix = { chain = ["fix-lint", "fix-fmt" ] }
 "fix-fmt" = "rye fmt"
 
 [tool.ruff]
-line-length = 200
+line-length = 300
 
 [tool.ruff.lint]
 ignore = ["E731"]
