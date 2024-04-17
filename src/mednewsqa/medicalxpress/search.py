@@ -18,10 +18,15 @@ _HEXT = hext.Rule("""
 def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
     url = f"https://medicalxpress.com/search/page{page_num}.html"
     params = {"search": query, "s": {"relevancy": 0, "date": 1}[sort_by]}
-    print(f'Requesting page {page_num} of search results for "{query}" sorted by {sort_by}.')
+    description = f'page {page_num} of search results for "{query}" sorted by {sort_by}'
+    print(f"Requesting {description}.")
     response = requests.get(url, params=params, headers=REQUEST_HEADERS)
-    response.raise_for_status()
-    print(f'Received page {page_num} of search results for "{query}" sorted by {sort_by}.')
+    try:
+        response.raise_for_status()
+    except requests.RequestException:
+        print(f"Failed to receive {description} due to status code {response.status_code}.")
+        raise
+    print(f"Received {description} with status code {response.status_code}.")
     return response
 
 
@@ -29,7 +34,7 @@ def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_
     try:
         response = _get_search_response(query, sort_by=sort_by, page_num=page_num)
     except requests.HTTPError as exc:
-        if exc.response.status_code == 404:
+        if exc.response.status_code == 404:  # Observed for a large page number of a valid search term.
             return []
         raise
     html = response.text
@@ -41,5 +46,9 @@ def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_
 
 def get_printable_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_num: int = _DEFAULTS["page_num"]) -> str:
     results = get_search_results(query, sort_by=sort_by, page_num=page_num)
-    printable_results = f'Search results for "{query}" (page {page_num}):\n\n' + "\n\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
+    heading = f'Search results for "{query}" by {sort_by} (page {page_num}):'
+    if results:
+        printable_results = heading + "\n\n" + "\n\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
+    else:
+        printable_results = heading + "\n(none)"
     return printable_results
