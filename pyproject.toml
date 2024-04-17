@@ -1,0 +1,41 @@
+[project]
+name = "mednewsqa"
+version = "0.1.0"
+description = "Medical news Q&A using MedicalXpress and GPT-4"
+authors = [
+    { name = "Ouroboros Chrysopoeia", email = "impredicative@users.noreply.github.com" }
+]
+dependencies = []
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mednewsqa"]
+
+[project.scripts]
+mednewsqa = "mednewsqa.__main__:main"
+
+[tool.rye.scripts]  # Run as "rye run <command>"
+check = { chain = ["check-lint", "check-fmt" ] }
+"check-lint" = "rye lint"
+"check-fmt" = "rye fmt --check"
+fix = { chain = ["fix-lint", "fix-fmt" ] }
+"fix-lint" = "rye lint --fix"
+"fix-fmt" = "rye fmt"
+
+[tool.ruff]
+line-length = 200
+
+[tool.ruff.lint]
+ignore = ["E731"]
