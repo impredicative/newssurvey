@@ -76,6 +76,7 @@ _CONTENT_TRAILING_RE_BLACKLISTED = re.compile(r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Au
 def _get_article_response(url: str) -> requests.Response:
     print(f"Reading {url}.")
     response = requests.get(url, headers=REQUEST_HEADERS)
+    # Note: params={"deviceType": "mobile"} is not specified because it results in the loss of the article date.
     try:
         response.raise_for_status()
     except requests.RequestException:
@@ -88,6 +89,21 @@ def _get_article_response(url: str) -> requests.Response:
 def _get_article_content(url: str) -> list[str]:
     response = _get_article_response(url)
     html = response.text
+
+    # Replace heading tags with paragraph tag
+    # This is done because the hext rule extracts text from p tags only.
+    heading_level = 1
+    while True:
+        heading_tag_half_open, heading_tag_full_open, heading_tag_close = f"<h{heading_level} ", f"<h{heading_level}>", f"</h{heading_level}>"
+        if heading_tag_close in html:
+            html = html.replace(heading_tag_half_open, "<p ")
+            html = html.replace(heading_tag_full_open, "<p>")
+            html = html.replace(heading_tag_close, "</p>")
+            # print(f"Replaced h{heading_level} with p tags.")
+            heading_level += 1
+        else:
+            break
+
     rule = _HEXT
     html = hext.Html(html)
     results = rule.extract(html)
@@ -115,6 +131,6 @@ def _get_filtered_article_content(url: str) -> list[str]:
 
 def get_article_text(url: str) -> str:
     content = _get_filtered_article_content(url)
-    text = "\n\n* ".join(content)
+    text = "\n\n* ".join(content)  # TODO: Remove asterisk.
     text = text.strip()
     return text
