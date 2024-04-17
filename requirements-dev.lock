@@ -8,3 +8,15 @@
 #   with-sources: false
 
 -e file:.
+certifi==2024.2.2
+    # via requests
+charset-normalizer==3.3.2
+    # via requests
+hext==1.0.8
+    # via mednewsqa
+idna==3.7
+    # via requests
+requests==2.31.0
+    # via mednewsqa
+urllib3==2.2.1
+    # via requests
