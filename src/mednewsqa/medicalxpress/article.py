@@ -1,9 +1,10 @@
+import datetime
 import re
 
 import hext
 import requests
 
-from mednewsqa.config import REQUEST_HEADERS
+from mednewsqa.config import DISKCACHE, REQUEST_HEADERS
 
 _HEXT = hext.Rule("""
     <html>
@@ -69,14 +70,21 @@ _CONTENT_RE_FULLMATCH_BLACKLIST = [
 _CONTENT_TRAILING_RE_BLACKLISTED = re.compile(r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{4})$")
 
 
+@DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
 def _get_article_response(url: str) -> requests.Response:
+    print(f"Reading {url}.")
     response = requests.get(url, headers=REQUEST_HEADERS)
+    try:
+        response.raise_for_status()
+    except requests.RequestException:
+        print(f"Failed to read {url} due to status code {response.status_code}.")
+        raise
+    print(f"Read {url} with status code {response.status_code}.")
     return response
 
 
 def _get_article_content(url: str) -> list[str]:
     response = _get_article_response(url)
-    response.raise_for_status()
     html = response.text
     rule = _HEXT
     html = hext.Html(html)
