@@ -21,12 +21,15 @@ _CONTENT_BLACKLIST = {
     "Twit",
     "Share",
     "Email",
+    #
+    # Review attributes observed before article text.
     "fact-checked",
     "peer-reviewed publication",
     "trusted source",
-    #
-    # Review attributes observed before article text.
     "proofread",
+    "reputable news agency",
+    #
+    # Observed after article text.
     "Explore further",
     "Facebook",
     "Twitter",
@@ -35,8 +38,6 @@ _CONTENT_BLACKLIST = {
     "0",
     "",
     "More information Privacy policy",
-    #
-    # Observed after article text.
     "1 hour ago",
 }
 _CONTENT_STARTSWITH_BLACKLIST = (
@@ -55,6 +56,7 @@ _CONTENT_STARTSWITH_BLACKLIST = (
     "Daily science news ",
     "The latest engineering, electronics ",
     "The most comprehensive sci-tech news ",
+    "©",
 )
 _CONTENT_RE_FULLMATCH_BLACKLIST = [
     re.compile(p)
@@ -100,6 +102,7 @@ def _get_filtered_article_content(url: str) -> list[str]:
     content = [c for c in content if not c.startswith(_CONTENT_STARTSWITH_BLACKLIST)]
     content = [c for c in content if not any(p.fullmatch(c) for p in _CONTENT_RE_FULLMATCH_BLACKLIST)]
 
+    # Remove trailing dates
     while True:
         entry = content[-1]
         if _CONTENT_TRAILING_RE_BLACKLISTED.fullmatch(entry):
@@ -112,6 +115,6 @@ def _get_filtered_article_content(url: str) -> list[str]:
 
 def get_article_text(url: str) -> str:
     content = _get_filtered_article_content(url)
-    text = "\n\n".join(content)
+    text = "\n\n* ".join(content)
     text = text.strip()
     return text
