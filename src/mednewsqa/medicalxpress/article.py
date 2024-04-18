@@ -81,6 +81,10 @@ def _get_article_content(url: str) -> list[str]:
     html = hext.Html(html)
     results = rule.extract(html)
     results = results[0]["content"]
+
+    results = [r.strip() for r in results]
+    results = [r for r in results if r]
+
     return results
 
 
