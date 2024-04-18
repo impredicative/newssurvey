@@ -20,7 +20,7 @@ class UnsupportedPageError(RequestError):
     """Excessive page number request error."""
 
 
-@DISKCACHE.memoize(expire=datetime.timedelta(hours=1).total_seconds(), tag="_get_search_response")
+@DISKCACHE.memoize(expire=datetime.timedelta(hours=4).total_seconds(), tag="_get_search_response")
 def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
     """Return a response from the MedicalXpress website for a given query, sorting preference, and page number.
 
