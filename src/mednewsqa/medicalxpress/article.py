@@ -31,6 +31,9 @@ _PRE_CONTENT_RE_FULLMATCH_BLACKLIST = [
     )
 ]
 _MID_CONTENT_BLACKLIST = {
+    "written by researcher(s)",
+    #
+    # Review attributes:
     "fact-checked",
     "peer-reviewed publication",
     "trusted source",
