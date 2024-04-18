@@ -118,6 +118,6 @@ def _get_filtered_article_content(url: str) -> list[str]:
 
 def get_article_text(url: str) -> str:
     content = _get_filtered_article_content(url)
-    text = "\n\n* ".join(content)  # TODO: Remove asterisk.
+    text = "\n\n".join(content)
     text = text.strip()
     return text
