@@ -43,12 +43,13 @@ _MID_CONTENT_BLACKLIST = {
 _MID_CONTENT_STARTSWITH_BLACKLIST = (
     "This article has been reviewed ",
     "©",
+    "Copyright ©",
 )
 _POST_CONTENT_BLACKLIST = {
     "Explore further",
 }
 _POST_CONTENT_STARTSWITH_BLACKLIST = ()
-# _CONTENT_TRAILING_RE_BLACKLISTED = re.compile(r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{4})$")
+_CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 
 @DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
@@ -108,6 +109,12 @@ def _get_filtered_article_content(url: str) -> list[str]:
 
     # Remove invalid mid-article content
     content = [c for c in content if ((c not in _MID_CONTENT_BLACKLIST) and (not c.startswith(_MID_CONTENT_STARTSWITH_BLACKLIST)))]
+
+    # Remove invalid suffix
+    for idx, c in enumerate(content.copy()):
+        for suffix in _CONTENT_SUFFIX_REMOVELIST:
+            if c.endswith(suffix):
+                content[idx] = c.removesuffix(suffix)
 
     assert content
     return content
