@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import re
 
 import hext
@@ -13,63 +14,35 @@ _HEXT = hext.Rule("""
         </body>
     </html>
     """)
-_CONTENT_BLACKLIST = {
-    # Observed before article text.
+_PRE_CONTENT_BLACKLIST = {
+    "Science X Account",
     "Forget Password?",
     "Learn more",
     "share this!",
     "Twit",
     "Share",
     "Email",
-    #
-    # Review attributes observed before article text.
+}
+_PRE_CONTENT_STARTSWITH_BLACKLIST = ("Click here to ",)
+_PRE_CONTENT_RE_FULLMATCH_BLACKLIST = [
+    re.compile(p)
+    for p in (
+        r"\d+",  # Example: 39
+    )
+]
+_MID_CONTENT_BLACKLIST = {
     "fact-checked",
     "peer-reviewed publication",
     "trusted source",
     "proofread",
     "reputable news agency",
-    #
-    # Observed after article text.
-    "Explore further",
-    "Facebook",
-    "Twitter",
-    "Email",
-    "Feedback to editors",
-    "0",
-    "",
-    "More information Privacy policy",
-    "1 hour ago",
 }
-_CONTENT_STARTSWITH_BLACKLIST = (
-    # Observed before article text.
-    "Click here to ",
-    "This article has been reviewed ",
-    #
-    # Observed after article text.
-    "Use this form if you have come across a ",
-    "Please select the most appropriate ",
-    "Thank you for taking time ",
-    "Your feedback is ",
-    "Your email address is ",
-    "Get weekly and/or daily updates ",
-    "We keep our content ",
-    "Daily science news ",
-    "The latest engineering, electronics ",
-    "The most comprehensive sci-tech news ",
-    "©",
-)
-_CONTENT_RE_FULLMATCH_BLACKLIST = [
-    re.compile(p)
-    for p in (
-        # Observed before article text:
-        r"\d+",  # Example: 39
-        #
-        # Observed after article text:
-        r"\d+ minutes ago",  # Example: 8 minutes ago
-        r"\d+ hours ago",  # Example: 5 hours ago
-    )
-]
-_CONTENT_TRAILING_RE_BLACKLISTED = re.compile(r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{4})$")
+_MID_CONTENT_STARTSWITH_BLACKLIST = ("This article has been reviewed ",)
+_POST_CONTENT_BLACKLIST = {
+    "Explore further",
+}
+_POST_CONTENT_STARTSWITH_BLACKLIST = ("©",)
+# _CONTENT_TRAILING_RE_BLACKLISTED = re.compile(r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{4})$")
 
 
 @DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
@@ -114,18 +87,19 @@ def _get_article_content(url: str) -> list[str]:
 def _get_filtered_article_content(url: str) -> list[str]:
     content = _get_article_content(url)
     assert content
-    content = [c for c in content if c not in _CONTENT_BLACKLIST]
-    content = [c for c in content if not c.startswith(_CONTENT_STARTSWITH_BLACKLIST)]
-    content = [c for c in content if not any(p.fullmatch(c) for p in _CONTENT_RE_FULLMATCH_BLACKLIST)]
 
-    # Remove trailing dates
-    while True:
-        entry = content[-1]
-        if _CONTENT_TRAILING_RE_BLACKLISTED.fullmatch(entry):
-            content = content[:-1]
-        else:
-            break
+    # Remove invalid pre-article content
+    dropwhile_predicate = lambda c: ((c in _PRE_CONTENT_BLACKLIST) or (c.startswith(_PRE_CONTENT_STARTSWITH_BLACKLIST)) or any(p.fullmatch(c) for p in _PRE_CONTENT_RE_FULLMATCH_BLACKLIST))
+    content = list(itertools.dropwhile(dropwhile_predicate, content))
 
+    # Remove invalid post-article content
+    takewhile_predicate = lambda c: ((c not in _POST_CONTENT_BLACKLIST) and (not c.startswith(_POST_CONTENT_STARTSWITH_BLACKLIST)))
+    content = list(itertools.takewhile(takewhile_predicate, content))
+
+    # Remove invalid mid-article content
+    content = [c for c in content if ((c not in _MID_CONTENT_BLACKLIST) and (not c.startswith(_MID_CONTENT_STARTSWITH_BLACKLIST)))]
+
+    assert content
     return content
 
 
