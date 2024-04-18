@@ -1,4 +1,4 @@
-Currently you are executing step 1 of the above workflow. As such, your current task is to identify and list all search terms relevant to the user's input, one per line. Note that MedicalXpress search may use primitive word matching, not semantic matching. The user's well-being may depend on your exhaustiveness. Do not otherwise comment on the task. Your response will be parsed by the workflow execution software. In case the user's input must be rejected for any reason, just say "none" instead.
+Currently you are executing step 1 of the above workflow. As such, your current task is to exhaustively list all search terms relevant to the user's input, one per line. Note that MedicalXpress search may use primitive word matching, not semantic matching. The user's well-being may depend on your thoroughness. Do not otherwise comment on the task. Your response will be parsed by the workflow execution software. In case the user's input must be rejected for any reason, just say "none" instead.
 
 The user's medical question or concern is below:
 
