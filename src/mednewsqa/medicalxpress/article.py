@@ -6,6 +6,7 @@ import hext
 import requests
 
 from mednewsqa.config import DISKCACHE, REQUEST_HEADERS
+from mednewsqa.util.sys import print_error
 
 _HEXT = hext.Rule("""
     <html>
@@ -60,7 +61,7 @@ def _get_article_response(url: str) -> requests.Response:
     try:
         response.raise_for_status()
     except requests.RequestException:
-        print(f"Failed to read {url} due to status code {response.status_code}.")
+        print_error(f"Failed to read {url} due to status code {response.status_code}.")
         raise
     print(f"Read {url} with status code {response.status_code}.")
     return response

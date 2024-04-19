@@ -5,6 +5,7 @@ import requests
 
 from mednewsqa.config import DISKCACHE, REQUEST_HEADERS
 from mednewsqa.exceptions import RequestError
+from mednewsqa.util.sys import print_error
 
 _DEFAULTS = {"sort_by": "relevancy", "page_num": 1}
 _HEXT = hext.Rule("""
@@ -45,7 +46,7 @@ def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests
     try:
         response.raise_for_status()
     except requests.RequestException:
-        print(f"Failed to receive {description} due to status code {response.status_code}.")
+        print_error(f"Failed to receive {description} due to status code {response.status_code}.")
         raise
     print(f"Received {description} with status code {response.status_code}.")
     return response
