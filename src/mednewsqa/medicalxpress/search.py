@@ -3,7 +3,8 @@ import datetime
 import hext
 import requests
 
-from mednewsqa.config import DISKCACHE, REQUEST_HEADERS
+from _common import DISKCACHE
+from mednewsqa.config import REQUEST_HEADERS
 from mednewsqa.exceptions import RequestError
 from mednewsqa.util.sys import print_error
 
