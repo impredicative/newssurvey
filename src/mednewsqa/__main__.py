@@ -39,7 +39,7 @@ def main(query: Optional[str] = None, path: Optional[Path] = None, confirm: bool
         # generate_response(query, output_path=path, confirm=confirm)
     except mednewsqa.exceptions.Error as exc:
         print_error(str(exc))
-        sep = '\n' if (isinstance(query, str) and (len(query.splitlines()) > 1)) else ' '
+        sep = "\n" if (isinstance(query, str) and (len(query.splitlines()) > 1)) else " "
         print_error(f"Failed to generate response for query:{sep}{query}")
         exit(1)
     except KeyboardInterrupt:
