@@ -1,5 +1,5 @@
 [project]
-name = "mednewsqa"
+name = "newsqa"
 version = "0.1.0"
 description = "Medical news Q&A using MedicalXpress and GPT-4"
 authors = [
@@ -28,10 +28,10 @@ dev-dependencies = []
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mednewsqa"]
+packages = ["src/newsqa"]
 
 [project.scripts]
-mednewsqa = "mednewsqa.__main__:main"
+newsqa = "newsqa.__main__:main"
 
 [tool.rye.scripts]  # Run as "rye run <command>"
 check = { chain = ["check-lint", "check-fmt" ] }

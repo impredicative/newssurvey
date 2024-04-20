@@ -1,10 +1,10 @@
-# mednewsqa
-**mednewsqa** is a Python 3.12 application to generate a response to a medical question or concern using medical news. It uses [MedicalXpress](https://medicalxpress.com/) to conduct searches and read article texts. Numerous calls are made to the GPT-4 LLM to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
+# newsqa
+**newsqa** (news Q&A) is a Python 3.12 application to generate a response to a question or concern using a supported news site. The specific news site is used to conduct searches and read article texts. Currently only the [MedicalXpress](https://medicalxpress.com/) is supported for medical Q&A. Numerous calls are made to the GPT-4 LLM to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
 ## Approach
 Each step in this workflow corresponds to an action taken by the LLM.
 
-1. **Get search terms**: Search terms for the given user input are listed by the LLM. The user input is a medical question or concern.
+1. **Get search terms**: Search terms for the given user input are listed by the LLM. The user input is a question or concern.
 2. **Get filtered search results**: For each search term, a single page of search results is retrieved, sorted upstream by each of `relevancy` and `date`. Each result is composed of a title and a blurb. The search results are filtered in batches for relevance by the LLM. This step is repeated for additional pages of search results until there are no relevant results.
 3. **Get draft sections by article**: For each filtered search result, the corresponding article text is retrieved. For each text, the LLM suggests one or more single-level draft sections for the final answer, with the understanding that the text will contribute to its respective suggested sections. Each article is expected to contribute only to a subset of sections of the final answer, not necessarily to all sections.
 4. **Get final sections**: A full map of all article results with their respective draft sections is presented to the LLM. The LLM suggests a coherent ordered single-level final list of sections.

@@ -4,10 +4,10 @@ import fire
 import os
 from pathlib import Path
 
-import mednewsqa.exceptions
-from mednewsqa.util.openai import ensure_openai_key
-from mednewsqa.util.sys import print_error
-from mednewsqa.workflow.query import get_query, ensure_query_is_valid
+import newsqa.exceptions
+from newsqa.util.openai import ensure_openai_key
+from newsqa.util.sys import print_error
+from newsqa.workflow.query import get_query, ensure_query_is_valid
 
 
 def main(query: Optional[str] = None, path: Optional[Path] = None, confirm: bool = False) -> None:
