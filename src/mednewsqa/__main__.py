@@ -7,6 +7,7 @@ from pathlib import Path
 import mednewsqa.exceptions
 from mednewsqa.util.openai import ensure_openai_key
 from mednewsqa.util.sys import print_error
+from mednewsqa.workflow.query import get_query, ensure_query_is_valid
 
 
 def main(query: Optional[str] = None, path: Optional[Path] = None, confirm: bool = False) -> None:
@@ -35,7 +36,7 @@ def main(query: Optional[str] = None, path: Optional[Path] = None, confirm: bool
         if not isinstance(confirm, bool):
             raise mednewsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
 
-        generate_response(query, output_path=path, confirm=confirm)
+        # generate_response(query, output_path=path, confirm=confirm)
     except mednewsqa.exceptions.Error as exc:
         print_error(str(exc))
         sep = '\n' if (isinstance(query, str) and (len(query.splitlines()) > 1)) else ' '
