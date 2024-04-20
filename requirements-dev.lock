@@ -43,6 +43,8 @@ pydantic==2.7.0
     # via openai
 pydantic-core==2.18.1
     # via pydantic
+python-dotenv==1.0.1
+    # via mednewsqa
 requests==2.31.0
     # via mednewsqa
 six==1.16.0
