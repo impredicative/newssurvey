@@ -27,7 +27,7 @@ fire==0.6.0
     # via newsqa
 h11==0.14.0
     # via httpcore
-hext==1.0.8
+hext==1.0.9
     # via newsqa
 httpcore==1.0.5
     # via httpx
@@ -37,11 +37,11 @@ idna==3.7
     # via anyio
     # via httpx
     # via requests
-openai==1.23.2
+openai==1.23.6
     # via newsqa
-pydantic==2.7.0
+pydantic==2.7.1
     # via openai
-pydantic-core==2.18.1
+pydantic-core==2.18.2
     # via pydantic
 python-dotenv==1.0.1
     # via newsqa
