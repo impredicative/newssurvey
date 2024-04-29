@@ -40,6 +40,7 @@ check = { chain = ["check-lint", "check-fmt" ] }
 fix = { chain = ["fix-lint", "fix-fmt" ] }
 "fix-lint" = "rye lint --fix"
 "fix-fmt" = "rye fmt"
+syncup = "rye sync --update-all"
 
 [tool.ruff]
 line-length = 300
