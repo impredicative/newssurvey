@@ -6,8 +6,8 @@ import hext
 import requests
 
 from _common import DISKCACHE
-from mednewsqa.config import REQUEST_HEADERS
-from mednewsqa.util.sys import print_error
+from newsqa.config import REQUEST_HEADERS
+from newsqa.util.sys import print_error
 
 _HEXT = hext.Rule("""
     <html>

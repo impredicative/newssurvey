@@ -4,7 +4,7 @@ from typing import Optional
 import dotenv
 import openai
 
-import mednewsqa.exceptions
+import newsqa.exceptions
 
 dotenv.load_dotenv()
 
@@ -20,7 +20,7 @@ MODELS = {
 def ensure_openai_key() -> None:
     """Raise `EnvError` if the environment variable OPENAI_API_KEY is unavailable."""
     if not os.environ.get("OPENAI_API_KEY"):
-        raise mednewsqa.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
+        raise newsqa.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
 
 
 def get_openai_client() -> OpenAI:

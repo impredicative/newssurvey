@@ -1,8 +1,8 @@
 import contextlib
 import io
 
-import mednewsqa.exceptions
-from mednewsqa.util.sys import print_error
+import newsqa.exceptions
+from newsqa.util.sys import print_error
 
 
 def is_query_valid(query: str) -> bool:
@@ -31,7 +31,7 @@ def ensure_query_is_valid(query: str) -> None:
     with contextlib.redirect_stderr(error):
         if not is_query_valid(query):
             error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise mednewsqa.exceptions.InputError(error)
+            raise newsqa.exceptions.InputError(error)
 
 
 def get_query() -> str:

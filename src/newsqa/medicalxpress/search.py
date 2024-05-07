@@ -4,9 +4,9 @@ import hext
 import requests
 
 from _common import DISKCACHE
-from mednewsqa.config import REQUEST_HEADERS
-from mednewsqa.exceptions import RequestError
-from mednewsqa.util.sys import print_error
+from newsqa.config import REQUEST_HEADERS
+from newsqa.exceptions import RequestError
+from newsqa.util.sys import print_error
 
 _DEFAULTS = {"sort_by": "relevancy", "page_num": 1}
 _HEXT = hext.Rule("""

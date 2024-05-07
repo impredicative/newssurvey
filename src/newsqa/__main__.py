@@ -34,10 +34,10 @@ def main(query: Optional[str] = None, path: Optional[Path] = None, confirm: bool
             path = Path(path)
 
         if not isinstance(confirm, bool):
-            raise mednewsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
+            raise newsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
 
         # generate_response(query, output_path=path, confirm=confirm)
-    except mednewsqa.exceptions.Error as exc:
+    except newsqa.exceptions.Error as exc:
         print_error(str(exc))
         sep = "\n" if (isinstance(query, str) and (len(query.splitlines()) > 1)) else " "
         print_error(f"Failed to generate response for query:{sep}{query}")
