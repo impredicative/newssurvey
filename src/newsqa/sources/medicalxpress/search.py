@@ -41,7 +41,7 @@ def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: b
     url = f"https://medicalxpress.com/search/page{page_num}.html"
     params = {"search": query, "s": {"relevancy": 0, "date": 1}[sort_by], "h": {True: 1, False: 0}[headlines]}
     headlines_filter_status = "with" if headlines else "without"
-    description = f'page {page_num} of search results {headlines_filter_status} a headlines filter for "{query}" sorted by {sort_by}'
+    description = f'page {page_num} of search results {headlines_filter_status} the headlines filter for "{query}" sorted by {sort_by}'
     if page_num > MAX_PAGE_NUM:
         raise UnsupportedPageError(f"Unable to request {description} because it exceeds the max page number of {MAX_PAGE_NUM}.")
     print(f"Requesting {description}.")
