@@ -5,10 +5,11 @@ import re
 import hext
 import requests
 
-from _common import DISKCACHE
 from newsqa.config import REQUEST_HEADERS
-from newsqa.util.sys import print_error
+from newsqa.util.diskcache_ import get_diskcache
+from newsqa.util.sys_ import print_error
 
+_DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
     <html>
         <body>
@@ -54,7 +55,7 @@ _POST_CONTENT_STARTSWITH_BLACKLIST = ()
 _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 
-@DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
 def _get_article_response(url: str) -> requests.Response:
     print(f"Reading {url}.")
     response = requests.get(url, headers=REQUEST_HEADERS)
