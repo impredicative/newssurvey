@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import Optional
 
@@ -5,15 +6,15 @@ import dotenv
 import openai
 
 import newsqa.exceptions
+from newsqa.util.diskcache_ import get_diskcache
 
 dotenv.load_dotenv()
 
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
-OpenAI = openai.OpenAI
 
-MAX_TTS_INPUT_LEN = 4096
+_DISKCACHE = get_diskcache(__file__)
 MODELS = {
-    "text": "gpt-4-turbo-2024-04-09",
+    "text": "gpt-4o-2024-05-13",
 }
 
 
@@ -23,25 +24,21 @@ def ensure_openai_key() -> None:
         raise newsqa.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
 
 
-def get_openai_client() -> OpenAI:
-    """Return the OpenAI client."""
-    return OpenAI()
-
-
-def get_completion(prompt: str, *, client: Optional[OpenAI] = None) -> ChatCompletion:
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=12).total_seconds(), tag="get_completion")
+def get_completion(prompt: str) -> ChatCompletion:
     """Return the completion for the given prompt."""
-    if not client:
-        client = get_openai_client()
-    # print(f"Requesting completion for prompt of length {len(prompt)}.")
+    client = openai.OpenAI()
+    print(f"Requesting completion for prompt of length {len(prompt)}.")
     completion = client.chat.completions.create(model=MODELS["text"], messages=[{"role": "user", "content": prompt}])
+    print(f"Received completion for prompt of length {len(prompt)}.")
     # Note: Specifying max_tokens=4096 with gpt-4-turbo-preview did not benefit in increasing output length, and a higher value is disallowed. Ref: https://platform.openai.com/docs/api-reference/chat/create
     return completion
 
 
-def get_content(prompt: str, *, client: Optional[OpenAI] = None, completion: Optional[ChatCompletion] = None) -> str:
-    """Return the content for the given prompt."""
+def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None) -> str:
+    """Return the completion content for the given prompt."""
     if not completion:
-        completion = get_completion(prompt, client=client)
+        completion = get_completion(prompt)
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
