@@ -9,11 +9,6 @@ from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
 
 _DISKCACHE = get_diskcache(__file__)
-_DEFAULTS = {
-    "sort_by": "relevancy",  # Choices: relevancy, date
-    "headlines": False,
-    "page_num": 1,
-}
 _HEXT = hext.Rule("""
     <h2 class="mb-2">
       <a href:link class="news-link" @text:title />
@@ -28,14 +23,14 @@ class UnsupportedPageError(RequestError):
 
 
 @_DISKCACHE.memoize(expire=datetime.timedelta(hours=4).total_seconds(), tag="_get_search_response")
-def _get_search_response(query: str, *, sort_by: str, headlines: bool, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
+def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: bool = False, page_num: int = 1) -> requests.Response:
     """Return a response from the MedicalXpress website for a given query, sorting preference, and page number.
 
     Parameters:
         query (str): The search term used to query the website.
-        sort_by (str): The method of sorting the search results ('relevancy' or 'date').
-        headlines (bool): The filter to limit search results to headlines matches only.
-        page_num (int): The page number of the search results to retrieve.
+        sort_by (str, optional): The sorting method for the search results ('relevancy' or 'date'), with a default value of 'relevancy'.
+        headlines (bool): The filter to limit search results to headlines matches only, with a default value of False.
+        page_num (int, optional): The page number to retrieve, with a default value of 1.
 
     Returns:
         requests.Response: The HTTP response object containing the search results.
@@ -60,14 +55,10 @@ def _get_search_response(query: str, *, sort_by: str, headlines: bool, page_num:
     return response
 
 
-def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], headlines: bool = _DEFAULTS["headlines"], page_num: int = _DEFAULTS["page_num"]) -> list[dict]:
+def get_search_results(**kwargs) -> list[dict]:
     """Return search results as a list of dictionaries, each containing the 'title', 'link', and 'description' of an article.
 
-    Parameters:
-        query (str): The search term.
-        sort_by (str, optional): The sorting method for the search results, with a default value of 'relevancy'.
-        headlines (bool): The filter to limit search results to headlines matches only.
-        page_num (int, optional): The page number to retrieve, with a default value of 1.
+    `kwargs` are forwarded to `_get_search_response`.
 
     Returns:
         list[dict]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
@@ -75,7 +66,7 @@ def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], headl
     An empty list is returned if the requested page number exceeds its maximum limit.
     """
     try:
-        response = _get_search_response(query, sort_by=sort_by, headlines=headlines, page_num=page_num)
+        response = _get_search_response(**kwargs)
     except UnsupportedPageError:
         return []
     html = response.text
@@ -85,13 +76,10 @@ def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], headl
     return results
 
 
-def get_printable_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_num: int = _DEFAULTS["page_num"]) -> str:
+def get_printable_search_results(**kwargs) -> str:
     """Return the search results as a printable string with enumerated articles.
 
-    Parameters:
-        query (str): The search term.
-        sort_by (str, optional): The sorting method for the search results, with a default value of 'relevancy'.
-        page_num (int, optional): The page number to retrieve, with a default value of 1.
+    `kwargs` are forwarded to `get_search_results`.
 
     Returns:
         str: A formatted string containing the search results, with each result numbered and displayed with its title, link, and description.
@@ -99,8 +87,8 @@ def get_printable_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_b
     A message indicating no results is returned if there are none.
     """
 
-    results = get_search_results(query, sort_by=sort_by, page_num=page_num)
-    heading = f'Search results for "{query}" by {sort_by} (page {page_num}):'
+    results = get_search_results(**kwargs)
+    heading = "Search results:"
     if results:
         printable_results = heading + "\n\n" + "\n\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
     else:
