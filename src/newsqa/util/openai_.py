@@ -13,8 +13,9 @@ dotenv.load_dotenv()
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
 
 _DISKCACHE = get_diskcache(__file__)
-MODELS = {
+MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": "gpt-4o-2024-05-13",
+    "embeddings": "text-embedding-3-large",
 }
 
 
