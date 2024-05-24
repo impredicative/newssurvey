@@ -18,7 +18,7 @@ def get_diskcache(file_path: str, *, size_gib: int = 1) -> diskcache.FanoutCache
     path = Path(file_path)  # Ex: /home/user/projects/newsqa/src/newsqa/sources/medicalxpress/article.py
     assert path.is_relative_to(PACKAGE_PATH), path
     path = path.relative_to(PACKAGE_PATH)  # Ex: sources/medicalxpress/article.py
-    path = path.with_suffix('')  # Ex: sources/medicalxpress/article
+    path = path.with_suffix("")  # Ex: sources/medicalxpress/article
     path = DISKCACHE_ROOT_PATH / path  # Ex: /home/user/projects/newsqa/src/newsqa/.diskcache/sources/medicalxpress/article
-    print(f'Using diskcache path: {path}')
+    print(f"Using diskcache path: {path}")
     return diskcache.FanoutCache(directory=str(path), timeout=1, size_limit=size_gib * GiB)

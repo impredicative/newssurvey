@@ -11,6 +11,7 @@ from newsqa.util.sys_ import print_error
 _DISKCACHE = get_diskcache(__file__)
 _DEFAULTS = {
     "sort_by": "relevancy",  # Choices: relevancy, date
+    "headlines": False,
     "page_num": 1,
 }
 _HEXT = hext.Rule("""
@@ -27,12 +28,13 @@ class UnsupportedPageError(RequestError):
 
 
 @_DISKCACHE.memoize(expire=datetime.timedelta(hours=4).total_seconds(), tag="_get_search_response")
-def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
+def _get_search_response(query: str, *, sort_by: str, headlines: bool, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
     """Return a response from the MedicalXpress website for a given query, sorting preference, and page number.
 
     Parameters:
         query (str): The search term used to query the website.
         sort_by (str): The method of sorting the search results ('relevancy' or 'date').
+        headlines (bool): The filter to limit search results to headlines matches only.
         page_num (int): The page number of the search results to retrieve.
 
     Returns:
@@ -42,8 +44,9 @@ def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests
         UnsupportedPageError: If the page number is higher than the maximum allowed.
     """
     url = f"https://medicalxpress.com/search/page{page_num}.html"
-    params = {"search": query, "s": {"relevancy": 0, "date": 1}[sort_by]}
-    description = f'page {page_num} of search results for "{query}" sorted by {sort_by}'
+    params = {"search": query, "s": {"relevancy": 0, "date": 1}[sort_by], "h": {True: 1, False: 0}[headlines]}
+    headlines_filter_status = "with" if headlines else "without"
+    description = f'page {page_num} of search results {headlines_filter_status} a headlines filter for "{query}" sorted by {sort_by}'
     if page_num > MAX_PAGE_NUM:
         raise UnsupportedPageError(f"Unable to request {description} because it exceeds the max page number of {MAX_PAGE_NUM}.")
     print(f"Requesting {description}.")
@@ -57,12 +60,13 @@ def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests
     return response
 
 
-def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_num: int = _DEFAULTS["page_num"]) -> list[dict]:
+def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], headlines: bool = _DEFAULTS["headlines"], page_num: int = _DEFAULTS["page_num"]) -> list[dict]:
     """Return search results as a list of dictionaries, each containing the 'title', 'link', and 'description' of an article.
 
     Parameters:
         query (str): The search term.
         sort_by (str, optional): The sorting method for the search results, with a default value of 'relevancy'.
+        headlines (bool): The filter to limit search results to headlines matches only.
         page_num (int, optional): The page number to retrieve, with a default value of 1.
 
     Returns:
@@ -71,13 +75,9 @@ def get_search_results(query: str, *, sort_by: str = _DEFAULTS["sort_by"], page_
     An empty list is returned if the requested page number exceeds its maximum limit.
     """
     try:
-        response = _get_search_response(query, sort_by=sort_by, page_num=page_num)
+        response = _get_search_response(query, sort_by=sort_by, headlines=headlines, page_num=page_num)
     except UnsupportedPageError:
         return []
-    # except requests.HTTPError as exc:
-    #     if exc.response.status_code == 404:  # Observed when `page_num > MAX_PAGE_NUM`.
-    #         return []
-    #     raise
     html = response.text
     html = hext.Html(html)
     rule = _HEXT
