@@ -13,10 +13,10 @@ _DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
     <html>
         <body>
-            { <p @text:content /> }
+            { <*:type-matches(/^(p)$|^(h[1-6])$/) @text:content /> }
         </body>
     </html>
-    """)
+    """)  # Ref: https://github.com/html-extract/hext/issues/30#issuecomment-2072869699
 _PRE_CONTENT_BLACKLIST = {
     "Science X Account",
     "Forget Password?",
@@ -72,16 +72,6 @@ def _get_article_response(url: str) -> requests.Response:
 def _get_article_content(url: str) -> list[str]:
     response = _get_article_response(url)
     html = response.text
-
-    # Replace heading tags with paragraph tag
-    # This is done because the hext rule extracts text from p tags only.
-    for heading_level in range(1, 7):
-        heading_tag_half_open, heading_tag_full_open, heading_tag_close = f"<h{heading_level} ", f"<h{heading_level}>", f"</h{heading_level}>"
-        if heading_tag_close in html:
-            html = html.replace(heading_tag_half_open, "<p ")
-            html = html.replace(heading_tag_full_open, "<p>")
-            html = html.replace(heading_tag_close, "</p>")
-            # print(f"Replaced h{heading_level} with p tags.")
 
     rule = _HEXT
     html = hext.Html(html)
