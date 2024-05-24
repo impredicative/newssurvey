@@ -3,26 +3,30 @@ import datetime
 import hext
 import requests
 
-from _common import DISKCACHE
 from newsqa.config import REQUEST_HEADERS
 from newsqa.exceptions import RequestError
-from newsqa.util.sys import print_error
+from newsqa.util.diskcache_ import get_diskcache
+from newsqa.util.sys_ import print_error
 
-_DEFAULTS = {"sort_by": "relevancy", "page_num": 1}
+_DISKCACHE = get_diskcache(__file__)
+_DEFAULTS = {
+    "sort_by": "relevancy",  # Choices: relevancy, date
+    "page_num": 1,
+}
 _HEXT = hext.Rule("""
     <h2 class="mb-2">
       <a href:link class="news-link" @text:title />
     </h2>
     <p class="mb-4" @text:description />
     """)
-MAX_PAGE_NUM = 40
+MAX_PAGE_NUM = 40  # Observed empirically. Ex: https://medicalxpress.com/search/page41.html?search=papaya&s=0
 
 
 class UnsupportedPageError(RequestError):
     """Excessive page number request error."""
 
 
-@DISKCACHE.memoize(expire=datetime.timedelta(hours=4).total_seconds(), tag="_get_search_response")
+@_DISKCACHE.memoize(expire=datetime.timedelta(hours=4).total_seconds(), tag="_get_search_response")
 def _get_search_response(query: str, *, sort_by: str, page_num: int) -> requests.Response:  # Note: Default values are intentionally not specified for any arg in order to cache explicitly.
     """Return a response from the MedicalXpress website for a given query, sorting preference, and page number.
 
