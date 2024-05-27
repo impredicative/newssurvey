@@ -22,7 +22,7 @@ def is_source_valid(source: str) -> bool:
         return False
     if source not in NEWS_SOURCES:
         supported_news_sources = ", ".join(sorted(NEWS_SOURCES))
-        print_error(f"Source {source!r} is not among the supported news source: {supported_news_sources}")
+        print_error(f"{source!r} is not among the supported news sources: {supported_news_sources}")
         return False
     return True
 
@@ -39,7 +39,7 @@ def ensure_source_is_valid(source: str) -> None:
 def get_source() -> str:
     """Get news source from user input."""
     assert NEWS_SOURCES
-    supported_news_sources = dict(zip(range(1, len(NEWS_SOURCES) + 1), sorted(NEWS_SOURCES)))
+    supported_news_sources = dict(zip(map(str, range(1, len(NEWS_SOURCES) + 1)), sorted(NEWS_SOURCES)))
     print("The supported news sources are:")
     for source_num, source in supported_news_sources.items():
         print(f"\t{source_num}. {source}")
