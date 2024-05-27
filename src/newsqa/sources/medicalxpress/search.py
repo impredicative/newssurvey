@@ -1,4 +1,5 @@
 import datetime
+import time
 
 import hext
 import requests
@@ -7,6 +8,8 @@ from newsqa.config import REQUEST_HEADERS
 from newsqa.exceptions import RequestError
 from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
+
+from ._common import SLEEP_TIME_BETWEEN_NEWS_REQUESTS
 
 _DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
@@ -52,6 +55,7 @@ def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: b
         print_error(f"Failed to receive {description} due to status code {response.status_code}.")
         raise
     print(f"Received {description} with status code {response.status_code}.")
+    time.sleep(SLEEP_TIME_BETWEEN_NEWS_REQUESTS)
     return response
 
 
