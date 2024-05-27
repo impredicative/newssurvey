@@ -10,7 +10,7 @@
 -e file:.
 annotated-types==0.7.0
     # via pydantic
-anyio==4.3.0
+anyio==4.4.0
     # via httpx
     # via openai
 certifi==2024.2.2
@@ -37,7 +37,7 @@ idna==3.7
     # via anyio
     # via httpx
     # via requests
-openai==1.30.2
+openai==1.30.3
     # via newsqa
 pydantic==2.7.1
     # via openai
@@ -57,7 +57,7 @@ termcolor==2.4.0
     # via fire
 tqdm==4.66.4
     # via openai
-typing-extensions==4.11.0
+typing-extensions==4.12.0
     # via openai
     # via pydantic
     # via pydantic-core
