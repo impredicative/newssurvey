@@ -2,7 +2,7 @@ import contextlib
 import io
 
 import newsqa.exceptions
-from newsqa.util.sys import print_error
+from newsqa.util.sys_ import print_error
 
 
 def is_query_valid(query: str) -> bool:
