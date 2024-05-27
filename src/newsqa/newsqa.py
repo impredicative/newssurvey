@@ -1,6 +1,10 @@
 from pathlib import Path
 from typing import Optional
 
+from newsqa.util.openai_ import ensure_openai_key
+from newsqa.workflow.query import ensure_query_is_valid
+from newsqa.workflow.source import ensure_source_is_valid
+
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
     """Return a response for the given source and query.
@@ -15,3 +19,11 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     If failed, a subclass of the `newsqa.exceptions.Error` exception is raised.
     """
+    ensure_openai_key()
+
+    ensure_source_is_valid(source)
+    print(f"SOURCE: {source}")
+
+    ensure_query_is_valid(query)
+    query_sep = "\n" if (len(query.splitlines()) > 1) else " "
+    print(f"QUERY:{query_sep}{query}")
