@@ -4,7 +4,7 @@
 ## Approach
 Each step in this workflow corresponds to an action taken by the LLM.
 
-1. **Get search terms**: Search terms for the given user input are listed by the LLM. The user input is a question or concern.
+1. **Get search terms**: Search terms for the given user query and site are listed by the LLM. The user query is a question or concern applicable to the user chosen news site.
 2. **Get filtered search results**: For each search term, a single page of search results is retrieved, sorted upstream by each of `relevancy` and `date`. Each result is composed of a title and a blurb. The search results are filtered in batches for relevance by the LLM. This step is repeated for additional pages of search results until there are no relevant results.
 3. **Get draft sections by article**: For each filtered search result, the corresponding article text is retrieved. For each text, the LLM suggests one or more single-level draft sections for the final answer, with the understanding that the text will contribute to its respective suggested sections. Each article is expected to contribute only to a subset of sections of the final answer, not necessarily to all sections.
 4. **Get final sections**: A full map of all article results with their respective draft sections is presented to the LLM. The LLM suggests a coherent ordered single-level final list of sections.
