@@ -38,7 +38,7 @@ def get_query() -> str:
     """Get user query from user input."""
     query = None
     while not query:
-        query = input("Specify the medical question or concern: ")
+        query = input("Specify the question or concern: ")
         query = query.strip()
         if not is_query_valid(query):
             query = None

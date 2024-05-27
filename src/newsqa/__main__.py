@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import newsqa.exceptions
+from newsqa.newsqa import generate_response
 from newsqa.util.openai_ import ensure_openai_key
 from newsqa.util.sys_ import print_error
 from newsqa.workflow.query import get_query, ensure_query_is_valid
@@ -41,11 +42,8 @@ def main(source: Optional[str] = None, query: Optional[str] = None, path: Option
         if not isinstance(confirm, bool):
             raise newsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
 
-        # response = generate_response(source=source, query=query, output_path=path, confirm=confirm)
-        # assert response
-        # print(response)
-        # if path:
-        #     path.write_text(response)
+        response = generate_response(source=source, query=query, output_path=path, confirm=confirm)
+        print(response)
     except newsqa.exceptions.Error as exc:
         print_error(str(exc))
         query_sep = "\n" if (isinstance(query, str) and (len(query.splitlines()) > 1)) else " "
