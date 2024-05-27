@@ -8,7 +8,7 @@ from newsqa.util.sys_ import print_error
 def is_query_valid(query: str) -> bool:
     """Return true if the query is structurally valid, otherwise false.
 
-    A validation error is printed if the query is false.
+    A validation error is printed if the query is invalid.
     """
     if not isinstance(query, str):  # Note: This happens if `-t` flag is provided without any value.
         print_error("Query must be a string.")
