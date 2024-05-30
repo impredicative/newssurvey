@@ -25,7 +25,7 @@ def ensure_openai_key() -> None:
         raise newsqa.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
 
 
-@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=12).total_seconds(), tag="get_completion")
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_completion")
 def get_completion(prompt: str) -> ChatCompletion:
     """Return the completion for the given prompt."""
     client = openai.OpenAI()
