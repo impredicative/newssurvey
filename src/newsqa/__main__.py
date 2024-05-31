@@ -1,3 +1,4 @@
+import importlib
 from typing import Optional
 
 import fire
@@ -5,6 +6,7 @@ import os
 from pathlib import Path
 
 import newsqa.exceptions
+from newsqa.config import NEWS_SOURCES
 from newsqa.newsqa import generate_response
 from newsqa.util.openai_ import ensure_openai_key
 from newsqa.util.sys_ import print_error
@@ -31,9 +33,10 @@ def main(source: Optional[str] = None, query: Optional[str] = None, path: Option
         if not source:
             source = get_source()
         ensure_source_is_valid(source)
+        source_module = importlib.import_module(NEWS_SOURCES[source].name)
 
         if not query:
-            query = get_query()
+            query = get_query(source_type=source_module.NEWS_TYPE)
         ensure_query_is_valid(query)
 
         if path:

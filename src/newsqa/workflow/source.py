@@ -2,7 +2,7 @@ import contextlib
 import io
 
 import newsqa.exceptions
-from newsqa.config import NEWS_SOURCES_NAMES
+from newsqa.config import NEWS_SOURCES
 from newsqa.util.sys_ import print_error
 
 
@@ -20,9 +20,12 @@ def is_source_valid(source: str) -> bool:
     if len(source) == 0:
         print_error("No source was provided.")
         return False
-    if source not in NEWS_SOURCES_NAMES:
-        supported_news_sources = ", ".join(sorted(NEWS_SOURCES_NAMES))
+    if source not in NEWS_SOURCES:
+        supported_news_sources = ", ".join(sorted(NEWS_SOURCES))
         print_error(f"{source!r} is not among the supported news sources: {supported_news_sources}")
+        return False
+    if not NEWS_SOURCES[source]:
+        print_error(f"{source!r} is not an importable news source module.")
         return False
     return True
 
@@ -38,8 +41,8 @@ def ensure_source_is_valid(source: str) -> None:
 
 def get_source() -> str:
     """Get news source from user input."""
-    assert NEWS_SOURCES_NAMES
-    supported_news_sources = dict(zip(map(str, range(1, len(NEWS_SOURCES_NAMES) + 1)), sorted(NEWS_SOURCES_NAMES)))
+    assert NEWS_SOURCES
+    supported_news_sources = dict(zip(map(str, range(1, len(NEWS_SOURCES) + 1)), sorted(NEWS_SOURCES)))
     print("The supported news sources are:")
     for source_num, source in supported_news_sources.items():
         print(f"\t{source_num}. {source}")

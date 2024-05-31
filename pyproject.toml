@@ -6,6 +6,7 @@ authors = [
     { name = "Ouroboros Chrysopoeia", email = "impredicative@users.noreply.github.com" }
 ]
 dependencies = [
+    "click>=8.1.7",
     "diskcache>=5.6.3",
     "fire>=0.6.0",
     "hext>=1.0.9",
