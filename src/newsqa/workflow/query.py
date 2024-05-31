@@ -47,7 +47,7 @@ def get_query(*, source_type: str, approach: str = "click.edit") -> str:
             case "input":
                 query = input(f"Specify the {source_type} question or concern: ")
             case "click.edit":
-                query = click.edit(text=f"\n# Specify the {source_type} question or concern in one or more lines.\n# Lines starting with # will be skipped.") or ""
+                query = click.edit(text=f"\n# Specify the {source_type} question or concern in one or more lines.\n# Lines starting with # will be skipped.", require_save=False) or ""
                 query = "\n".join(ln for ln in query.splitlines() if not ln.lstrip().startswith("#"))
             case _:
                 assert False, approach
