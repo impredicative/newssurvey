@@ -37,15 +37,15 @@ idna==3.7
     # via anyio
     # via httpx
     # via requests
-openai==1.30.3
+openai==1.30.5
     # via newsqa
-pydantic==2.7.1
+pydantic==2.7.2
     # via openai
-pydantic-core==2.18.2
+pydantic-core==2.18.3
     # via pydantic
 python-dotenv==1.0.1
     # via newsqa
-requests==2.32.2
+requests==2.32.3
     # via newsqa
 six==1.16.0
     # via fire
