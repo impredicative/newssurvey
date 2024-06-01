@@ -42,7 +42,7 @@ def ensure_query_is_valid(query: str) -> None:
 def get_query(*, source_type: str, approach: str = "click.edit") -> str:
     """Get user query from user input.
 
-    `source_type` is a string that corresponds to the NEWS_TYPE variable of the corresponding source.
+    `source_type` is a string that corresponds to the SOURCE_TYPE variable of the corresponding source.
     """
     query = None
     while not query:

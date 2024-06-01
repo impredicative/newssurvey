@@ -34,7 +34,7 @@ def main(source: Optional[str] = None, query: Optional[str] = None, path: Option
         source_module = get_source_module(source)
 
         if not query:
-            query = get_query(source_type=source_module.NEWS_TYPE)
+            query = get_query(source_type=source_module.SOURCE_TYPE)
         ensure_query_is_valid(query)
 
         if path:
