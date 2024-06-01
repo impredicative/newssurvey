@@ -43,4 +43,5 @@ def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None) -> 
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
+    print(f'\nPROMPT:\n{prompt}\nCOMPLETION:\n{content}')
     return content
