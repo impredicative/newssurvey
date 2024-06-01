@@ -10,8 +10,8 @@ from newsqa.config import NEWS_SOURCES
 from newsqa.newsqa import generate_response
 from newsqa.util.openai_ import ensure_openai_key
 from newsqa.util.sys_ import print_error
-from newsqa.workflow.query import get_query, ensure_query_is_valid
-from newsqa.workflow.source import get_source, ensure_source_is_valid
+from newsqa.workflow.user.query import get_query, ensure_query_is_valid
+from newsqa.workflow.user.source import get_source, ensure_source_is_valid
 
 
 def main(source: Optional[str] = None, query: Optional[str] = None, path: Optional[Path] = None, confirm: bool = False) -> None:

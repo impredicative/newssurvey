@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from newsqa.util.openai_ import ensure_openai_key, MODELS
-from newsqa.workflow.query import ensure_query_is_valid
-from newsqa.workflow.source import ensure_source_is_valid
+from newsqa.workflow.user.query import ensure_query_is_valid
+from newsqa.workflow.user.source import ensure_source_is_valid
 
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
