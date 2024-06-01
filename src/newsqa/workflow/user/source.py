@@ -1,5 +1,7 @@
 import contextlib
+import importlib
 import io
+from types import ModuleType
 
 import newsqa.exceptions
 from newsqa.config import NEWS_SOURCES
@@ -57,3 +59,8 @@ def get_source() -> str:
         if not is_source_valid(source):
             source = None
     return source
+
+
+def get_source_module(source: str) -> ModuleType:
+    """Get the source module corresponding to the given source name."""
+    return importlib.import_module(NEWS_SOURCES[source].name)
