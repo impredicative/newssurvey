@@ -24,6 +24,9 @@ def is_query_valid(query: str) -> bool:
     if len(query) < 2:
         print_error("Query must be at least two characters long.")
         return False
+    if any(ln.lstrip().startswith("#") for ln in query.splitlines()):
+        print_error("Query may not contain any line starting with #.")
+        return False
     return True
 
 
