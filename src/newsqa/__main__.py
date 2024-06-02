@@ -12,7 +12,7 @@ from newsqa.workflow.user.query import get_query, ensure_query_is_valid
 from newsqa.workflow.user.source import get_source, get_source_module, ensure_source_is_valid
 
 
-def main(source: Optional[str] = None, query: Optional[str] = None, path: Optional[Path] = None, confirm: bool = False) -> None:
+def main(source: Optional[str] = None, query: Optional[str] = None, output_path: Optional[Path] = None, confirm: bool = False) -> None:
     """Generate, print, and optionally write a response to a question or concern using a supported news source.
 
     The progress and response both are printed to stdout.
@@ -20,7 +20,7 @@ def main(source: Optional[str] = None, query: Optional[str] = None, path: Option
     Params:
     * `source` (-s): Name of supported news source. If not given, the user is prompted for it.
     * `query` (-q): Question or concern answerable by the news source. If not given, the user is prompted for it.
-    * `path (-p)`: Output file path. If given, the response is also written to this text file except if there is an error.
+    * `output_path (-o)`: Output file path. If given, the response is also written to this text file except if there is an error.
     * `confirm` (-c): Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     A nonzero exitcode exists if there is an error.
@@ -37,13 +37,13 @@ def main(source: Optional[str] = None, query: Optional[str] = None, path: Option
             query = get_query(source_type=source_module.SOURCE_TYPE)
         ensure_query_is_valid(query)
 
-        if path:
-            path = Path(path)
+        if output_path:
+            output_path = Path(output_path)
 
         if not isinstance(confirm, bool):
             raise newsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
 
-        response = generate_response(source=source, query=query, output_path=path, confirm=confirm)
+        response = generate_response(source=source, query=query, output_path=output_path, confirm=confirm)
         print(response)
     except newsqa.exceptions.Error as exc:
         print_error(str(exc))
