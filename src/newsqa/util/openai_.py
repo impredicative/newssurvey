@@ -13,6 +13,9 @@ dotenv.load_dotenv()
 
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
 
+_COLOR_LIGHT_GRAY = "\033[0;37m"
+_COLOR_RESET = "\033[0m"
+
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": "gpt-4o-2024-05-13",
@@ -44,5 +47,5 @@ def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None) -> 
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
-    print(f"\nPROMPT:\n{indent(prompt)}\nCOMPLETION:\n{indent(content)}")
+    print(f"\n{_COLOR_LIGHT_GRAY}PROMPT:\n{indent(prompt)}\nCOMPLETION:\n{indent(content)}{_COLOR_RESET}")
     return content
