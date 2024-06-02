@@ -7,6 +7,7 @@ import openai
 
 import newsqa.exceptions
 from newsqa.util.diskcache_ import get_diskcache
+from newsqa.util.textwrap import tab_indent as indent
 
 dotenv.load_dotenv()
 
@@ -43,5 +44,5 @@ def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None) -> 
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
-    print(f"\nPROMPT:\n{prompt}\nCOMPLETION:\n{content}")
+    print(f"\nPROMPT:\n{indent(prompt)}\nCOMPLETION:\n{indent(content)}")
     return content
