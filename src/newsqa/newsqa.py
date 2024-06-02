@@ -3,7 +3,8 @@ from typing import Optional
 
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
-from newsqa.workflow.user.source import ensure_source_is_valid
+from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
+from newsqa.workflow.llm.list_search_terms import list_search_terms
 
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -23,9 +24,12 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     ensure_source_is_valid(source)
     print(f"SOURCE: {source}")
+    source_module = get_source_module(source)
 
     ensure_query_is_valid(query)
     query_sep = "\n" if (len(query.splitlines()) > 1) else " "
     print(f"QUERY:{query_sep}{query}")
 
     print(f"MODELS: text={MODELS["text"]}, embeddings={MODELS["embeddings"]}")
+
+    list_search_terms(user_query=query, source_site=source_module.SOURCE_SITE, source_type=source_module.SOURCE_TYPE)
