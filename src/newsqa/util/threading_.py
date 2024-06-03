@@ -12,7 +12,7 @@ class CooldownLock:
     Caution: The implementation may have a slight race condition, although efforts have been made while acquiring the lock to minimize its impact.
     """
 
-    def __init__(self, cooldown: float = 0.5, name: Optional[str] = None):
+    def __init__(self, cooldown: float = 1, name: Optional[str] = None):
         """Initialize with a specified cooldown period.
 
         Args:
