@@ -1,6 +1,6 @@
 from newsqa.util.threading_ import CooldownLock
 
-SOURCE_SITE = "medicalxpress.com"
+# SOURCE_SITE_URL = "medicalxpress.com"
 SOURCE_SITE_NAME = "MedicalXpress"
 SOURCE_TYPE = "medical"
 
