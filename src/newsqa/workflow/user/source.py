@@ -4,7 +4,7 @@ import io
 from types import ModuleType
 
 import newsqa.exceptions
-from newsqa.config import NEWS_SOURCES
+from newsqa.config import NEWS_SOURCES, NEWS_SOURCE_NAMESPACE
 from newsqa.util.sys_ import print_error
 
 
@@ -64,3 +64,12 @@ def get_source() -> str:
 def get_source_module(source: str) -> ModuleType:
     """Get the source module corresponding to the given source name."""
     return importlib.import_module(NEWS_SOURCES[source].name)
+
+
+def get_source_module_name(module: ModuleType) -> str:
+    name = module.__name__
+    prefix = f"{NEWS_SOURCE_NAMESPACE}."
+    assert name.startswith(prefix), name
+    name = name.removeprefix(prefix)
+    assert "." not in name, name
+    return name

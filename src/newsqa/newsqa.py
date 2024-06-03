@@ -33,5 +33,5 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     print(f"MODELS: text={MODELS["text"]}, embeddings={MODELS["embeddings"]}")
 
-    _search_terms = list_search_terms(user_query=query, source_module=source_module)
-    # get_filtered_search_results(user_query=query, source=source, search_terms=search_terms)
+    search_terms = list_search_terms(user_query=query, source_module=source_module)
+    _search_results = get_filtered_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
