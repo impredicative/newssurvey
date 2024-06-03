@@ -1,5 +1,4 @@
 import datetime
-import time
 
 import hext
 import requests
@@ -9,7 +8,7 @@ from newsqa.exceptions import RequestError
 from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
 
-from ._common import SLEEP_TIME_BETWEEN_NEWS_REQUESTS
+from ._common import request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
@@ -47,15 +46,15 @@ def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: b
     description = f'page {page_num} of search results {headlines_filter_status} the headlines filter for "{query}" sorted by {sort_by}'
     if page_num > MAX_PAGE_NUM:
         raise UnsupportedPageError(f"Unable to request {description} because it exceeds the max page number of {MAX_PAGE_NUM}.")
-    print(f"Requesting {description}.")
-    response = requests.get(url, params=params, headers=REQUEST_HEADERS)
+    with request_cooldown_lock:
+        print(f"Requesting {description}.")
+        response = requests.get(url, params=params, headers=REQUEST_HEADERS)
     try:
         response.raise_for_status()
     except requests.RequestException:
         print_error(f"Failed to receive {description} due to status code {response.status_code}.")
         raise
     print(f"Received {description} with status code {response.status_code}.")
-    time.sleep(SLEEP_TIME_BETWEEN_NEWS_REQUESTS)
     return response
 
 

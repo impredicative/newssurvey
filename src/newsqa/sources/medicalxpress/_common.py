@@ -1,1 +1,7 @@
-SLEEP_TIME_BETWEEN_NEWS_REQUESTS = 0.5  # This is intended to prevent errors due to too many requests.
+from newsqa.util.threading_ import CooldownLock
+
+SOURCE_SITE = "medicalxpress.com"
+SOURCE_SITE_NAME = "MedicalXpress"
+SOURCE_TYPE = "medical"
+
+request_cooldown_lock = CooldownLock(cooldown=0.5, name=SOURCE_SITE_NAME)

@@ -1,7 +1,6 @@
 import datetime
 import itertools
 import re
-import time
 
 import hext
 import requests
@@ -10,7 +9,7 @@ from newsqa.config import REQUEST_HEADERS
 from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
 
-from ._common import SLEEP_TIME_BETWEEN_NEWS_REQUESTS
+from ._common import request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
@@ -60,16 +59,16 @@ _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 @_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
 def _get_article_response(url: str) -> requests.Response:
-    print(f"Reading {url}.")
-    response = requests.get(url, headers=REQUEST_HEADERS)
-    # Note: params={"deviceType": "mobile"} is not specified because it results in the loss of the article date.
+    with request_cooldown_lock:
+        print(f"Reading {url}.")
+        response = requests.get(url, headers=REQUEST_HEADERS)
+        # Note: params={"deviceType": "mobile"} is not specified because it results in the loss of the article date.
     try:
         response.raise_for_status()
     except requests.RequestException:
         print_error(f"Failed to read {url} due to status code {response.status_code}.")
         raise
     print(f"Read {url} with status code {response.status_code}.")
-    time.sleep(SLEEP_TIME_BETWEEN_NEWS_REQUESTS)
     return response
 
 
