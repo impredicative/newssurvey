@@ -11,6 +11,7 @@ class CooldownLock:
 
     Caution: The implementation may have a slight race condition, although efforts have been made while acquiring the lock to minimize its impact.
     """
+
     def __init__(self, cooldown: float = 0.5, name: Optional[str] = None):
         """Initialize with a specified cooldown period.
 
@@ -19,7 +20,7 @@ class CooldownLock:
             name: Optional name of lock used in log messages.
         """
         self._cooldown_period = cooldown
-        self._name = f'{name} lock' if name else 'lock'
+        self._name = f"{name} lock" if name else "lock"
 
         self._earliest_use_time = 0
         self._main_lock = threading.Lock()
@@ -31,7 +32,7 @@ class CooldownLock:
             while num_approvals < 2:  # Intended to minimize effect of race condition.
                 wait_time = self._earliest_use_time - time.monotonic()
                 if wait_time > 0:
-                    print(f'Sleeping for {wait_time:.1f}s to acquire {self._name}.')
+                    print(f"Sleeping for {wait_time:.1f}s to acquire {self._name}.")
                     time.sleep(wait_time)
                     num_approvals = 0
                 else:
