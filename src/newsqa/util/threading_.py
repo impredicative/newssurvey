@@ -10,6 +10,8 @@ class CooldownLock:
     such as for managing access to a shared resource in a way that prevents excessively rapid consecutive uses.
 
     Caution: The implementation may have a slight race condition, although efforts have been made while acquiring the lock to minimize its impact.
+
+    Ref: https://stackoverflow.com/a/78572164/
     """
 
     def __init__(self, cooldown: float = 1, name: Optional[str] = None):
