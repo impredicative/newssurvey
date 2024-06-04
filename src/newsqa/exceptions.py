@@ -18,5 +18,13 @@ class LanguageModelOutputError(ModelOutputError):
     """Language model output error."""
 
 
+class LanguageModelOutputRejectionError(LanguageModelOutputError):
+    """Language model output rejection error."""
+
+
+class LanguageModelOutputStructureError(LanguageModelOutputError):
+    """Language model output structure error."""
+
+
 class RequestError(Error):
     """Malformed HTTP request error"""

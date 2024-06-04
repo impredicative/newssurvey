@@ -14,10 +14,11 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
             page_results = source_module.get_search_results(query=search_term, page_num=page_num, **kwargs)
             if not page_results:
                 break
-            page_results = filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
-            if not page_results:
+            filtered_page_results = filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
+            print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with keyword arguments: {kwargs}")
+            if not filtered_page_results:
                 break
-            for result in page_results:
+            for result in filtered_page_results:
                 result_link = result["link"]
                 if result_link not in results:
                     results[result_link] = result
@@ -29,6 +30,7 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
             for sort_by in ("relevancy", "date"):
                 for headlines in (False, True):
                     insert_paged_results(sort_by=sort_by, headlines=headlines)
+                    print(f"Accumulated up to {len(results)} filtered results for search term {search_term!r}.")
         case _:
             print_warning(f"Customized acquisition of search results is not implemented for the {source} source, and so the default acquisition will be used.")
             insert_paged_results()
@@ -46,11 +48,13 @@ def get_filtered_search_results(user_query: str, source_module: ModuleType, sear
         list[dict]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
     """
     results = {}
-    for term in search_terms:
+    num_terms = len(search_terms)
+    for term_num, term in enumerate(search_terms, start=1):
         results_for_term = _get_filtered_search_results_for_search_term(user_query=user_query, source_module=source_module, search_term=term)
         for result in results_for_term:
             result_link = result["link"]
             if result_link not in results:
                 results[result_link] = result
+        print(f"Accumulated a running total of {len(results)} filtered results for up to {term_num}/{num_terms} search terms.")
     results = list(results.values())
     return results

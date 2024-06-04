@@ -34,7 +34,9 @@ def is_search_terms_list_valid(terms: list[str]) -> bool:
 def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
     """Return the list of search topics.
 
-    `LanguageModelOutputError` is raised if the model output is structurally invalid.
+    `LanguageModelOutputError` is raised if the model output has an error.
+    The subclass `LanguageModelOutputRejectionError` is raised if the output is rejected.
+    The subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
     """
     assert user_query
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
@@ -43,7 +45,7 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
 
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
-        raise newsqa.exceptions.LanguageModelOutputError("No search terms exist for query.")
+        raise newsqa.exceptions.LanguageModelOutputRejectionError("No search terms exist for query.")
 
     invalid_terms = ("", *none_responses)
     terms = [t.strip() for t in response.splitlines() if t.strip().lower() not in invalid_terms]  # Note: A terminal "None" line has been observed with valid entries before it.
@@ -52,7 +54,7 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
     with contextlib.redirect_stderr(error):
         if not is_search_terms_list_valid(terms):
             error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise newsqa.exceptions.LanguageModelOutputError(error)
+            raise newsqa.exceptions.LanguageModelOutputStructureError(error)
 
     assert terms
     return terms
