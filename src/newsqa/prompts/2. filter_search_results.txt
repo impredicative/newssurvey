@@ -9,6 +9,6 @@ For context, the user's {source_type} question or concern is below:
 
 ## Articles
 
-Each article below is numbered. Your response will be in the form "<number>=<y/n>, ...", all in a single line. You must include a decision for every listed article, always in numerical order. As an example, your response could be "1=y, 2=y, 3=y, 4=n, 5=y, 6=n, 7=n, 8=n, 9=n, 10=n" without the quotes, in a single line. Another sample response could be "1=n, 2=n, 3=n, 4=n, 5=n, 6=n, 7=n, 8=n, 9=n, 10=n" if nothing was relevant, or "1=y, 2=y, 3=y, 4=y, 5=y, 6=y, 7=y, 8=y, 9=y, 10=y" if everything was relevant. Here, "y" means yes (to fetch) and "n" means no (to skip), obviously. For formality sake, always include all responses, whether "y" or "n".
+Each article below is numbered. Your response will be in the form "<number>=<y/n>, ...", all in a single line. You must include a decision for every listed article, always in numerical order. As an example, your response could be "1=y, 2=y, 3=y, 4=n, 5=y, 6=n, 7=n, 8=n, 9=n, 10=n" without the quotes, in a single line. Another sample response could be "1=n, 2=n, 3=n, 4=n, 5=n, 6=n, 7=n, 8=n, 9=n, 10=n" if nothing was relevant, or "1=y, 2=y, 3=y, 4=y, 5=y, 6=y, 7=y, 8=y, 9=y, 10=y" if everything was relevant. Here, "y" means yes (to fetch the result) and "n" means no (to skip the result), obviously. For formality sake, always include all responses, whether "y" or "n". In particular, don't omit the "n" responses, as omitting them will result in a parsing error.
 
 {search_results}
