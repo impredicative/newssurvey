@@ -25,7 +25,8 @@ def is_query_valid(query: str) -> bool:
         print_error("Query must be at least two characters long.")
         return False
     if any(ln.lstrip().startswith("#") for ln in query.splitlines()):
-        print_error("Query may not contain any line starting with #.")
+        print_error("Query may not contain any line starting with # as it will interfere with separating sections in the prompts.")
+        # Note: Technically, only level 1 to 2 headings need to be avoided, with level 3 and lower levels being acceptable.
         return False
     return True
 

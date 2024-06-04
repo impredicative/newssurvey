@@ -1,10 +1,14 @@
-In this step of the workflow, in the context of the user's input, your task is to filter for potentially relevant {source_type} articles from the page of search results below. Separately for each article, if you respond in the affirmative, its full-text will subsequently be read, and the article will continue to be considered for the user's query. Alternatively, separately for each article, if you respond in the negative, its full-text will not be read, and the article will be ruled out from consideration for the user's query. Consider each article independently without regard to the others in the batch. There is no quota to meet, so don't feel obligated to select anything if all search results clearly can be ruled out. This is just one of many pages of search results.
+In this step of the workflow, in the context of the user's input, your task is to filter for potentially relevant {source_type} articles from the page of search results below. You will be provided one or more search results to filter. Separately for each search result, if you respond in the affirmative, its full-text will subsequently be fetched, and the article will continue to be considered for the user's query. Alternatively, if you respond in the negative, its full-text will not be read, and the article will be ruled out from consideration for the user's query. Consider each article independently without regard to the others in the batch. There is no quota to meet, and this is just one of many pages of search results.
 
-Each article below is numbered. Your response will be in the form "<number>=<y/n> ..." in a single line. As an example, your response could be "1=y 2=y 3=y 4=n 5=y, 6=n 7=n 8=n 9=n 10=n" without the quotes, in a single line. Another sample response could be "1=n 2=n 3=n 4=n 5=n 6=n 7=n 8=n" if nothing was relevant. Here, "y" means yes (to read) and "n" means no (to skip), obviously.
-
-{articles}
-
+## Query
 
 For context, the user's {source_type} question or concern is below:
 
 {user_query}
+
+
+## Articles
+
+Each article below is numbered. Your response will be in the form "<number>=<y/n>, ...", all in a single line. You must include a decision for every listed article, always in numerical order. As an example, your response could be "1=y, 2=y, 3=y, 4=n, 5=y, 6=n, 7=n, 8=n, 9=n, 10=n" without the quotes, in a single line. Another sample response could be "1=n, 2=n, 3=n, 4=n, 5=n, 6=n, 7=n, 8=n, 9=n, 10=n" if nothing was relevant, or "1=y, 2=y, 3=y, 4=y, 5=y, 6=y, 7=y, 8=y, 9=y, 10=y" if everything was relevant. Here, "y" means yes (to fetch) and "n" means no (to skip), obviously. For formality sake, always include all responses, whether "y" or "n".
+
+{search_results}
