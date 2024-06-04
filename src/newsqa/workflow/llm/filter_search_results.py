@@ -5,6 +5,8 @@ from newsqa.util.openai_ import get_content
 
 
 def filter_search_results(user_query: str, source_module: ModuleType, results: list[dict]) -> list[dict]:
+    assert user_query
+    assert results
     prompt_data = {
         "user_query": user_query,
         "source_site_name": source_module.SOURCE_SITE_NAME,
