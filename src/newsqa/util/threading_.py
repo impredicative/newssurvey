@@ -9,9 +9,7 @@ class CooldownLock:
     This is useful in scenarios where it's also necessary to limit the frequency of lock acquisition,
     such as for managing access to a shared resource in a way that prevents excessively rapid consecutive uses.
 
-    Caution: The implementation may have a slight race condition, although efforts have been made while acquiring the lock to minimize its impact.
-
-    Ref: https://stackoverflow.com/a/78572164/
+    Ref: https://stackoverflow.com/a/78591650/
     """
 
     def __init__(self, cooldown: float = 1, name: Optional[str] = None):
@@ -25,29 +23,23 @@ class CooldownLock:
         self._name = f"{name} lock" if name else "lock"
 
         self._earliest_use_time = 0
-        self._main_lock = threading.Lock()
-        self._cooldown_lock = threading.Lock()
+        self._lock = threading.Lock()
 
     def acquire(self) -> bool:
-        num_approvals = 0
-        with self._cooldown_lock:
-            while num_approvals < 2:  # Intended to minimize effect of race condition.
-                wait_time = self._earliest_use_time - time.monotonic()
-                if wait_time > 0:
-                    print(f"Sleeping for {wait_time:.1f}s to acquire {self._name}.")
-                    time.sleep(wait_time)
-                    num_approvals = 0
-                else:
-                    num_approvals += 1
-            self._main_lock.acquire()
-            return True
+        self._lock.acquire()
+        wait_time = self._earliest_use_time - time.monotonic()
+        if wait_time > 0:
+            print(f"Sleeping for {wait_time:.1f}s to acquire {self._name}.")
+            time.sleep(wait_time)
+        return True
 
     def release(self):
-        self._earliest_use_time = time.monotonic() + self._cooldown_period
-        self._main_lock.release()
+        if self.locked():
+            self._earliest_use_time = time.monotonic() + self._cooldown_period
+        self._lock.release()
 
     def locked(self) -> bool:
-        return self._main_lock.locked()
+        return self._lock.locked()
 
     def __enter__(self) -> Self:
         self.acquire()
