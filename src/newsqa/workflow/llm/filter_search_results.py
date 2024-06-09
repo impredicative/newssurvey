@@ -57,7 +57,7 @@ def filter_search_results(user_query: str, source_module: ModuleType, results: l
         "search_results": "\n\n".join(f'{num}. {result['title']}\n{result.get('description', '')}'.rstrip() for num, result in enumerate(results, start=1)),
     }
     prompt = PROMPTS["0. common"].format(**prompt_data) + "\n\n" + PROMPTS["2. filter_search_results"].format(**prompt_data)
-    response = get_content(prompt)
+    response = get_content(prompt, log=False)
 
     if response == "0":
         return []

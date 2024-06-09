@@ -39,12 +39,13 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     return completion
 
 
-def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None) -> str:
+def get_content(prompt: str, *, completion: Optional[ChatCompletion] = None, log: bool = True) -> str:
     """Return the completion content for the given prompt."""
     if not completion:
         completion = get_completion(prompt, model=MODELS["text"])
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
-    print(f"\n{_COLOR_LIGHT_GRAY}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
+    if log:
+        print(f"\n{_COLOR_LIGHT_GRAY}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
     return content
