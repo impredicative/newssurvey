@@ -3,6 +3,7 @@ from types import ModuleType
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.user.source import get_source_module_name
 from newsqa.types import SearchResult
+from newsqa.util.dict import dict_str
 from newsqa.util.sys_ import print_warning
 
 
@@ -16,7 +17,7 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
             if not page_results:
                 break
             filtered_page_results = filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
-            print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with keyword arguments: {kwargs}")
+            print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with arguments: {dict_str(kwargs)}")
             if not filtered_page_results:
                 break
             for result in filtered_page_results:
