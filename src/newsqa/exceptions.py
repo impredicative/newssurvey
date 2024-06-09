@@ -28,3 +28,7 @@ class LanguageModelOutputStructureError(LanguageModelOutputError):
 
 class RequestError(Error):
     """Malformed HTTP request error"""
+
+
+class SourceInsufficiencyError(Error):
+    """Source data insufficiency error."""

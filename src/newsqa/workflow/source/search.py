@@ -1,5 +1,6 @@
 from types import ModuleType
 
+from newsqa.exceptions import SourceInsufficiencyError
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.types import SearchResult
 from newsqa.util.dict import dict_str
@@ -40,6 +41,8 @@ def get_filtered_search_results(user_query: str, source_module: ModuleType, sear
 
     Returns:
         list[searchResult]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
+
+    `SourceInsufficiencyError` is raised if no filtered results are available.
     """
     results = {}
     num_terms = len(search_terms)
@@ -50,23 +53,10 @@ def get_filtered_search_results(user_query: str, source_module: ModuleType, sear
             if result_link not in results:
                 results[result_link] = result
         print(f"Accumulated a running total of {len(results)} filtered results for {term_num}/{num_terms} search terms.")
+
+    if not results:
+        raise SourceInsufficiencyError("No filtered search results exist for query.")
+
     results = list(results.values())
-    assert len(results) == len(set(r['link'] for r in results))  # Ensures no duplicates.
+    assert len(results) == len(set(r["link"] for r in results))  # Ensures no duplicates.
     return results
-
-
-def get_printable_search_results(results: list[SearchResult]) -> str:
-    """Return the search results as a printable string with enumerated articles.
-
-    Returns:
-        str: A formatted string containing the search results, with each result numbered and displayed with its title, link, and description.
-
-    A message indicating no results is returned if there are none.
-    """
-
-    heading = f"SEARCH RESULTS ({len(results)}):"
-    if results:
-        printable_results = heading + "\n" + "\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
-    else:
-        printable_results = heading + "\n(none)"
-    return printable_results
