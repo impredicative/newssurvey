@@ -5,6 +5,7 @@ import requests
 
 from newsqa.config import REQUEST_HEADERS
 from newsqa.exceptions import RequestError
+from newsqa.types import SearchResult
 from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
 
@@ -58,7 +59,7 @@ def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: b
     return response
 
 
-def get_search_results(**kwargs) -> list[dict]:
+def get_search_results(**kwargs) -> list[SearchResult]:
     """Return search results as a list of dictionaries, each containing the 'title', 'link', and 'description' of an article.
 
     `kwargs` are forwarded to `_get_search_response`.

@@ -2,10 +2,11 @@ from types import ModuleType
 
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.user.source import get_source_module_name
+from newsqa.types import SearchResult
 from newsqa.util.sys_ import print_warning
 
 
-def _get_filtered_search_results_for_search_term(user_query: str, source_module: ModuleType, search_term: str) -> list[dict]:
+def _get_filtered_search_results_for_search_term(user_query: str, source_module: ModuleType, search_term: str) -> list[SearchResult]:
     results = {}
 
     def insert_paged_results(**kwargs) -> None:
@@ -39,13 +40,13 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
     return results
 
 
-def get_filtered_search_results(user_query: str, source_module: ModuleType, search_terms: list[str]) -> list[dict]:
+def get_filtered_search_results(user_query: str, source_module: ModuleType, search_terms: list[str]) -> list[SearchResult]:
     """Get filtered search results.
 
     Results are filtered for relevance by the LLM.
 
     Returns:
-        list[dict]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
+        list[searchResult]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
     """
     results = {}
     num_terms = len(search_terms)

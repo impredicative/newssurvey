@@ -4,6 +4,7 @@ import re
 from types import ModuleType
 
 import newsqa.exceptions
+from newsqa.types import SearchResult
 from newsqa.config import PROMPTS
 from newsqa.util.openai_ import get_content
 from newsqa.util.sys_ import print_error
@@ -52,7 +53,7 @@ def _are_responses_valid(responses: list[str]) -> bool:
     return True
 
 
-def filter_search_results(user_query: str, source_module: ModuleType, results: list[dict]) -> list[dict]:
+def filter_search_results(user_query: str, source_module: ModuleType, results: list[SearchResult]) -> list[SearchResult]:
     """Return the list of relevant search results.
 
     `LanguageModelOutputError` is raised if the model output has an error.
