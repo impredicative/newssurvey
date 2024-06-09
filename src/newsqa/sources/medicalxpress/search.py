@@ -87,5 +87,5 @@ def run_searches(target: Callable) -> None:
     Note: The keyword arguments `query` and `page_num` are managed automatically by the target function, and are therefore not provided.
     """
     for sort_by in ("relevancy", "date"):
-        for headlines in (False, True):
+        for headlines in (True, False):
             target(sort_by=sort_by, headlines=headlines)
