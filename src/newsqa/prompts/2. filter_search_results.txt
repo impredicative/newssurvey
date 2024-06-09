@@ -1,14 +1,5 @@
 In this step of the workflow, in the context of the user's input, your task is to filter for potentially relevant {source_type} articles from the page of search results below. You will be provided one or more search results to filter. Separately for each search result, if you respond in the affirmative, its full-text will subsequently be read, and the article will continue to be considered for the user's query. Alternatively, if you respond in the negative, its full-text will not be read, and the article will be ruled out from consideration for the user's query. Consider each article independently without regard to the others in the batch. There is no quota to meet, and this is just one of many pages of search results.
 
-## Query
-
-For context, the user's {source_type} question or concern is below:
-
-{user_query}
-
-
-## Articles
-
 Each article below is numbered. In your response, you are to identify only the affirmative responses. Your response will be in a single line in the space-separated format "<number> <number> ...". As an example, your response could be "3 5 8" without the quotes, in which case the correspondingly numbered articles will be read, and all others will be skipped. As a different example, if given ten search results, in the rare case that everything was relevant, your response would be "1 2 3 4 5 6 7 8 9 10", and everything will then be read. In contrast, if nothing was relevant, just say "0" instead.
 
 {search_results}

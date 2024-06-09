@@ -40,8 +40,10 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
     """
     assert user_query
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
-    prompt = PROMPTS["0. common"].format(**prompt_data) + "\n\n" + PROMPTS["1. list_search_terms"].format(**prompt_data)
-    response = get_content(prompt)
+    prompt_data["task"] = PROMPTS["1. list_search_terms"].format(**prompt_data)
+    prompt = PROMPTS["0. common"].format(**prompt_data)
+
+    response = get_content(prompt, log=False)
 
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
