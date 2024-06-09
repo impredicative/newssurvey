@@ -1,4 +1,4 @@
-In this step of the workflow, in the context of the user's input, your task is to filter for potentially relevant {source_type} articles from the page of search results below. You will be provided one or more search results to filter. Separately for each search result, if you respond in the affirmative, its full-text will subsequently be fetched, and the article will continue to be considered for the user's query. Alternatively, if you respond in the negative, its full-text will not be read, and the article will be ruled out from consideration for the user's query. Consider each article independently without regard to the others in the batch. There is no quota to meet, and this is just one of many pages of search results.
+In this step of the workflow, in the context of the user's input, your task is to filter for potentially relevant {source_type} articles from the page of search results below. You will be provided one or more search results to filter. Separately for each search result, if you respond in the affirmative, its full-text will subsequently be read, and the article will continue to be considered for the user's query. Alternatively, if you respond in the negative, its full-text will not be read, and the article will be ruled out from consideration for the user's query. Consider each article independently without regard to the others in the batch. There is no quota to meet, and this is just one of many pages of search results.
 
 ## Query
 
@@ -9,8 +9,6 @@ For context, the user's {source_type} question or concern is below:
 
 ## Articles
 
-Each article below is numbered. Your response will be in the form "<number>=<y/n>, ...", all in a single line. You must include a decision for every listed article, always in numerical order. As an example, your response could be "1=y, 2=y, 3=y, 4=n, 5=y, 6=n, 7=n, 8=n, 9=n, 10=n" without the quotes, in a single line. Another sample response could be "1=n, 2=n, 3=n, 4=n, 5=n, 6=n, 7=n, 8=n, 9=n, 10=n" if nothing was relevant, or "1=y, 2=y, 3=y, 4=y, 5=y, 6=y, 7=y, 8=y, 9=y, 10=y" if everything was relevant. Here, "y" means yes (to fetch the result) and "n" means no (to skip the result), obviously. For formality’s sake, always include all responses, whether "y" or "n", and in strict sequential order. Don't omit the "n" responses, as omitting anything will result in a parsing error.
+Each article below is numbered. In your response, you are to identify only the affirmative responses. Your response will be in a single line in the space-separated format "<number> <number> ...". As an example, your response could be "3 5 8" without the quotes, in which case the correspondingly numbered articles will be read, and all others will be skipped. As a different example, if given ten search results, in the rare case that everything was relevant, your response would be "1 2 3 4 5 6 7 8 9 10", and everything will then be read. In contrast, if nothing was relevant, just say "0" instead.
 
 {search_results}
-
-Reminder: Provide all responses, not just the affirmative ones.
