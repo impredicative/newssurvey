@@ -1,4 +1,5 @@
 import datetime
+from typing import Callable
 
 import hext
 import requests
@@ -80,21 +81,11 @@ def get_search_results(**kwargs) -> list[SearchResult]:
     return results
 
 
-def get_printable_search_results(**kwargs) -> str:
-    """Return the search results as a printable string with enumerated articles.
+def run_searches(target: Callable) -> None:
+    """Call the given target function with the respective keyword arguments for each type of search that can be conducted.
 
-    `kwargs` are forwarded to `get_search_results`.
-
-    Returns:
-        str: A formatted string containing the search results, with each result numbered and displayed with its title, link, and description.
-
-    A message indicating no results is returned if there are none.
+    Note: The keyword arguments `query` and `page_num` are managed automatically by the target function, and are therefore not provided.
     """
-
-    results = get_search_results(**kwargs)
-    heading = "Search results:"
-    if results:
-        printable_results = heading + "\n\n" + "\n\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
-    else:
-        printable_results = heading + "\n(none)"
-    return printable_results
+    for sort_by in ("relevancy", "date"):
+        for headlines in (False, True):
+            target(sort_by=sort_by, headlines=headlines)

@@ -1,16 +1,16 @@
 from types import ModuleType
 
 from newsqa.workflow.llm.filter_search_results import filter_search_results
-from newsqa.workflow.user.source import get_source_module_name
 from newsqa.types import SearchResult
 from newsqa.util.dict import dict_str
-from newsqa.util.sys_ import print_warning
 
 
 def _get_filtered_search_results_for_search_term(user_query: str, source_module: ModuleType, search_term: str) -> list[SearchResult]:
     results = {}
 
     def insert_paged_results(**kwargs) -> None:
+        assert "query" not in kwargs, kwargs
+        assert "page_num" not in kwargs, kwargs
         page_num = 1
         while True:
             page_results = source_module.get_search_results(query=search_term, page_num=page_num, **kwargs)
@@ -25,17 +25,9 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
                 if result_link not in results:
                     results[result_link] = result
             page_num += 1
+        print(f"Obtained {len(results)} filtered results for search term {search_term!r}.")
 
-    source = get_source_module_name(source_module)
-    match source:
-        case "medicalxpress":
-            for sort_by in ("relevancy", "date"):
-                for headlines in (False, True):
-                    insert_paged_results(sort_by=sort_by, headlines=headlines)
-                    print(f"Accumulated up to {len(results)} filtered results for search term {search_term!r}.")
-        case _:
-            print_warning(f"Customized acquisition of search results is not implemented for the {source} source, and so the default acquisition will be used.")
-            insert_paged_results()
+    source_module.run_searches(insert_paged_results)
 
     results = list(results.values())
     return results
@@ -57,6 +49,24 @@ def get_filtered_search_results(user_query: str, source_module: ModuleType, sear
             result_link = result["link"]
             if result_link not in results:
                 results[result_link] = result
-        print(f"Accumulated a running total of {len(results)} filtered results for up to {term_num}/{num_terms} search terms.")
+        print(f"Accumulated a running total of {len(results)} filtered results for {term_num}/{num_terms} search terms.")
     results = list(results.values())
+    assert len(results) == len(set(r['link'] for r in results))  # Ensures no duplicates.
     return results
+
+
+def get_printable_search_results(results: list[SearchResult]) -> str:
+    """Return the search results as a printable string with enumerated articles.
+
+    Returns:
+        str: A formatted string containing the search results, with each result numbered and displayed with its title, link, and description.
+
+    A message indicating no results is returned if there are none.
+    """
+
+    heading = f"SEARCH RESULTS ({len(results)}):"
+    if results:
+        printable_results = heading + "\n" + "\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(results, start=1))
+    else:
+        printable_results = heading + "\n(none)"
+    return printable_results

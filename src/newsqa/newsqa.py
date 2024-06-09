@@ -5,6 +5,7 @@ from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.source.search import get_filtered_search_results
 from newsqa.workflow.user.query import ensure_query_is_valid
 from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
+from newsqa.workflow.source.search import get_printable_search_results
 from newsqa.workflow.llm.list_search_terms import list_search_terms
 
 
@@ -35,4 +36,5 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     search_terms = list_search_terms(user_query=query, source_module=source_module)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
-    _search_results = get_filtered_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
+    search_results = get_filtered_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
+    print(get_printable_search_results(search_results))
