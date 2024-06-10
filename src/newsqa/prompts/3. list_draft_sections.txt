@@ -1,4 +1,6 @@
-In this step of the workflow, you are given the full-text of an article. It is one of many articles that you will independently be given. For your information, in the context of the user's query, a research report is to later be generated in a subsequent step. For now, your task is to list one or more section names of the report that the current article text can contribute to with regard to the user's query. List only the relevant section names that the current article can strongly substantiate, and only if they hold relevance to the user's query. When reading the article text, do not be biased by mere opinions, as opinions are a dime a dozen; look to data instead. In a later step, you will be asked to actually write each of the listed sections using the article text.
+In this step of the workflow, you are given the full-text of an article. It is one of many articles that you will independently be given. For your information, in the context of the user's query, a research report is to later be generated in a subsequent step. For now, your task is to list one or more section names of the report that the current article text can contribute to with regard to the user's query. List only the relevant section names that the current article can strongly substantiate, and only if they hold relevance to the user's query. In a later step, you will be asked to actually write each of the listed sections using the article text.
+
+When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts often have undeclared conflicts of interest. Look to data and results instead.
 
 Do not provide a nested hierarchy of section names; emit only a flattened single-level instead of a hierarchy, even if it means duplicating a few words. Each listed section must be self-sufficient. Different articles will contribute to different sections of the report, although some overlap is also naturally expected.
 
@@ -6,7 +8,7 @@ List one section name per line. The user's well-being may depend on your thoroug
 
 In case there are no sections names to list, just say "none" instead. This can happen if this particular article were to not be relevant to the user's query.
 
-The article title and text are below.
+The article title and text are below:
 
 
 {article_title}
