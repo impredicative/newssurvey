@@ -123,6 +123,9 @@ def filter_search_results(user_query: str, source_module: ModuleType, search_ter
     Returns:
         list[searchResult]: A list of dictionaries where each dictionary represents an article with its title, link, and description.
 
+    The internal function raises `LanguageModelOutputError` if the model output has an error.
+    The subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+
     `SourceInsufficiencyError` is raised if no filtered results are available.
     """
     results = {}
