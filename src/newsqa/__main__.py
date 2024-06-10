@@ -19,7 +19,7 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
 
     Params:
     * `source` (-s): Name of supported news source. If not given, the user is prompted for it.
-    * `query` (-q): Question or concern answerable by the news source. If not given, the user is prompted for it.
+    * `query` (-q): Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.
     * `output_path (-o)`: Output file path. If given, the response is also written to this text file except if there is an error.
     * `confirm` (-c): Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
@@ -35,6 +35,9 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
 
         if not query:
             query = get_query(source_type=source_module.SOURCE_TYPE)
+        elif (query_path := Path(query)).is_file():
+            assert query_path.exists()
+            query = query_path.read_text().strip()
         ensure_query_is_valid(query)
 
         if output_path:
