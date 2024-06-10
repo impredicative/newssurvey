@@ -2,10 +2,10 @@ from pathlib import Path
 from typing import Optional
 
 from newsqa.util.openai_ import ensure_openai_key, MODELS
-from newsqa.workflow.source.search import get_filtered_search_results
 from newsqa.workflow.user.query import ensure_query_is_valid
 from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
 from newsqa.workflow.llm.list_search_terms import list_search_terms
+from newsqa.workflow.llm.filter_search_results import get_filtered_search_results
 
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
