@@ -1,3 +1,1 @@
-In this step of the workflow, your task is to exhaustively list all {source_type} search terms relevant to the user's input, one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's input.
-
-In case the user's input must be rejected for any reason, or if there are no search terms to list, just say "none" instead.
+In this step of the workflow, your task is to exhaustively list all {source_type} search terms relevant to the user's input, one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's input. Do not prefix the search terms with bullets, etc. In case the user's input must be rejected for any reason, or if there are no search terms to list, just say "none" instead.
