@@ -23,6 +23,10 @@ def is_search_terms_list_valid(terms: list[str]) -> bool:
             print_error(f"Search term is invalid because it has leading or trailing whitespace: {term!r}")
             return False
 
+        if term.startswith(("- ", "* ")):
+            print_error(f"Search term is invalid because it has a leading bullet prefix: {term}")
+            return False
+
         if term in seen:
             print_error(f"Search term is invalid because it is a duplicate: {term}")
             return False
