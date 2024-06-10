@@ -43,7 +43,7 @@ def _are_responses_valid(responses: list[str]) -> bool:
     return True
 
 
-def filter_search_results(user_query: str, source_module: ModuleType, results: list[SearchResult]) -> list[SearchResult]:
+def _filter_search_results(user_query: str, source_module: ModuleType, results: list[SearchResult]) -> list[SearchResult]:
     """Return the list of relevant search results.
 
     `LanguageModelOutputError` is raised if the model output has an error.
@@ -98,7 +98,7 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
             page_results = source_module.get_search_results(query=search_term, page_num=page_num, **kwargs)
             if not page_results:
                 break
-            filtered_page_results = filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
+            filtered_page_results = _filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
             print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with arguments: {dict_str(kwargs)}")
             if not filtered_page_results:
                 break
