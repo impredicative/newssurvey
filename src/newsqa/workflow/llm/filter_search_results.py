@@ -87,7 +87,7 @@ def _filter_search_results(user_query: str, source_module: ModuleType, results: 
     return filtered_results
 
 
-def _get_filtered_search_results_for_search_term(user_query: str, source_module: ModuleType, search_term: str) -> list[SearchResult]:
+def _filter_search_results_for_search_term(user_query: str, source_module: ModuleType, search_term: str) -> list[SearchResult]:
     results = {}
 
     def insert_paged_results(**kwargs) -> None:
@@ -128,7 +128,7 @@ def filter_search_results(user_query: str, source_module: ModuleType, search_ter
     results = {}
     num_terms = len(search_terms)
     for term_num, term in enumerate(search_terms, start=1):
-        results_for_term = _get_filtered_search_results_for_search_term(user_query=user_query, source_module=source_module, search_term=term)
+        results_for_term = _filter_search_results_for_search_term(user_query=user_query, source_module=source_module, search_term=term)
         for result in results_for_term:
             result_link = result["link"]
             if result_link not in results:
