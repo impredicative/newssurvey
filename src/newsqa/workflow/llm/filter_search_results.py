@@ -116,7 +116,7 @@ def _get_filtered_search_results_for_search_term(user_query: str, source_module:
 
 
 def filter_search_results(user_query: str, source_module: ModuleType, search_terms: list[str]) -> list[SearchResult]:
-    """Get filtered search results.
+    """Return filtered search results.
 
     Results are filtered for relevance by the LLM.
 
