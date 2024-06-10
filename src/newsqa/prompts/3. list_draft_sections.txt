@@ -10,7 +10,6 @@ In case there are no sections names to list, just say "none" instead. This can h
 
 The article title and text are below:
 
-
 {article_title}
 
 {article_text}

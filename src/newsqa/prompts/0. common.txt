@@ -5,6 +5,5 @@ For context, the user's {source_type} question or concern is below:
 
 {user_query}
 
-
 ## Task
 {task}
