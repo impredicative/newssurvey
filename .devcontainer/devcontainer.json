@@ -4,7 +4,17 @@
 	"name": "Debian",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
-    "postCreateCommand": "./scripts/setup_rye.sh"
+	"postCreateCommand": "./scripts/setup_rye.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+				"GitHub.copilot",
+				"mhutchie.git-graph",
+				"ms-python.python",
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	}
 	
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
