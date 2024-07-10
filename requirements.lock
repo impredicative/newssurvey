@@ -6,6 +6,8 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
+#   universal: false
 
 -e file:.
 annotated-types==0.7.0
@@ -13,7 +15,7 @@ annotated-types==0.7.0
 anyio==4.4.0
     # via httpx
     # via openai
-certifi==2024.2.2
+certifi==2024.7.4
     # via httpcore
     # via httpx
     # via requests
@@ -39,11 +41,11 @@ idna==3.7
     # via anyio
     # via httpx
     # via requests
-openai==1.30.5
+openai==1.35.13
     # via newsqa
-pydantic==2.7.2
+pydantic==2.8.2
     # via openai
-pydantic-core==2.18.3
+pydantic-core==2.20.1
     # via pydantic
 python-dotenv==1.0.1
     # via newsqa
@@ -59,9 +61,9 @@ termcolor==2.4.0
     # via fire
 tqdm==4.66.4
     # via openai
-typing-extensions==4.12.0
+typing-extensions==4.12.2
     # via openai
     # via pydantic
     # via pydantic-core
-urllib3==2.2.1
+urllib3==2.2.2
     # via requests
