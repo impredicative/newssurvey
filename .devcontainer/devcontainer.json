@@ -5,6 +5,9 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
 	"postCreateCommand": "./scripts/setup_rye.sh",
+	"containerEnv": {
+        "UV_LINK_MODE": "copy"  // Prevents "warning: Failed to hardlink files"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
