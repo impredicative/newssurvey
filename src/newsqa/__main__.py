@@ -12,7 +12,7 @@ from newsqa.workflow.user.query import get_query, ensure_query_is_valid
 from newsqa.workflow.user.source import get_source, get_source_module, ensure_source_is_valid
 
 
-def main(source: Optional[str] = None, query: Optional[str] = None, output_path: Optional[Path] = None, confirm: bool = False) -> None:
+def main(source: Optional[str] = None, query: Optional[str] = None, output_path: Optional[Path] = None, confirm: bool = True) -> None:
     """Generate, print, and optionally write a response to a question or concern using a supported news source.
 
     The progress and response both are printed to stdout.
@@ -21,7 +21,9 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
     * `source` (-s): Name of supported news source. If not given, the user is prompted for it.
     * `query` (-q): Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.
     * `output_path (-o)`: Output file path. If given, the response is also written to this text file except if there is an error.
-    * `confirm` (-c): Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
+    * `confirm` (-c): Confirm as the workflow progresses.
+        If `True, a confirmation is interactively sought as each step of the workflow progresses. Its default is `True`.
+        If `False`, the workflow progresses without any confirmation.
 
     A nonzero exitcode exists if there is an error.
     """
@@ -44,7 +46,7 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
             output_path = Path(output_path)
 
         if not isinstance(confirm, bool):
-            raise newsqa.exceptions.InputError("`confirm` (-c) argument has an invalid value. No value is to explicitly be specified for it since it is a boolean.")
+            raise newsqa.exceptions.InputError(f"`confirm` (-c) argument has an invalid value {confirm!r} of type {type(confirm)}. Its value, if specified, is required to be a boolean.")
 
         response = generate_response(source=source, query=query, output_path=output_path, confirm=confirm)
         print(response)
