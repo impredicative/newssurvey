@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
+from newsqa.types import SearchResult
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
 from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
@@ -34,8 +35,8 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     print(f"MODELS: large={MODELS["text"]["large"]}, small={MODELS["text"]["small"]}, embeddings={MODELS["embeddings"]}")
 
-    search_terms = list_search_terms(user_query=query, source_module=source_module)
+    search_terms: list[str] = list_search_terms(user_query=query, source_module=source_module)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
-    search_results = filter_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
+    search_results: list[SearchResult] = filter_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
     print(f"SEARCH RESULTS ({len(search_results)}):\n" + "\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(search_results, start=1)))
     _draft_sections = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)
