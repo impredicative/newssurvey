@@ -1,8 +1,8 @@
-from typing import Optional
-
-import fire
 import os
 from pathlib import Path
+from typing import Optional
+
+import click
 
 import newsqa.exceptions
 from newsqa.newsqa import generate_response
@@ -12,18 +12,15 @@ from newsqa.workflow.user.query import get_query, ensure_query_is_valid
 from newsqa.workflow.user.source import get_source, get_source_module, ensure_source_is_valid
 
 
-def main(source: Optional[str] = None, query: Optional[str] = None, output_path: Optional[Path] = None, confirm: bool = True) -> None:
+@click.command(context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 120})
+@click.option("--source", "-s", default=None, help="Name of supported news source. If not given, the user is prompted for it.")
+@click.option("--query", "-q", default=None, help="Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.")
+@click.option("--output-path", "-o", default=None, type=Path, help="Output file path. If given, the response is also written to this text file except if there is an error.")
+@click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
+def main(source: Optional[str], query: Optional[str], output_path: Optional[Path], confirm: bool) -> None:
     """Generate, print, and optionally write a response to a question or concern using a supported news source.
 
     The progress and response both are printed to stdout.
-
-    Params:
-    * `source` (-s): Name of supported news source. If not given, the user is prompted for it.
-    * `query` (-q): Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.
-    * `output_path (-o)`: Output file path. If given, the response is also written to this text file except if there is an error.
-    * `confirm` (-c): Confirm as the workflow progresses.
-        If `True, a confirmation is interactively sought as each step of the workflow progresses. Its default is `True`.
-        If `False`, the workflow progresses without any confirmation.
 
     A nonzero exitcode exists if there is an error.
     """
@@ -43,10 +40,8 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
         ensure_query_is_valid(query)
 
         if output_path:
-            output_path = Path(output_path)
-
-        if not isinstance(confirm, bool):
-            raise newsqa.exceptions.InputError(f"`confirm` (-c) argument has an invalid value {confirm!r} of type {type(confirm)}. Its value, if specified, is required to be a boolean.")
+            assert isinstance(output_path, Path), (output_path, type(output_path))
+        assert isinstance(confirm, bool), (confirm, type(confirm))
 
         response = generate_response(source=source, query=query, output_path=output_path, confirm=confirm)
         print(response)
@@ -62,4 +57,4 @@ def main(source: Optional[str] = None, query: Optional[str] = None, output_path:
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    main()
