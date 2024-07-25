@@ -4,7 +4,7 @@ from types import ModuleType
 
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.config import PROMPTS
-from newsqa.types import SearchArticle, SearchResult
+from newsqa.types import AnalyzedArticle, SearchArticle, SearchResult
 from newsqa.util.openai_ import get_content
 from newsqa.util.sys_ import print_error
 
@@ -36,7 +36,7 @@ def _are_sections_valid(sections: list[str]) -> bool:
     return True
 
 
-def _list_draft_sections_for_search_result(user_query: str, source_module: ModuleType, search_result: SearchResult) -> tuple[SearchArticle, list[str]]:
+def _list_draft_sections_for_search_result(user_query: str, source_module: ModuleType, search_result: SearchResult) -> AnalyzedArticle:
     """Return a tuple containing the search article and a list of draft section names for the given search result.
 
     `LanguageModelOutputError` is raised if the model output has an error.
@@ -70,10 +70,12 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     print(f'Obtained {len(sections)} draft section names for article: {search_result['title']}.')
     # for section in sections:
     #     print(f"  {section}")
-    return article, sections
+
+    analyzed_article = {"article": article, "sections": sections}
+    return analyzed_article
 
 
-def list_draft_sections(user_query: str, source_module: ModuleType, search_results: list[SearchResult]) -> list[tuple[SearchArticle, list[str]]]:
+def list_draft_sections(user_query: str, source_module: ModuleType, search_results: list[SearchResult]) -> list[AnalyzedArticle]:
     """Return a list of tuples containing the search article and respective draft section names.
 
     The internal function `_list_draft_sections_for_search_result` raises `LanguageModelOutputError` if the model output has an error.
@@ -81,18 +83,18 @@ def list_draft_sections(user_query: str, source_module: ModuleType, search_resul
 
     `SourceInsufficiencyError` is raised if no draft section names are available.
     """
-    data = []
+    analyzed_articles = []
     num_search_results = len(search_results)
     all_sections = set()
     for search_result_num, search_result in enumerate(search_results, start=1):
-        article, sections_for_search_result = _list_draft_sections_for_search_result(user_query=user_query, source_module=source_module, search_result=search_result)
-        if sections_for_search_result:
-            data.append((article, sections_for_search_result))
-            for section in sections_for_search_result:
+        analyzed_article = _list_draft_sections_for_search_result(user_query=user_query, source_module=source_module, search_result=search_result)
+        if sections := analyzed_article["sections"]:
+            analyzed_articles.append(analyzed_article)
+            for section in sections:
                 if section not in all_sections:
                     all_sections.add(section)
         print(f"Accumulated a running total of {len(all_sections)} draft section names for {search_result_num}/{num_search_results} search results.")
 
     if not all_sections:
         raise SourceInsufficiencyError("No draft section names were suggested for query.")
-    return data
+    return analyzed_articles

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from newsqa.types import SearchArticle, SearchResult
+from newsqa.types import AnalyzedArticle, SearchResult
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
@@ -46,4 +46,4 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     if confirm:
         get_confirmation("draft sections")
-    _articles_and_draft_sections: list[tuple[SearchArticle, list[str]]] = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)
+    _articles_and_draft_sections: list[AnalyzedArticle] = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)

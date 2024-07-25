@@ -9,3 +9,8 @@ class SearchResult(TypedDict):
 
 class SearchArticle(SearchResult):
     text: Required[str]
+
+
+class AnalyzedArticle(TypedDict):
+    article: Required[SearchArticle]
+    sections: NotRequired[list[str]]
