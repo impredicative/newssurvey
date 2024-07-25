@@ -32,6 +32,7 @@ _PRE_CONTENT_STARTSWITH_BLACKLIST = ("Click here to ",)
 _PRE_CONTENT_RE_FULLMATCH_BLACKLIST = [
     re.compile(p)
     for p in (
+        r"\d+(?:\.\d+)?K",  # Example: 1.9K
         r"\d+",  # Example: 39
     )
 ]
