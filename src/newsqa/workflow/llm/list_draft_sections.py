@@ -46,7 +46,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
 
     article_text = source_module.get_article_text(search_result["link"])
     article = SearchArticle(**search_result, text=article_text)
-    assert article_text.startswith(search_result["title"]), article  # If this fails, fix the parsing, otherwise conditionally prepend the title.
+    assert article_text.startswith(search_result["title"]), article  # If this fails, fix the parsing to ensure it is true.
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     prompt_data["task"] = PROMPTS["3. list_draft_sections"].format(**prompt_data, article=article_text)
