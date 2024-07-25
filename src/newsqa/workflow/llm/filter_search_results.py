@@ -31,14 +31,19 @@ def _are_responses_valid(responses: list[str]) -> bool:
             return False
         number = int(response)
 
+        if number < 0:
+            print_error(f"Response {count} is invalid because it is negative: {number}")
+            return False
+
         if number in seen:
             print_error(f"Response {count} is invalid because it is a duplicate: {number}")
             return False
         seen.add(number)
 
-        if number < max(seen):
-            print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
-            return False
+        # Note: This fails sometimes when using the small gpt-4o-mini-2024-07-18 model, and is therefore disabled.
+        # if number < max(seen):
+        #     print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
+        #     return False
 
     return True
 
@@ -59,7 +64,7 @@ def _filter_search_results(user_query: str, source_module: ModuleType, results: 
     }
     prompt_data["task"] = PROMPTS["2. filter_search_results"].format(**prompt_data)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, log=False)
+    response = get_content(prompt, model_size="small", log=False)
 
     if response == "0":
         return []
@@ -83,6 +88,8 @@ def _filter_search_results(user_query: str, source_module: ModuleType, results: 
             raise LanguageModelOutputStructureError(f"While filtering search results, the received completion has an error. {error}")
 
     responses = [int(r) for r in responses]
+    responses = [r for r in responses if (r != 0)]
+    responses.sort()
     filtered_results = [results[r - 1] for r in responses]
     return filtered_results
 

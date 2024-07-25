@@ -38,7 +38,7 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     search_terms: list[str] = list_search_terms(user_query=query, source_module=source_module)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
-    
+
     if confirm:
         get_confirmation("search results")
     search_results: list[SearchResult] = filter_search_results(user_query=query, source_module=source_module, search_terms=search_terms)
