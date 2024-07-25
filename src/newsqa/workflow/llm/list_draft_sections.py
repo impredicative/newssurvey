@@ -45,7 +45,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     assert user_query
 
     article_text = source_module.get_article_text(search_result["link"])
-    assert article_text.startswith(search_result["title"]), (search_result["title"], article_text)  # If this fails, conditionally prepend the title.
+    assert article_text.startswith(search_result["title"]), (search_result["title"], article_text)  # If this fails, fix the parsing, otherwise conditionally prepend the title.
     article = SearchArticle(**search_result, text=article_text)
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
@@ -56,7 +56,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
         print(f'No draft section names exist for article: {search_result['title']}')
-        return article, []
+        return AnalyzedArticle(article=article, sections=[])
 
     sections = [line.strip() for line in response.splitlines()]  # Note: Trailing whitespace has been observed in a name.
     sections = [line for line in sections if line]  # Note: Empty intermediate lines have been observed between names.
@@ -71,8 +71,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     # for section in sections:
     #     print(f"  {section}")
 
-    analyzed_article = {"article": article, "sections": sections}
-    return analyzed_article
+    return AnalyzedArticle(article=article, sections=sections)
 
 
 def list_draft_sections(user_query: str, source_module: ModuleType, search_results: list[SearchResult]) -> list[AnalyzedArticle]:
