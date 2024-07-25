@@ -78,6 +78,11 @@ def get_search_results(**kwargs) -> list[SearchResult]:
     html = hext.Html(html)
     rule = _HEXT
     results = rule.extract(html)
+
+    for result in results:
+        result["title"] = result["title"].rstrip("\xa0")
+        assert result["title"] == result["title"].strip(), result
+
     return results
 
 
