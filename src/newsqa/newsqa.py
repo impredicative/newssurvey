@@ -47,4 +47,4 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
     if confirm:
         get_confirmation("draft sections")
     articles_and_draft_sections: list[AnalyzedArticle] = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)
-    print("DRAFT SECTIONS " + "\n".join(f'#{num}: {a["article"]["title"]}\n{"\n\t".join(a["sections"])}') for num, a in enumerate(articles_and_draft_sections, start=1))
+    print("DRAFT SECTIONS:\n" + "\n".join(f'#{num}: {a["article"]["title"]}\n\t{"\n\t".join(a["sections"])}' for num, a in enumerate(articles_and_draft_sections, start=1)))

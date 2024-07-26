@@ -51,7 +51,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     prompt_data["task"] = PROMPTS["3. list_draft_sections"].format(**prompt_data, article=article_text)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, model_size="small", log=True)
+    response = get_content(prompt, model_size="small", log=False)
 
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
