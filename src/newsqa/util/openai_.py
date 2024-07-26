@@ -43,7 +43,7 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     return completion
 
 
-def get_content(prompt: str, *, model_size: str = "large", completion: Optional[ChatCompletion] = None, log: bool = True) -> str:
+def get_content(prompt: str, *, model_size: str, completion: Optional[ChatCompletion] = None, log: bool = False) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the completion content for the given prompt."""
     assert model_size in MODELS["text"], model_size
     model = MODELS["text"][model_size]

@@ -47,7 +47,7 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
     prompt_data["task"] = PROMPTS["1. list_search_terms"].format(**prompt_data)
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
-    response = get_content(prompt, log=False)
+    response = get_content(prompt, model_size="large", log=False)
 
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
