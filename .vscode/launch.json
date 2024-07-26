@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "Python Debugger: newsqa",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "newsqa",
+            "args": ["-s", "medicalxpress", "-q", "~/newsqa_query.txt"],
+        }
+    ]
+}
