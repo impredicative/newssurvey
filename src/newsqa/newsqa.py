@@ -9,6 +9,7 @@ from newsqa.workflow.user.source import ensure_source_is_valid, get_source_modul
 from newsqa.workflow.llm.list_search_terms import list_search_terms
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.llm.list_draft_sections import list_draft_sections
+from newsqa.workflow.llm.list_final_sections import list_final_sections
 
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -48,3 +49,7 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
         get_confirmation("draft sections")
     articles_and_draft_sections: list[AnalyzedArticle] = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)
     print("DRAFT SECTIONS:\n" + "\n".join(f'#{num}: {a["article"]["title"]}\n\t{"\n\t".join(a["sections"])}' for num, a in enumerate(articles_and_draft_sections, start=1)))
+
+    if confirm:
+        get_confirmation("final sections")
+    _articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections)
