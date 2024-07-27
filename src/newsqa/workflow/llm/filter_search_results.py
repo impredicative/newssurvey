@@ -60,7 +60,7 @@ def _filter_search_results(user_query: str, source_module: ModuleType, results: 
         "user_query": user_query,
         "source_site_name": source_module.SOURCE_SITE_NAME,
         "source_type": source_module.SOURCE_TYPE,
-        "search_results": "\n\n".join(f'{num}. {result['title']}\n{result.get('description', '')}'.rstrip() for num, result in enumerate(results, start=1)),
+        "search_results": "\n\n".join(f'{num}. {result['title']}\n{result['link']}\n{result.get('description', '')}'.rstrip() for num, result in enumerate(results, start=1)),  # Note: Link is included because it contains the year and month.
     }
     prompt_data["task"] = PROMPTS["2. filter_search_results"].format(**prompt_data)
     prompt = PROMPTS["0. common"].format(**prompt_data)
