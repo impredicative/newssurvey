@@ -2,8 +2,8 @@ import contextlib
 import io
 from types import ModuleType
 
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.config import PROMPTS
+from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.types import AnalyzedArticle, SearchArticle, SearchResult
 from newsqa.util.openai_ import get_content
 from newsqa.util.sys_ import print_error
