@@ -40,7 +40,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     """Return a tuple containing the search article and a list of draft section names for the given search result.
 
     `LanguageModelOutputError` is raised if the model output has an error.
-    The subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
+    Specifically, its subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
     """
     assert user_query
 
@@ -78,7 +78,7 @@ def list_draft_sections(user_query: str, source_module: ModuleType, search_resul
     """Return a list of tuples containing the search article and respective draft section names.
 
     The internal function `_list_draft_sections_for_search_result` raises `LanguageModelOutputError` if the model output has an error.
-    The subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+    Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
 
     `SourceInsufficiencyError` is raised if no draft section names are available.
     """
