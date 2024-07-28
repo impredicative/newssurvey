@@ -1,5 +1,6 @@
 import datetime
 import os
+import time
 from typing import Optional
 
 import dotenv
@@ -37,8 +38,10 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     assert model in MODELS["text"].values(), model
     client = openai.OpenAI()
     print(f"Requesting completion for prompt of length {len(prompt):,} using model {model}.")
+    time_start = time.monotonic()
     completion = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}])
-    print(f"Received completion for prompt of length {len(prompt):,} using model {model}.")
+    time_used = time.monotonic() - time_start
+    print(f"Received completion for prompt of length {len(prompt):,} using model {model} in {time_used:.1f}s.")
     # Note: Specifying max_tokens=4096 with gpt-4-turbo-preview did not benefit in increasing output length, and a higher value is disallowed. Ref: https://platform.openai.com/docs/api-reference/chat/create
     return completion
 
