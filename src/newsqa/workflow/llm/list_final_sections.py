@@ -115,8 +115,10 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     The internal function `_list_final_sections_for_sample` raises `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
+    num_unique_draft_sections = len({s for a in articles_and_draft_sections for s in a["sections"]})
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
+
     votes_needed_to_finalize_section = {"test": 1, "qa": 2, "prod": 3}["test"]  # TODO: Set to prod.
     rng = random.Random(0)
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
@@ -127,8 +129,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
         unique_sections = {s for a in articles_and_sections for s in a["sections"]}
         num_unique_sections = len(unique_sections)
         num_unique_sections_finalized = sum((max(draft_to_final_section_candidate_counts.get(s, {}).values(), default=0) >= votes_needed_to_finalize_section) for s in unique_sections)
-        pct_unique_sections_finalized = num_unique_sections_finalized / num_unique_sections
-        print(f"After iteration {iteration_num}, {num_unique_sections_finalized}/{num_unique_sections} ({pct_unique_sections_finalized:.2%}) sections are finalized.")
+        print(f"After iteration {iteration_num}, the section counts are: finalized={num_unique_sections_finalized} current={num_unique_sections} original={num_unique_draft_sections}")
         if num_unique_sections == num_unique_sections_finalized:
             break
         iteration_num += 1
