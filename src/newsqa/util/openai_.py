@@ -46,12 +46,21 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     return completion
 
 
-def get_content(prompt: str, *, model_size: str, completion: Optional[ChatCompletion] = None, log: bool = False) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
+def get_content(prompt: str, *, model_size: str, completion: Optional[ChatCompletion] = None, log: bool = False, read_cache: bool = True) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the completion content for the given prompt."""
     assert model_size in MODELS["text"], model_size
     model = MODELS["text"][model_size]
     if not completion:
-        completion = get_completion(prompt, model=model)
+        if read_cache:
+            completion = get_completion(prompt, model=model)
+        else:
+            cache_key = get_completion.__cache_key__(prompt, model=model)
+            cache_key_deletion_status = _DISKCACHE.delete(cache_key)
+            if cache_key_deletion_status:
+                print(f"Deleted cache key for prompt of length {len(prompt):,} using model {model}.")
+            else:
+                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found.")
+            completion = get_completion(prompt, model=model)
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
