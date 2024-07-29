@@ -93,8 +93,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     numbered_draft_sections_str = "\n".join(numbered_draft_sections)
     prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, model_size="large", log=True)
-    # Note: The small model "gpt-4o-mini-2024-07-18" absolutely cannot be trusted to reliably provide valid output in any format. In numerous tests it failed to provide valid output in any format.
+    response = get_content(prompt, model_size="small", log=True)
 
     numbered_response_sections = [line.strip() for line in response.splitlines()]
     numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -120,11 +119,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
     votes_needed_to_finalize_section = {"test": 1, "qa": 2, "prod": 3}["test"]  # TODO: Set to prod.
     rng = random.Random(0)
-    max_section_sample_size = 200
-    # Notes:
-    # Using 1000 was observed to lead to a premature truncation of the response by the model after the first 800.
-    # Using 500 was observed to lead to an incorrect name of the draft section after the first 100.
-    # Using 300 was observed to lead to an incorrect name of the draft section after the first 200.
+    max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
 
     draft_to_final_section_candidate_counts: dict[str, dict[str, int]] = {}
     iteration_num = 0
@@ -137,6 +132,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
         if num_unique_sections == num_unique_sections_finalized:
             break
         iteration_num += 1
+        # input("Press Enter to continue...")
 
         sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
         sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, sample_draft_sections)
