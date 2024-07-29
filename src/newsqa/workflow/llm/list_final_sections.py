@@ -64,7 +64,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
             return False
 
         draft_section, response_draft_section = draft_match.group("draft"), response_match.group("draft")
-        if draft_section != response_draft_section:
+        if draft_section.casefold() != response_draft_section.casefold():
             print_error(f"The #{num} draft section name ({draft_section!r}) and response draft section name ({response_draft_section!r}) are unequal. The response section string is: {numbered_response_section!r}")
             return False
 
