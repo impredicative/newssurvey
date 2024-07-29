@@ -20,6 +20,9 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     """Return true if the draft and final section names are valid, otherwise false.
 
     A validation error is printed if a section name is invalid.
+
+    Example of draft section: "123. Relation of Daytime Drowsiness to Alzheimer's Disease Risk"
+    Example of response section: "123. Relation of Daytime Drowsiness to Alzheimer's Disease Risk → Alzheimer's Disease and Daytime Drowsiness"
     """
     if not numbered_draft_sections:
         print_error("No draft section names exist.")
@@ -90,7 +93,8 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     numbered_draft_sections_str = "\n".join(numbered_draft_sections)
     prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, model_size="small", log=True)
+    response = get_content(prompt, model_size="large", log=True)
+    # Note: The small model "gpt-4o-mini-2024-07-18" absolutely cannot be trusted to reliably provide valid output in any format. In numerous tests it failed to provide valid output in any format.
 
     numbered_response_sections = [line.strip() for line in response.splitlines()]
     numbered_response_sections = [line for line in numbered_response_sections if line]
