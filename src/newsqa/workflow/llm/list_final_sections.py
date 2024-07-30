@@ -124,12 +124,15 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
 
     The internal function `_list_final_sections_for_sample` raises `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+
+    Convergence examples:
+    * (votes_needed_to_finalize_section=1) After iteration 81, the section counts are: finalized=298 current=298 original=1569
     """
     num_unique_draft_sections = len({s for a in articles_and_draft_sections for s in a["sections"]})
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
-    votes_needed_to_finalize_section = {"test": 1, "qa": 2, "prod": 3}["test"]  # TODO: Set to prod.
+    votes_needed_to_finalize_section = 1
     rng = random.Random(0)
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
 
