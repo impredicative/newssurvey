@@ -132,10 +132,10 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
-    votes_needed_to_finalize_section = 1
-    rng = random.Random(0)
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
+    votes_needed_to_finalize_section = 1
 
+    rng = random.Random(0)
     draft_to_final_section_candidate_counts: dict[str, dict[str, int]] = {}
     iteration_num = 0
     while True:
