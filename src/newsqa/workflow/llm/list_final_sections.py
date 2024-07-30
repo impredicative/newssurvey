@@ -138,7 +138,6 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
-    max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
     votes_needed_to_finalize_section = 1  # Note: Using a value >1, e.g. 2, whether initially or incrementally, led to extremely slow progress with convergence in comparison to a fixed value of 1.
     rng = random.Random(0)
 
@@ -154,13 +153,19 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
         if num_unique_sections == num_unique_sections_finalized:
             num_unique_sections_by_cycle.append(num_unique_sections)
             assert num_unique_sections_by_cycle[cycle_num] == num_unique_sections_by_cycle[-1] == num_unique_sections
-            if (num_unique_sections_by_cycle[-1] == num_unique_sections_by_cycle[-2]):
+            if num_unique_sections_by_cycle[-1] == num_unique_sections_by_cycle[-2]:
                 print(f"Convergence reached after {iteration_num} iterations in cycle {cycle_num} for finalizing section names.")
                 break
             cycle_num += 1
             draft_to_final_section_candidate_counts.clear()
         iteration_num += 1
         # input("Press Enter to continue...")
+
+        max_section_sample_size = {num_unique_sections >= 100: 100, num_unique_sections < 100: 50}[True]
+        # Note:
+        # * Using 200 or 300 led to a very slow response requiring over a minute.
+        # * Using 100 led to a convergence at just over 80 final sections.
+        # * Dynamically using 50 led to a convergence at just over 50 final sections.
 
         sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
         sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, sample_draft_sections)
