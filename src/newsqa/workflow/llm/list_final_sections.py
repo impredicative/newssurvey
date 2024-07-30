@@ -133,7 +133,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
-    votes_needed_to_finalize_section = 1
+    votes_needed_to_finalize_section = 1  # Note: Using a value >1, e.g. 2, led to extremely slow convergence in comparison to a value of 1.
 
     rng = random.Random(0)
     draft_to_final_section_candidate_counts: dict[str, dict[str, int]] = {}
