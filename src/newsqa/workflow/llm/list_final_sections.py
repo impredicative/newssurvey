@@ -134,23 +134,31 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     Convergence examples:
     * (votes_needed_to_finalize_section=1) After iteration 117, the section counts are: finalized=313 current=313 original=1569
     """
-    num_unique_draft_sections: Final[int] = len({s for a in articles_and_draft_sections for s in a["sections"]})
+    num_unique_original_sections: Final[int] = len({s for a in articles_and_draft_sections for s in a["sections"]})
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute.
-    votes_needed_to_finalize_section = 1  # Note: Using a value >1, e.g. 2, led to extremely slow convergence in comparison to a value of 1.
-
+    votes_needed_to_finalize_section = 1  # Note: Using a value >1, e.g. 2, whether initially or incrementally, led to extremely slow progress with convergence in comparison to a fixed value of 1.
     rng = random.Random(0)
+
     draft_to_final_section_candidate_counts: dict[str, dict[str, int]] = {}
-    iteration_num = 0
+    cycle_num, iteration_num = 1, 0
+    num_unique_sections_by_cycle: list[int] = [num_unique_original_sections]
     while True:
         unique_sections = {s for a in articles_and_sections for s in a["sections"]}
         num_unique_sections = len(unique_sections)
         num_unique_sections_finalized = sum((max(draft_to_final_section_candidate_counts.get(s, {}).values(), default=0) >= votes_needed_to_finalize_section) for s in unique_sections)
-        print(f"After iteration {iteration_num}, the section counts are: finalized={num_unique_sections_finalized} current={num_unique_sections} original={num_unique_draft_sections}")
+        num_votes_cast = sum(sum(draft_to_final_section_candidate_counts.get(s, {}).values()) for s in unique_sections)
+        print(f"After iteration {iteration_num} in cycle {cycle_num}, with {num_votes_cast:,} active votes, the section name counts are: finalized={num_unique_sections_finalized} draft={num_unique_sections} original={num_unique_original_sections}")
         if num_unique_sections == num_unique_sections_finalized:
-            break
+            num_unique_sections_by_cycle.append(num_unique_sections)
+            assert num_unique_sections_by_cycle[cycle_num] == num_unique_sections_by_cycle[-1] == num_unique_sections
+            if (num_unique_sections_by_cycle[-1] == num_unique_sections_by_cycle[-2]):
+                print(f"Convergence reached after {iteration_num} iterations in cycle {cycle_num} for finalizing section names.")
+                break
+            cycle_num += 1
+            draft_to_final_section_candidate_counts.clear()
         iteration_num += 1
         # input("Press Enter to continue...")
 
@@ -170,6 +178,6 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
                             article_sections.append(final_section)
                         assert draft_section not in article["sections"]
                         assert final_section in article["sections"]
-                print(f"In iteration {iteration_num}, renamed draft section {draft_section!r} to final section {final_section!r}.")
+                print(f"In iteration {iteration_num} in cycle {cycle_num}, renamed draft section {draft_section!r} to final section {final_section!r}.")
 
     return articles_and_sections
