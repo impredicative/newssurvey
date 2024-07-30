@@ -52,4 +52,7 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     if confirm:
         get_confirmation("final sections")
-    _articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections)
+    articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections)
+    print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{num}: {a["article"]["title"]}\n\t{"\n\t".join(a["sections"])}' for num, a in enumerate(articles_and_final_sections, start=1)))
+    final_sections_sorted: list[str] = sorted({section for a in articles_and_final_sections for section in a["sections"]})
+    print(f"FINAL SECTIONS SORTED ({len(final_sections_sorted)}):\n" + "\n".join(f"{num}: {section}" for num, section in enumerate(final_sections_sorted, start=1)))

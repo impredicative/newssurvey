@@ -111,7 +111,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
                 print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting final section names: {error}")
                 # Observed message: Error: The #79 draft section name ('Circadian Rhythms and Sleep Patterns') and response draft section name ('Circadian Rhythms and Their Impact on Sleep Patterns') are unequal. The response section string is: '79. Circadian Rhythms and Their Impact on Sleep Patterns → Circadian Rhythms and Sleep'
                 continue
-        
+
         break
 
     numbered_response_matches = [_RESPONSE_SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
