@@ -126,7 +126,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
 
     Convergence examples:
-    * (votes_needed_to_finalize_section=1) After iteration 81, the section counts are: finalized=298 current=298 original=1569
+    * (votes_needed_to_finalize_section=1) After iteration 117, the section counts are: finalized=313 current=313 original=1569
     """
     num_unique_draft_sections = len({s for a in articles_and_draft_sections for s in a["sections"]})
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
