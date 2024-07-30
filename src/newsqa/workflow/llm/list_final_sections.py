@@ -10,7 +10,7 @@ from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import AnalyzedArticle
 from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error
+from newsqa.util.sys_ import print_error, print_warning
 
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
 _RESPONSE_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) → (?P<final>.+)")
@@ -78,7 +78,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str]) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, max_attempts: int = 3) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     `LanguageModelOutputError` is raised if the model output has an error.
@@ -93,16 +93,26 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     numbered_draft_sections_str = "\n".join(numbered_draft_sections)
     prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, model_size="small", log=True)
 
-    numbered_response_sections = [line.strip() for line in response.splitlines()]
-    numbered_response_sections = [line for line in numbered_response_sections if line]
+    for num_attempt in range(1, max_attempts + 1):
+        response = get_content(prompt, model_size="small", log=True, read_cache=num_attempt == 1)
 
-    error = io.StringIO()
-    with contextlib.redirect_stderr(error):
-        if not _are_sections_valid(numbered_draft_sections, numbered_response_sections):
+        numbered_response_sections = [line.strip() for line in response.splitlines()]
+        numbered_response_sections = [line for line in numbered_response_sections if line]
+
+        error = io.StringIO()
+        with contextlib.redirect_stderr(error):
+            response_is_valid = _are_sections_valid(numbered_draft_sections, numbered_response_sections)
+        if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise LanguageModelOutputStructureError(error)
+            if num_attempt == max_attempts:
+                raise LanguageModelOutputStructureError(error)
+            else:
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting final section names: {error}")
+                # Observed message: Error: The #79 draft section name ('Circadian Rhythms and Sleep Patterns') and response draft section name ('Circadian Rhythms and Their Impact on Sleep Patterns') are unequal. The response section string is: '79. Circadian Rhythms and Their Impact on Sleep Patterns → Circadian Rhythms and Sleep'
+                continue
+        
+        break
 
     numbered_response_matches = [_RESPONSE_SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
     draft_to_final_sections = {m.group("draft"): m.group("final") for m in numbered_response_matches}
