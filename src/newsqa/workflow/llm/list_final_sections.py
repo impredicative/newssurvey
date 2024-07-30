@@ -168,9 +168,10 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
         sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, sample_draft_sections)
         for draft_section, final_section in sample_draft_to_final_sections.items():
             draft_to_final_section_candidate_counts.setdefault(draft_section, {})
+            prev_max_final_section_candidate_count = max(draft_to_final_section_candidate_counts[draft_section].values(), default=0)
             final_section_candidate_count = draft_to_final_section_candidate_counts[draft_section].get(final_section, 0) + 1
             draft_to_final_section_candidate_counts[draft_section][final_section] = final_section_candidate_count
-            if (draft_section != final_section) and (final_section_candidate_count >= votes_needed_to_finalize_section) and (final_section_candidate_count == max(draft_to_final_section_candidate_counts[draft_section].values())):
+            if (draft_section != final_section) and (final_section_candidate_count >= votes_needed_to_finalize_section) and (final_section_candidate_count > prev_max_final_section_candidate_count):
                 for article in articles_and_sections:
                     article_sections = article["sections"]
                     assert article_sections
