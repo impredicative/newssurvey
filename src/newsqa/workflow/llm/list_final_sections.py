@@ -86,7 +86,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, max_attempts: int = 3) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], model_size: str, *, max_attempts: int = 3) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
@@ -113,7 +113,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size="small", log=False)
+        response = get_content(prompt, model_size=model_size, log=False)
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -126,8 +126,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
             if num_attempt == max_attempts:
                 raise LanguageModelOutputStructureError(error)
             else:
-                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting final section names: {error}")
-                # Observed message: Error: The #79 draft section name ('Circadian Rhythms and Sleep Patterns') and response draft section name ('Circadian Rhythms and Their Impact on Sleep Patterns') are unequal. The response section string is: '79. Circadian Rhythms and Their Impact on Sleep Patterns → Circadian Rhythms and Sleep'
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting final section names using {model_size} model: {error}")
                 continue
 
         break
@@ -139,9 +138,9 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     if abstained_draft_sections:
         # Note: This feature is implemented to discourage the model from emitting an invalid value for the final section name, e.g. "Not Applicable", as had otherwise been observed.
         num_draft_sections, num_abstained_draft_sections = len(draft_to_final_sections), len(abstained_draft_sections)
-        msg = f"The model abstained from providing final section names for {num_abstained_draft_sections}/{num_draft_sections} draft sections names."
+        msg = f"The {model_size} model abstained from providing final section names for {num_abstained_draft_sections}/{num_draft_sections} draft sections names."
         if num_abstained_draft_sections == num_draft_sections:
-            raise LanguageModelOutputStructureError(msg)  # Note: If this gets observed, it can perhaps be handled as a failed attempt by checking for it in `_are_sections_valid`.
+            raise LanguageModelOutputStructureError(msg)  # Note: If this gets observed, the condition can perhaps be handled as a failed attempt by checking for it in `_are_sections_valid` instead.
         print(msg)
         for abstained_draft_section in abstained_draft_sections:
             assert draft_to_final_sections[abstained_draft_section].lower() == _ABSTAINED_FINAL_SECTION_NAME
@@ -162,44 +161,48 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
+    num_successive_convergences_required_ordered_by_model = {  # First the small model is used to converge cheaply, then the large model is used to converge accurately.
+        "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11;
+        # "large": 1,  # Observed counts of sections for a user query: 1: 86→7;
+    }
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the note in its usage for convergence.
-    expected_report_length = "long"
-    num_successive_convergences_required = {"long": 1, "medium": 3, "short": 5}[expected_report_length]  # Observed counts of sections for a user query: 1 → 86; 2 → 19; 3 → 19; 5 → 11;
     rng = random.Random(0)
     get_unique_sections: Callable[[], set[str]] = lambda: {s for a in articles_and_sections for s in a["sections"]}
 
-    iteration_num = 0
-    prev_unique_sections: set[str] = get_unique_sections()
-    num_successive_convergences = 0
-    while True:
-        unique_sections: set[str] = get_unique_sections()
-        num_unique_sections, num_prev_unique_sections = len(unique_sections), len(prev_unique_sections)
-        print(f"After iteration {iteration_num}, the section counts are: current={num_unique_sections} previous={num_prev_unique_sections} original={num_unique_original_sections}")
+    for model_size, num_successive_convergences_required in num_successive_convergences_required_ordered_by_model.items():
+        iteration_num = 0
+        num_successive_convergences = 0
+        prev_unique_sections: set[str] = get_unique_sections()
 
-        if (iteration_num > 0) and (num_unique_sections <= max_section_sample_size) and (unique_sections == prev_unique_sections):
-            # Note: The condition `num_unique_sections <= max_section_sample_size` is added to ensure that convergence is over the entire population, not the sample.
-            num_successive_convergences += 1
-            print(f"Convergence {num_successive_convergences}/{num_successive_convergences_required} reached after {iteration_num} iterations for finalizing section names.")
-            if num_successive_convergences == num_successive_convergences_required:
-                break
-        elif num_successive_convergences > 0:
-            num_successive_convergences = 0
-        iteration_num += 1
-        prev_unique_sections = unique_sections
+        while True:
+            unique_sections: set[str] = get_unique_sections()
+            num_unique_sections, num_prev_unique_sections = len(unique_sections), len(prev_unique_sections)
+            print(f"After iteration {iteration_num} using {model_size} model, the section counts are: current={num_unique_sections} previous={num_prev_unique_sections} original={num_unique_original_sections}")
 
-        sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
-        sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, sample_draft_sections)
-        for draft_section, final_section in sample_draft_to_final_sections.items():
-            if draft_section != final_section:
-                for article in articles_and_sections:
-                    article_sections = article["sections"]
-                    assert article_sections
-                    if draft_section in article_sections:
-                        article_sections.remove(draft_section)
-                        if final_section not in article_sections:
-                            article_sections.append(final_section)
-                        assert draft_section not in article["sections"]
-                        assert final_section in article["sections"]
-                print(f"In iteration {iteration_num}, renamed draft section {draft_section!r} to final section {final_section!r}.")
+            if (iteration_num > 0) and (num_unique_sections <= max_section_sample_size) and (unique_sections == prev_unique_sections):
+                # Note: The condition `num_unique_sections <= max_section_sample_size` is added to ensure that convergence is over the entire population, not the sample.
+                num_successive_convergences += 1
+                print(f"Convergence {num_successive_convergences}/{num_successive_convergences_required} using {model_size} model reached after {iteration_num} iterations for finalizing section names.")
+                if num_successive_convergences == num_successive_convergences_required:
+                    break
+            elif num_successive_convergences > 0:
+                num_successive_convergences = 0
+            iteration_num += 1
+            prev_unique_sections = unique_sections
+
+            sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
+            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size)
+            for draft_section, final_section in sample_draft_to_final_sections.items():
+                if draft_section != final_section:
+                    for article in articles_and_sections:
+                        article_sections = article["sections"]
+                        assert article_sections
+                        if draft_section in article_sections:
+                            article_sections.remove(draft_section)
+                            if final_section not in article_sections:
+                                article_sections.append(final_section)
+                            assert draft_section not in article["sections"]
+                            assert final_section in article["sections"]
+                    print(f"In iteration {iteration_num} using {model_size} model, renamed draft section {draft_section!r} to final section {final_section!r}.")
 
     return articles_and_sections
