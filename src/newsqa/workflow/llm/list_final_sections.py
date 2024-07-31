@@ -161,11 +161,11 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
+    max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the code condition and note in its usage for convergence.
     num_successive_convergences_required_ordered_by_model = {
-        "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11;
-        # "large": 1,  # Observed counts of sections for a user query: 1: 86→7;
-    }
-    max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the note in its usage for convergence.
+        "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11; (all w/ max_section_sample_size condition)
+        # "large": 1,  # Observed counts of sections for a user query: 1: 86→7 (w/ max_section_sample_size condition); 1: 950→3 (w/o max_section_sample_size condition);
+    }  # Note: Only the small model is used because the large model converges only after an over-reduction in the number of sections, also at a noticeably greater cost.
     rng = random.Random(0)
     get_unique_sections: Callable[[], set[str]] = lambda: {s for a in articles_and_sections for s in a["sections"]}
 
