@@ -161,7 +161,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
-    num_successive_convergences_required_ordered_by_model = {  # First the small model is used to converge cheaply, then the large model is used to converge accurately.
+    num_successive_convergences_required_ordered_by_model = {
         "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11;
         # "large": 1,  # Observed counts of sections for a user query: 1: 86→7;
     }
@@ -180,7 +180,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
             print(f"After iteration {iteration_num} using {model_size} model, the section counts are: current={num_unique_sections} previous={num_prev_unique_sections} original={num_unique_original_sections}")
 
             if (iteration_num > 0) and (num_unique_sections <= max_section_sample_size) and (unique_sections == prev_unique_sections):
-                # Note: The condition `num_unique_sections <= max_section_sample_size` is added to ensure that convergence is over the entire population, not the sample.
+                # Note: The condition `num_unique_sections <= max_section_sample_size` ensures that convergence is over the entire population, not the sample.
                 num_successive_convergences += 1
                 print(f"Convergence {num_successive_convergences}/{num_successive_convergences_required} using {model_size} model reached after {iteration_num} iterations for finalizing section names.")
                 if num_successive_convergences == num_successive_convergences_required:
