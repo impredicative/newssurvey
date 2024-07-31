@@ -5,7 +5,7 @@ import itertools
 import random
 import re
 from types import ModuleType
-from typing import Final
+from typing import Callable, Final
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
@@ -166,7 +166,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     expected_report_length = "long"
     num_successive_convergences_required = {"long": 1, "medium": 3, "short": 5}[expected_report_length]  # Observed counts of sections for a user query: 1 → 86; 2 → 19; 3 → 19; 5 → 11;
     rng = random.Random(0)
-    get_unique_sections: callable[[], set[str]] = lambda: {s for a in articles_and_sections for s in a["sections"]}
+    get_unique_sections: Callable[[], set[str]] = lambda: {s for a in articles_and_sections for s in a["sections"]}
 
     iteration_num = 0
     prev_unique_sections: set[str] = get_unique_sections()
