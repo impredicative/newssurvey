@@ -16,7 +16,9 @@ from newsqa.util.sys_ import print_error, print_warning
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
 _RESPONSE_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) → (?P<final>.+)")
 
-_INVALID_FINAL_SECTION_NAMES = {"Not Applicable"}
+_ABSTAINED_FINAL_SECTION_NAME = "(abstain)"
+_INVALID_FINAL_SECTION_NAMES_TITLECASED = {"Not Applicable", "Abstain"}
+assert all(s.istitle() for s in _INVALID_FINAL_SECTION_NAMES_TITLECASED)
 
 
 def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_sections: list[str]) -> bool:
@@ -77,7 +79,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
             return False
         if not response_final_section:
             print_error(f"The #{num} final section name is empty. The response section string is: {numbered_response_section!r}")
-        if (response_final_section in _INVALID_FINAL_SECTION_NAMES) and (response_final_section != draft_section):
+        if (response_final_section != draft_section) and (response_final_section.title() in _INVALID_FINAL_SECTION_NAMES_TITLECASED):
             print_error(f"The #{num} final section name ({response_final_section!r}) is invalid. The response section string is: {numbered_response_section!r}")
             return False
 
@@ -86,6 +88,8 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
 
 def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, max_attempts: int = 3) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
+
+    Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
 
     `LanguageModelOutputError` is raised if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
@@ -122,6 +126,21 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
 
     numbered_response_matches = [_RESPONSE_SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
     draft_to_final_sections = {m.group("draft"): m.group("final") for m in numbered_response_matches}
+
+    abstained_draft_sections = [draft_section_name for draft_section_name, final_section_name in draft_to_final_sections.items() if (final_section_name.lower() == _ABSTAINED_FINAL_SECTION_NAME)]
+    if abstained_draft_sections:
+        # Note: This feature is implemented to discourage the model from emitting an invalid value for the final section name, e.g. "Not Applicable", as had otherwise been observed.
+        num_draft_sections, num_abstained_draft_sections = len(draft_to_final_sections), len(abstained_draft_sections)
+        msg = f"The model abstained from providing final section names for {num_abstained_draft_sections}/{num_draft_sections} draft sections names: {", ".join(abstained_draft_sections)}"
+        if num_abstained_draft_sections == num_draft_sections:
+            raise LanguageModelOutputStructureError(msg)
+        print(msg)
+        for abstained_draft_section in abstained_draft_sections:
+            assert draft_to_final_sections[abstained_draft_section].lower() == _ABSTAINED_FINAL_SECTION_NAME
+            del draft_to_final_sections[abstained_draft_section]  # skipped from the returned mapping.
+            # draft_to_final_sections[abstained_draft_section] = abstained_draft_section  # mapped to the corresponding draft section names.
+
+    assert draft_to_final_sections
     return draft_to_final_sections
 
 
@@ -171,7 +190,8 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
             prev_max_final_section_candidate_count = max(draft_to_final_section_candidate_counts[draft_section].values(), default=0)
             final_section_candidate_count = draft_to_final_section_candidate_counts[draft_section].get(final_section, 0) + 1
             draft_to_final_section_candidate_counts[draft_section][final_section] = final_section_candidate_count
-            if (draft_section != final_section) and (final_section_candidate_count >= votes_needed_to_finalize_section) and (final_section_candidate_count > prev_max_final_section_candidate_count):
+            if (draft_section != final_section) and (final_section_candidate_count >= votes_needed_to_finalize_section) and (final_section_candidate_count >= prev_max_final_section_candidate_count):
+                # Note: `>=` is intentionally used when tie-breaking against prev_max_final_section_candidate_count. This is considering that the latest vote is considered to be over a more finalized sample, and is therefore preferred.
                 for article in articles_and_sections:
                     article_sections = article["sections"]
                     assert article_sections
