@@ -5,11 +5,10 @@ import re
 import hext
 import requests
 
-from newsqa.config import REQUEST_HEADERS
 from newsqa.util.diskcache_ import get_diskcache
 from newsqa.util.sys_ import print_error
 
-from ._common import request_cooldown_lock
+from ._common import REQUEST_HEADERS, request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__)
 _HEXT = hext.Rule("""
