@@ -15,7 +15,8 @@ dotenv.load_dotenv()
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
 
 # _COLOR_LIGHT_GRAY = "\033[0;37m"
-_COLOR_LIGHT_BLUE = "\033[1;34m"
+# _COLOR_LIGHT_BLUE = "\033[1;34m"
+_COLOR_GRAY = "\033[0;90m"
 _COLOR_RESET = "\033[0m"
 
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
@@ -73,6 +74,6 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
     content = content.strip()
     assert content
     if log:
-        print(f"\n{_COLOR_LIGHT_BLUE}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
+        print(f"\n{_COLOR_GRAY}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
         # print(prefix_lines(f"PROMPT\n{prompt}\nCOMPLETION\n{content}"))
     return content
