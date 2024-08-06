@@ -6,10 +6,10 @@ Each input line is in the numbered format "{{num}}. {{unordered_subtopic}}". The
 
 The number of output subtopic names should of course be exactly equal to the number of inputs. This implies that the number in the last line of the input and the output lists will be the same.
 
-Also in effect, the set of output subtopic names should exactly match the input (except of course for their order). A validation check will be run on your response to ensure the output conforms to this point.
+Also, the set of output subtopic names should exactly match the input (except of course for their order). A validation check will be run on your response to ensure the output conforms to this point.
 
 In the rare event that all subtopics are already perfectly ordered for the report, just say "(ordered)" instead, indicating to the workflow that no reordering is necessary.
 
 The list of unordered subtopics is below:
 
-{unordererd_subtopics}
+{unordered_subtopics}
