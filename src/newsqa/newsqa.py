@@ -66,4 +66,3 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
     final_sections = list({section for a in articles_and_final_sections for section in a["sections"]})
     final_sections = order_final_sections(user_query=query, source_module=source_module, sections=final_sections)
     print(f"FINAL SECTIONS ORDERED ({len(final_sections)}):\n" + "\n".join([f"{section_num}. {section}" for section_num, section in enumerate(final_sections, start=1)]))
-    

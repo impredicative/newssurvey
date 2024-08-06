@@ -7,10 +7,11 @@ from types import ModuleType
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error, print_warning
+from newsqa.util.sys_ import print_error
 
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
+
 
 def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sections: list[str]) -> bool:
     """Return true if the output sections are a valid permutation of the input sections."""
@@ -77,11 +78,11 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
             return False
         else:
             output_sections.add(output_section)
-        
+
     if input_sections != output_sections:
         print_error("The input and output section names are unequal.")
         return False
-    
+
     return True
 
 
@@ -119,6 +120,7 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
 
     assert output_sections
     return output_sections
+
 
 def order_final_sections(user_query: str, source_module: ModuleType, sections: list[str]) -> list[str]:
     """Return a list of sections ordered by relevance to the user query."""
