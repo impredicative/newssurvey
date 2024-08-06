@@ -7,7 +7,7 @@ from types import ModuleType
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error
+from newsqa.util.sys_ import print_error, print_warning
 
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
@@ -86,7 +86,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     return True
 
 
-def _order_final_sections(user_query: str, source_module: ModuleType, sections: list[str]) -> list[str]:
+def _order_final_sections(user_query: str, source_module: ModuleType, sections: list[str], *, max_attempts: int = 3) -> list[str]:
     """Return a list of sections ordered by relevance to the user query."""
     assert user_query
     assert sections
@@ -100,20 +100,28 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
     prompt_data["task"] = PROMPTS["5. order_final_sections"].format(**prompt_data, unordered_subtopics=numbered_input_sections_str)
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
-    response = get_content(prompt, model_size="large", log=True)
+    for num_attempt in range(1, max_attempts + 1):
+        response = get_content(prompt, model_size="large", log=True, read_cache=(num_attempt == 1))
 
-    if response.strip().lower() == "(ordered)":
-        return input_sections
+        if response.strip().lower() == "(ordered)":
+            # return input_sections
+            response = numbered_input_sections_str
 
-    numbered_output_sections = [line.strip() for line in response.splitlines()]
-    numbered_output_sections = [line for line in numbered_output_sections if line]
+        numbered_output_sections = [line.strip() for line in response.splitlines()]
+        numbered_output_sections = [line for line in numbered_output_sections if line]
 
-    error = io.StringIO()
-    with contextlib.redirect_stderr(error):
-        response_is_valid = _are_sections_valid(numbered_input_sections, numbered_output_sections)
-    if not response_is_valid:
-        error = error.getvalue().rstrip().removeprefix("Error: ")
-        raise LanguageModelOutputStructureError(error)
+        error = io.StringIO()
+        with contextlib.redirect_stderr(error):
+            response_is_valid = _are_sections_valid(numbered_input_sections, numbered_output_sections)
+        if not response_is_valid:
+            error = error.getvalue().rstrip().removeprefix("Error: ")
+            if num_attempt == max_attempts:
+                raise LanguageModelOutputStructureError(error)
+            else:
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting ordered section names: {error}")
+                continue
+
+        break
 
     numbered_output_matches = [_SECTION_PATTERN.fullmatch(line) for line in numbered_output_sections]
     output_sections = [match["section"] for match in numbered_output_matches]
