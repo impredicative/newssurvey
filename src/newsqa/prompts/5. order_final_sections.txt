@@ -3,11 +3,12 @@ In this step of the workflow, you are given a deduplicated list of suggested sub
 Each input line is in the numbered format "{{num}}. {{unordered_subtopic}}". The numbering is just an ordered incremented enumeration of the input. Each line of your output will have the numbered format "{{num}}. {{ordered_subtopic}}". Your numbering will be an ordered incremented enumeration of the *output*. As such, the numbers in the inputs and outputs are simply sequential, and are intended only to have a running count of how many subtopics have been listed.
 
 The following validation checks will be run on your output. If your output does not pass all of these checks, this step will fail, and the workflow will also fail.
-1. The number of output subtopic names should of course be exactly equal to the number of inputs. Do not add or remove any subtopics. This implies that the number in each line of the input and the output lists will be the same.
-2. You must use all of the provided subtopic names. Do not modify any subtopic name.
-3. In summary, the set of output subtopic names should exactly match the input (except of course for their order).
+1. The number of output subtopic names should of course be exactly equal to the number of inputs. For this to pass, do not add or remove any subtopics. This implies that the number in each line of the input and the output lists will be the same.
+2. All of the provided subtopic names should be used. Moreover, they should be used as-is. Do not modify any subtopic name.
+3. There should be no duplicate in the output subtopic names, just as there is no duplicate in the input subtopic names.
+4. In summary, the set of output subtopic names should exactly match the input (except of course for their order).
 
-In the rare event that all subtopics are already perfectly ordered for the report, just say "(ordered)" instead, indicating to the workflow that no reordering is necessary.
+In short, only a reordering is requested. In the rare event that all subtopics are already perfectly ordered for the report, just say "(ordered)" instead, indicating to the workflow that no reordering is necessary.
 
 The list of unordered subtopics is below:
 
