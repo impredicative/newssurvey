@@ -101,7 +101,7 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size="large", log=True, read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size="small", log=True, read_cache=(num_attempt == 1))
 
         if response.strip().lower() == "(ordered)":
             # return input_sections
@@ -132,5 +132,6 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
 
 def order_final_sections(user_query: str, source_module: ModuleType, sections: list[str]) -> list[str]:
     """Return a list of sections ordered by relevance to the user query."""
+    assert len(sections) == len(set(sections))  # Ensure there are no duplicate sections.
     sections = sorted(sections)  # Note: Without this, the LLM response cannot be cached because the order of the input sections was not deterministic.
     return _order_final_sections(user_query, source_module, sections)
