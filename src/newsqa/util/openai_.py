@@ -8,12 +8,14 @@ import openai
 
 import newsqa.exceptions
 from newsqa.util.diskcache_ import get_diskcache
+# from newsqa.util.str import prefix_lines
 
 dotenv.load_dotenv()
 
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
 
-_COLOR_LIGHT_GRAY = "\033[0;37m"
+# _COLOR_LIGHT_GRAY = "\033[0;37m"
+_COLOR_LIGHT_BLUE = "\033[1;34m"
 _COLOR_RESET = "\033[0m"
 
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
@@ -52,6 +54,12 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
     model = MODELS["text"][model_size]
     if not completion:
         if read_cache:
+            cache_key = get_completion.__cache_key__(prompt, model=model)
+            cache_key_existence_status = cache_key in _DISKCACHE
+            if cache_key_existence_status:
+                print(f"Found cache key for prompt of length {len(prompt):,} using model {model}.")
+            else:
+                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found.")
             completion = get_completion(prompt, model=model)
         else:
             cache_key = get_completion.__cache_key__(prompt, model=model)
@@ -65,5 +73,6 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
     content = content.strip()
     assert content
     if log:
-        print(f"\n{_COLOR_LIGHT_GRAY}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
+        print(f"\n{_COLOR_LIGHT_BLUE}PROMPT:\n{prompt}\nCOMPLETION:\n{content}{_COLOR_RESET}")
+        # print(prefix_lines(f"PROMPT\n{prompt}\nCOMPLETION\n{content}"))
     return content
