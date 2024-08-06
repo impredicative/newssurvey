@@ -1,12 +1,11 @@
 In this step of the workflow, you are given a deduplicated list of suggested subtopics intended for a research report pertaining to the user's query. Currently the given subtopics are in random order. You are to order them in the desired target order which will be appropriate and correct for the report. The report will then be written in a later step.
 
-You must use all of the provided subtopic names. Do not modify any subtopic name; you will have an opportunity to do this later. If you modify any subtopic name in this step, a validation check will fail, and the workflow will also fail.
+Each input line is in the numbered format "{{num}}. {{unordered_subtopic}}". The numbering is just an ordered incremented enumeration of the input. Each line of your output will have the numbered format "{{num}}. {{ordered_subtopic}}". Your numbering will be an ordered incremented enumeration of the *output*. As such, the numbers in the inputs and outputs are simply sequential, and are intended only to have a running count of how many subtopics have been listed.
 
-Each input line is in the numbered format "{{num}}. {{unordered_subtopic}}". The numbering is just an ordered incremented enumeration of the input. Each line of your output will have the numbered format "{{num}}. {{ordered_subtopic}}". Your numbering will be an ordered incremented enumeration of the *output*. As such, the numbers in the inputs and outputs are simply sequential, and are intended only to count how many subtopics have been listed.
-
-The number of output subtopic names should of course be exactly equal to the number of inputs. This implies that the number in the last line of the input and the output lists will be the same.
-
-Also, the set of output subtopic names should exactly match the input (except of course for their order). A validation check will be run on your response to ensure the output conforms to this point.
+The following validation checks will be run on your output. If your output does not pass all of these checks, this step will fail, and the workflow will also fail.
+1. The number of output subtopic names should of course be exactly equal to the number of inputs. Do not add or remove any subtopics. This implies that the number in each line of the input and the output lists will be the same.
+2. You must use all of the provided subtopic names. Do not modify any subtopic name.
+3. In summary, the set of output subtopic names should exactly match the input (except of course for their order).
 
 In the rare event that all subtopics are already perfectly ordered for the report, just say "(ordered)" instead, indicating to the workflow that no reordering is necessary.
 
