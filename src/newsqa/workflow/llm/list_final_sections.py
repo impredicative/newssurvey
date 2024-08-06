@@ -79,6 +79,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
             return False
         if not response_final_section:
             print_error(f"The #{num} final section name is empty. The response section string is: {numbered_response_section!r}")
+            return False
         if (response_final_section != draft_section) and (response_final_section.title() in _INVALID_FINAL_SECTION_NAMES_TITLECASED):
             print_error(f"The #{num} final section name ({response_final_section!r}) is invalid. The response section string is: {numbered_response_section!r}")
             return False
