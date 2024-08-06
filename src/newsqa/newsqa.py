@@ -10,6 +10,7 @@ from newsqa.workflow.llm.list_search_terms import list_search_terms
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.llm.list_draft_sections import list_draft_sections
 from newsqa.workflow.llm.list_final_sections import list_final_sections
+from newsqa.workflow.llm.order_final_sections import order_final_sections
 
 
 def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -59,3 +60,10 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
     print("ARTICLES BY FINAL SECTION:\n" + "\n".join(f"{section_num}. {section} ({len(articles_by_section[section])} articles)\n\t" + "\n\t".join(f'{article_num}: {a["title"]}' for article_num, a in enumerate(articles_by_section[section], start=1)) for section_num, section in enumerate(final_sections_sorted, start=1)))
     print(f"FINAL SECTIONS SORTED ({len(final_sections_sorted)}):\n" + "\n".join(f"{num}: {section} ({len(articles_by_section[section])} articles)" for num, section in enumerate(final_sections_sorted, start=1)))
     del final_sections_sorted, articles_by_section
+
+    if confirm:
+        get_confirmation("ordering final sections")
+    final_sections = list({section for a in articles_and_final_sections for section in a["sections"]})
+    final_sections = order_final_sections(user_query=query, source_module=source_module, sections=final_sections)
+    print(f"FINAL SECTIONS ORDERED ({len(final_sections)}):\n" + "\n".join([f"{section_num}. {section}" for section_num, section in enumerate(final_sections, start=1)]))
+    
