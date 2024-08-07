@@ -83,6 +83,10 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
         if (response_final_section != draft_section) and (response_final_section.title() in _INVALID_FINAL_SECTION_NAMES_TITLECASED):
             print_error(f"The #{num} final section name ({response_final_section!r}) is invalid. The response section string is: {numbered_response_section!r}")
             return False
+        if _DRAFT_SECTION_PATTERN.fullmatch(response_final_section):
+            # Note: This has been observed when a numbered pattern, e.g. "123. ", was mistakenly prefixed to the final section name. It does however risk a false positive.
+            print_error(f"The #{num} final section name ({response_final_section!r}) is invalid. The response section string is: {numbered_response_section!r}")
+            return False
 
     return True
 
@@ -114,7 +118,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size=model_size, log=False)
+        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1))
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
