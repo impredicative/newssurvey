@@ -1,7 +1,7 @@
 import datetime
 import os
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 import dotenv
 import openai
@@ -30,6 +30,9 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
         "small": "text-embedding-3-small",  # Output vector length is 1536.
     },
 }
+TextModelSizeType = Literal["large", "small"]
+EmbeddingModelSizeType = Literal["large", "small"]
+
 MAX_OUTPUT_TOKENS = {
     "gpt-4o-2024-08-06": 16_384,
     "gpt-4o-2024-05-13": 4096,
