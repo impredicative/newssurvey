@@ -192,6 +192,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
             prev_unique_sections = unique_sections
 
             sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
+            # Note: sample_draft_sections is intentionally not sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
             sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size)
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
