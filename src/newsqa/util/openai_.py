@@ -8,7 +8,6 @@ import openai
 
 import newsqa.exceptions
 from newsqa.util.diskcache_ import get_diskcache
-# from newsqa.util.str import prefix_lines
 
 dotenv.load_dotenv()
 
@@ -22,10 +21,15 @@ _COLOR_RESET = "\033[0m"
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
-        "large": "gpt-4o-2024-05-13",
+        "large": ["gpt-4o-2024-05-13", "gpt-4o-2024-08-06"][-1],
         "small": "gpt-4o-mini-2024-07-18",
     },
     "embeddings": "text-embedding-3-large",
+}
+MAX_OUTPUT_TOKENS = {
+    "gpt-4o-2024-08-06": 16_384,
+    "gpt-4o-2024-05-13": 4096,
+    "gpt-4o-mini-2024-07-18": 16_384,
 }
 
 
@@ -39,13 +43,13 @@ def ensure_openai_key() -> None:
 def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the completion for the given prompt."""
     assert model in MODELS["text"].values(), model
+    assert model in MAX_OUTPUT_TOKENS, model
     client = openai.OpenAI()
     print(f"Requesting completion for prompt of length {len(prompt):,} using model {model}.")
     time_start = time.monotonic()
-    completion = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}])
+    completion = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}], max_tokens=MAX_OUTPUT_TOKENS[model])
     time_used = time.monotonic() - time_start
     print(f"Received completion for prompt of length {len(prompt):,} using model {model} in {time_used:.1f}s.")
-    # Note: Specifying max_tokens=4096 with gpt-4-turbo-preview did not benefit in increasing output length, and a higher value is disallowed. Ref: https://platform.openai.com/docs/api-reference/chat/create
     return completion
 
 
