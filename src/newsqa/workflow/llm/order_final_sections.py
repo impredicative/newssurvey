@@ -86,7 +86,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     return True
 
 
-def _order_final_sections(user_query: str, source_module: ModuleType, sections: list[str], *, max_attempts: int = 3) -> list[str]:
+def _order_final_sections(user_query: str, source_module: ModuleType, sections: list[str], *, max_attempts: int = 2) -> list[str]:
     """Return a list of sections ordered by relevance to the user query."""
     assert user_query
     assert sections
