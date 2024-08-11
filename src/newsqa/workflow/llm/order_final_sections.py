@@ -143,30 +143,40 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
     return output_sections
 
 
-def _update_scores(scores: dict[str, int], ordered_sample: list[str]) -> None:
-    """Update the scores in-place based on the ordered sample."""
+def _update_scores(scores: dict[str, dict[str, int]], ordered_sample: list[str], *, increment: str = "linear") -> None:
+    """Update the scores in-place based on the ordered sample.
+
+    The `increment` parameter can be either "linear" or "triangular".
+    """
     sample_len = len(ordered_sample)
-    for idx, item in enumerate(ordered_sample[:-1]):
-        old_score = scores[item]
-        increment = sample_len - idx - 1  # Does not converge by itself due to insufficient separation between scores.
-        increment = triangular_number(increment)  # Converges. For slightly slower convergence, append `// 2`.
-        new_score = old_score + increment
-        scores[item] = new_score
-        # print(f"Section {item!r} with a score of {old_score} has been incremented by {increment} to a new score of {new_score}.")
+    for idx, item in enumerate(ordered_sample):
+        old_score = scores[item]["score"]
+        score_increment = sample_len - idx  # Converges. Note: `- 1` is intentionally not appended in order to avoid the last section getting a score of 0.
+        match increment:
+            case "linear":
+                pass
+            case "triangular":
+                score_increment = triangular_number(score_increment)  # Not necessary. Converges in fewer iterations. For slightly slower convergence, append `// 2`.
+            case _:
+                raise ValueError(f"Invalid increment: {increment!r}")
+        new_score = old_score + score_increment
+        scores[item]["score"] = new_score
+        scores[item]["hits"] += 1
+        scores[item]["adj_score"] = scores[item]["score"] / scores[item]["hits"]
 
 
-def _get_sort_solution(items: list[str], scores: dict[str, int]) -> list[str]:
+def _get_sort_solution(items: list[str], scores: dict[str, dict[str, int]]) -> list[str]:
     """Get a sort solution, whether full or partial, based on the current scores."""
-    sorted_items = sorted(items, key=lambda item: scores[item], reverse=True)
+    sorted_items = sorted(items, key=lambda item: scores[item]["adj_score"], reverse=True)
 
     ordered_items = []
     for idx, item in enumerate(sorted_items[:-1]):
         next_item = sorted_items[idx + 1]
-        item_score, next_item_score = scores[item], scores[next_item]
-        if item_score > next_item_score:
+        item_score, next_item_score = scores[item]["adj_score"], scores[next_item]["adj_score"]
+        if item_score > next_item_score > 0:
             ordered_items.append(item)
         else:
-            print(f"Invalid order: Section {item!r} of index {idx} with a score of {item_score} does not have a greater score than next section {next_item!r} with a score of {next_item_score}.")
+            print(f"Invalid order: section={item!r} (score={item_score:.2f}) next_section={next_item!r} (score={next_item_score:.2f})")
             break
     else:
         ordered_items.append(sorted_items[-1])
@@ -185,18 +195,18 @@ def order_final_sections(user_query: str, source_module: ModuleType, sections: l
     sections = sorted(sections)  # Note: Without this, the LLM response cannot be cached because the order of the input sections was not deterministic.
     num_sections = len(sections)
 
-    max_section_sample_size = 20  # Number of iterations observed to be required for 76 sections: 10→118; 20→45; 25→20 (risky due to retried errors); 30→failure
+    max_section_sample_size = 20  # Values ≥30 were observed to fail with the small model. 25 may still work, but 20 is a safe choice.
     if num_sections <= max_section_sample_size:
         return _order_final_sections(user_query, source_module, sections)
     rng = random.Random(0)
-    scores = {item: 0 for item in sections}
+    scores = {item: {"hits": 0, "score": 0, "adj_score": 0} for item in sections}
 
     iteration = 0
     while True:
         ordered_sections = _get_sort_solution(sections, scores)
         print(f"After iteration {iteration}, there are {len(ordered_sections)} out of {num_sections} sections in order.")
         if len(ordered_sections) == num_sections:
-            print("The section ordering and scores are:\n\t" + "\n\t".join([f"{i}. {s} ({scores[s]})" for i, s in enumerate(ordered_sections, start=1)]))
+            print("The section ordering and scores are:\n\t" + "\n\t".join([f"{i}. {s} (hits={scores[s]['hits']}, score={scores[s]['score']}, adj_score={scores[s]['adj_score']:.1f})" for i, s in enumerate(ordered_sections, start=1)]))
             break
         iteration += 1
 
