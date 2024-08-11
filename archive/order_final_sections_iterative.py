@@ -5,10 +5,10 @@ import random
 
 def simulate_oracle(items):
     """Simulate the oracle by randomly shuffling and returning the items with a small chance of inconsistency."""
-    shuffled_items = random.sample(items, len(items))
-    if random.random() < 0.05:  # 5% chance to introduce inconsistency
+    shuffled_items = sorted(items)
+    if random.random() < 0.9:
         shuffled_items[-1], shuffled_items[-2] = shuffled_items[-2], shuffled_items[-1]
-    return sorted(shuffled_items)
+    return shuffled_items
 
 
 def update_pairwise_scores(pairwise_scores, ordered_sample):
@@ -20,7 +20,7 @@ def update_pairwise_scores(pairwise_scores, ordered_sample):
 
 
 def get_solution(items, pairwise_scores):
-    """Get a solution (partial or full) based on the current pairwise_scores."""
+    """Get a solution (partial or full) based on the current pairwise scores."""
     # Calculate scores for each item based solely on how often they precede others
     score_diff = {item: 0 for item in items}
     for item1 in items:
