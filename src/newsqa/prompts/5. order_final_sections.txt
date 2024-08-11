@@ -4,9 +4,9 @@ Each input line is in the numbered format "{{num}}. {{unordered_subtopic}}". The
 
 The following validation checks will be run on your output. If your output does not pass all of these checks, this step will fail, and the workflow will also fail.
 1. The number of output subtopic names should of course be exactly equal to the number of inputs. For this to pass, do not add or remove any subtopics. This implies that the number in each line of the input and the output lists will be the same.
-2. All of the provided subtopic names should be used. Moreover, they should be used as-is. Do not modify any subtopic name.
+2. Each of the provided subtopic names should be used exactly once. Moreover, they should be used as-is. Do not modify any subtopic name.
 3. There should be no duplicate in the output subtopic names, just as there is no duplicate in the input subtopic names.
-4. In summary, the set of output subtopic names should exactly match the input (except of course for their order).
+4. In summary, the `set` of output subtopic names should match the input, except of course for their order.
 
 In short, only a reordering is requested. In the rare event that all subtopics are already perfectly ordered for the report, just say "(ordered)" instead, indicating to the workflow that no reordering is necessary.
 
