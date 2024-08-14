@@ -1,0 +1,13 @@
+In this step of the workflow, you are given a deduplicated list of suggested subtopics intended for a research report pertaining to the user's query. Currently the given subtopics are in an undefined order. You are to rank them in the desired target order which will be appropriate and correct for the report. This will allow the workflow software to order the subtopics into the ranked order. The report will then be written in a later step.
+
+Each input line is in the numbered format "{{num}}. {{subtopic}}". The numbering is just an ordered incremented enumeration of the input. Each line of your output will have the numbered format "{{num}}. {{subtopic}} → {{rank}}". In effect, for each line, you are to copy "{{num}}. {{subtopic}}" as is, then append the target rank as " → {{rank}}" to the line. The input portion of the line is to remain wholly unaltered; you will copy it only for it to serve as an anchor to its rank.
+
+Given that there are {num_subtopics} subtopics, your rank for each subtopic will vary from 1 to {num_subtopics}. You will assign a rank number to each subtopic.
+
+In the rare event that all subtopics are already perfectly ranked for the report in their target rank, this would imply that your output {{rank}} would match the input {{num}} for each line.
+
+Remember, you are not to reorder the input sections, only to rank them while preserving their existing order.
+
+The list of subtopics is below:
+
+{unordered_subtopics}
