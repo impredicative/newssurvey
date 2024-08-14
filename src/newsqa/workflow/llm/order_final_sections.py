@@ -37,7 +37,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
             print_error(f"Input section #{num} is missing.")
             return False
         if not isinstance(numbered_output_section, str):  # Can be None if the list is exhausted given the use of zip_longest.
-            print_error(f"Response section #{num} is missing.")
+            print_error(f"Output section #{num} is missing.")
             return False
 
         input_match = _SECTION_PATTERN.fullmatch(numbered_input_section)
