@@ -1,5 +1,5 @@
 # newsqa
-**newsqa** (news Q&A) is a Python 3.12 application to research a question or concern using a supported news site. The specific news site is used to conduct searches and read article texts. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
+**newsqa** (news Q&A) is a Python 3.12 application to extensively research a question or concern using a supported news site. The specific news site is used to conduct searches and read article texts. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
 ## Approach
 Each step in this workflow corresponds to an action taken by the LLM.
