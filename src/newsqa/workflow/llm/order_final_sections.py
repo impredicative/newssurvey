@@ -167,20 +167,30 @@ def _update_scores(scores: dict[str, dict[str, int]], ordered_sample: list[str],
 
 def _get_sort_solution(items: list[str], scores: dict[str, dict[str, int]]) -> list[str]:
     """Get a sort solution, whether full or partial, based on the current scores."""
+    min_hits_threshold = 5
     sorted_items = sorted(items, key=lambda item: scores[item]["adj_score"], reverse=True)
 
     ordered_items = []
     for idx, item in enumerate(sorted_items[:-1]):
+        item_hits = scores[item]["hits"]
+        if item_hits < min_hits_threshold:
+            print(f"Insufficient hits: section={item!r} (hits={item_hits})")
+            break
         next_item = sorted_items[idx + 1]
         item_score, next_item_score = scores[item]["adj_score"], scores[next_item]["adj_score"]
         if item_score > next_item_score > 0:
             ordered_items.append(item)
         else:
-            print(f"Invalid order: section={item!r} (score={item_score:.2f}) next_section={next_item!r} (score={next_item_score:.2f})")
+            print(f"Invalid order: section={item!r} (adj_score={item_score:.2f}) next_section={next_item!r} (adj_score={next_item_score:.2f})")
             break
     else:
-        ordered_items.append(sorted_items[-1])
-        assert sorted_items == ordered_items
+        item = sorted_items[-1]
+        item_hits = scores[item]["hits"]
+        if item_hits >= min_hits_threshold:
+            ordered_items.append(sorted_items[-1])
+            assert sorted_items == ordered_items
+        else:
+            print(f"Insufficient hits: section={item!r} (hits={item_hits})")
 
     return ordered_items
 
