@@ -28,7 +28,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     if num_input_sections != num_output_sections:
         print_error(f"The number of input sections ({num_input_sections}) and output sections ({num_output_sections}) are unequal.")
         return False
-    
+
     for num, (numbered_input_section, numbered_output_section) in enumerate(itertools.zip_longest(numbered_input_sections, numbered_output_sections), start=1):
         if not isinstance(numbered_input_section, str):  # Can be None if the list is exhausted given the use of zip_longest.
             print_error(f"Input section #{num} is missing.")
@@ -36,7 +36,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if not isinstance(numbered_output_section, str):  # Can be None if the list is exhausted given the use of zip_longest.
             print_error(f"Output section #{num} is missing.")
             return False
-        
+
         input_match = _INPUT_SECTION_PATTERN.fullmatch(numbered_input_section)
         if not input_match:
             print_error(f"Input section string #{num} is invalid: {numbered_input_section!r}")
@@ -45,7 +45,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if not output_match:
             print_error(f"Output section string #{num} is invalid: {numbered_output_section!r}")
             return False
-        
+
         input_num, output_num = int(input_match.group("num")), int(output_match.group("num"))
         if num != input_num:
             print_error(f"The expected input section number ({num}) and actual input section number ({input_num}) are unequal. The input section string is: {numbered_input_section!r}")
@@ -53,7 +53,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if input_num != output_num:
             print_error(f"The input section number ({input_num}) and output section number ({output_num}) are unequal. The output section string is: {numbered_output_section!r}")
             return False
-        
+
         input_section = input_match.group("section")
         if input_section != input_section.strip():
             print_error(f"The #{num} input section name has leading or trailing whitespace: {input_section!r}")
@@ -65,13 +65,14 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if input_section != output_section:
             print_error(f"The #{num} input section name ({input_section!r}) and output section name ({output_section!r}) are unequal. The output section string is: {numbered_output_section!r}")
             return False
-        
+
         rank = int(output_match.group("rank"))
         if rank < 1:
             print_error(f"Section #{num} has an invalid output rank of {rank}. The output section string is: {numbered_output_section!r}")
             return False
 
     return True
+
 
 def _order_final_sections(user_query: str, source_module: ModuleType, sections: list[str], *, max_attempts: int = 1) -> list[str]:
     """Return a list of sections ordered by relevance to the user query.
@@ -121,6 +122,7 @@ def _order_final_sections(user_query: str, source_module: ModuleType, sections: 
     assert len(output_sections) == len(set(output_sections))
     return output_sections
 
+
 def order_final_sections(user_query: str, source_module: ModuleType, sections: list[str]) -> list[str]:
     """Return a list of sections ordered by relevance to the user query.
 
@@ -139,7 +141,7 @@ def order_final_sections(user_query: str, source_module: ModuleType, sections: l
     ordered_sections = sections
     while True:
         num_ordered = sum(1 for (prev_section, section) in itertools.zip_longest(prev_ordered_sections, ordered_sections) if (prev_section == section))
-        print(f'After iteration {iteration}, there are {num_ordered} out of {num_sections} sections in order.')
+        print(f"After iteration {iteration}, there are {num_ordered} out of {num_sections} sections in order.")
         if (iteration > 0) and (num_ordered == num_sections):
             num_successive_convergences += 1
             print(f"Convergence {num_successive_convergences}/{num_successive_convergences_required} reached after {iteration} iterations for ordering section names.")
@@ -151,7 +153,7 @@ def order_final_sections(user_query: str, source_module: ModuleType, sections: l
         prev_ordered_sections = ordered_sections
 
         ordered_sections = _order_final_sections(user_query, source_module, ordered_sections)
-    
+
     assert len(ordered_sections) == len(sections)
     assert set(ordered_sections) == set(sections)
     assert len(ordered_sections) == len(set(ordered_sections))
