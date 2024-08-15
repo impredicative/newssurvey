@@ -100,7 +100,7 @@ def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `m
     time_start = time.monotonic()
     response = client.embeddings.create(input=text, model=model)
     time_used = time.monotonic() - time_start
-    print(f"Received embedding for text of length {len(text):,} ({text_log!r}) using model {model} in {time_used:.1f}s.")
+    # print(f"Received embedding for text of length {len(text):,} ({text_log!r}) using model {model} in {time_used:.1f}s.")
     return response
 
 
