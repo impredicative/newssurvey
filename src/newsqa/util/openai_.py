@@ -96,11 +96,11 @@ def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `m
     assert model in MODELS["embedding"].values(), model
     client = openai.OpenAI()
     text_log = text[:100] + "..." if (len(text) > 100) else text
-    print(f"Requesting embedding for text of length {len(text):,} ({text_log!r}) using model {model}.")
-    time_start = time.monotonic()
+    print(f"Requesting embedding for text {text_log!r} of length {len(text):,} using model {model}.")
+    # time_start = time.monotonic()
     response = client.embeddings.create(input=text, model=model)
-    time_used = time.monotonic() - time_start
-    # print(f"Received embedding for text of length {len(text):,} ({text_log!r}) using model {model} in {time_used:.1f}s.")
+    # time_used = time.monotonic() - time_start
+    # print(f"Received embedding for text {text_log!r} of length {len(text):,} using model {model} in {time_used:.1f}s.")
     return response
 
 
