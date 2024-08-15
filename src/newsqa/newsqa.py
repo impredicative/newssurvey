@@ -36,7 +36,7 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
     query_sep = "\n" if (len(query.splitlines()) > 1) else " "
     print(f"QUERY:{query_sep}{query}")
 
-    print(f"MODELS: large={MODELS["text"]["large"]}, small={MODELS["text"]["small"]}, embeddings={MODELS["embeddings"]}")
+    print(f"MODELS: text:large={MODELS["text"]["large"]}, text:small={MODELS["text"]["small"]}, embedding:large={MODELS["embedding"]["large"]}")
 
     search_terms: list[str] = list_search_terms(user_query=query, source_module=source_module)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))

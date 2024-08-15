@@ -25,7 +25,7 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
         "large": ["gpt-4o-2024-05-13", "gpt-4o-2024-08-06"][-1],
         "small": "gpt-4o-mini-2024-07-18",
     },
-    "embeddings": {
+    "embedding": {
         "large": "text-embedding-3-large",  # Output vector length is 3072.
         "small": "text-embedding-3-small",  # Output vector length is 1536.
     },
@@ -93,7 +93,7 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
 @_DISKCACHE.memoize(tag="get_embedding")
 def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the embedding response for the given text."""
-    assert model in MODELS["embeddings"].values(), model
+    assert model in MODELS["embedding"].values(), model
     client = openai.OpenAI()
     print(f"Requesting embedding for text of length {len(text):,} using model {model}.")
     time_start = time.monotonic()
@@ -105,8 +105,8 @@ def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `m
 
 def get_vector(text: str, *, model_size: str, embedding: Optional[CreateEmbeddingResponse] = None, log: bool = False) -> list[float]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the embedding vector for the given text."""
-    assert model_size in MODELS["embeddings"], model_size
-    model = MODELS["embeddings"][model_size]
+    assert model_size in MODELS["embedding"], model_size
+    model = MODELS["embedding"][model_size]
     if not embedding:
         embedding = get_embedding(text, model=model)
     vector = embedding.data[0].embedding
