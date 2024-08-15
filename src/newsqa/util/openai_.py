@@ -90,7 +90,7 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
     return content
 
 
-@_DISKCACHE.memoize(tag="get_embedding")
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_embedding")
 def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the embedding response for the given text."""
     assert model in MODELS["embedding"].values(), model
