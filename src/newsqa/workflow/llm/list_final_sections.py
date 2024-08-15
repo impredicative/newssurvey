@@ -7,10 +7,12 @@ import re
 from types import ModuleType
 from typing import Callable, Final
 
+from scipy.spatial.distance import cosine
+
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import AnalyzedArticle
-from newsqa.util.openai_ import get_content
+from newsqa.util.openai_ import get_content, get_vector
 from newsqa.util.sys_ import print_error, print_warning
 
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
@@ -91,7 +93,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], model_size: str, *, max_attempts: int = 3) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, model_size: str, selection: str, max_attempts: int = 5) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
@@ -104,13 +106,20 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     # return {draft_section: draft_section.title() for draft_section in draft_sections}  # Placeholder.
     assert user_query
     assert draft_sections
+    draft_sections = draft_sections.copy()  # Note: This is done to prevent an accidental modification of the input, such as by a random shuffle.
 
     rng = random.Random(0)
     prompt_source_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
 
     for num_attempt in range(1, max_attempts + 1):
+        read_cache = True
         if num_attempt > 1:
-            rng.shuffle(draft_sections)  # Note: This is done to try to prevent the model from repeatedly failing on a fixed order of draft sections as has been observed.
+            match selection:
+                case 'random':
+                    rng.shuffle(draft_sections)  # Note: This is done to try to prevent the model from repeatedly failing on a fixed order of draft sections as has been observed.
+                    # Note: read_cache remains true.
+                case _:
+                    read_cache = False
 
         numbered_draft_sections = [f"{i}. {s}" for i, s in enumerate(draft_sections, start=1)]
         numbered_draft_sections_str = "\n".join(numbered_draft_sections)
@@ -118,7 +127,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1))
+        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=read_cache)
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -166,12 +175,17 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
+    sample_selection = [
+        'random',  # Required 245 iterations to finalize to 60/1959 sections of high quality
+        'embedding',  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
+        ][0]
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the code condition and note in its usage for convergence.
     num_successive_convergences_required_ordered_by_model = {
         "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11; (all w/ max_section_sample_size condition)
         # "large": 1,  # Observed counts of sections for a user query: 1: 86→7 (w/ max_section_sample_size condition); 1: 950→3 (w/o max_section_sample_size condition);
     }  # Note: Only the small model is used because the large model converges only after an over-reduction in the number of sections, also at a noticeably greater cost.
     rng = random.Random(0)
+    section_embeddings: dict[str, list[float]] = {}
     get_unique_sections: Callable[[], set[str]] = lambda: {s for a in articles_and_sections for s in a["sections"]}
 
     for model_size, num_successive_convergences_required in num_successive_convergences_required_ordered_by_model.items():
@@ -195,9 +209,21 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
             iteration_num += 1
             prev_unique_sections = unique_sections
 
-            sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
-            # Note: sample_draft_sections is intentionally not sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
-            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size)
+            if (sample_selection == 'random') or (num_unique_sections <= max_section_sample_size):
+                sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
+            elif sample_selection == 'embedding':
+                assert num_unique_sections > max_section_sample_size
+                for section in sorted(unique_sections):  # Note: `sorted` is used to log progress in an alphabetical order.
+                    if section not in section_embeddings:
+                        section_embeddings[section] = get_vector(section, model_size="large")
+                sample_draft_section = rng.choice(sorted(unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
+                sample_draft_section_embedding = section_embeddings[sample_draft_section]
+                sample_draft_section_distances = {s: cosine(sample_draft_section_embedding, section_embeddings[s]) for s in unique_sections}
+                sample_draft_sections = sorted(unique_sections, key=sample_draft_section_distances.__getitem__)[:min(max_section_sample_size, num_unique_sections)]  # Note: This doesn't make the sample fully sorted because `sample_draft_section` is still random and all other values in the sample depend on it.
+            else:
+                raise ValueError(f"Invalid sample selection: {sample_selection!r}")
+            # Note: sample_draft_sections is intentionally not fully sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
+            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection=sample_selection)
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
                     for article in articles_and_sections:
@@ -209,6 +235,6 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
                                 article_sections.append(final_section)
                             assert draft_section not in article["sections"]
                             assert final_section in article["sections"]
-                    print(f"In iteration {iteration_num} using {model_size} model, renamed draft section {draft_section!r} to final section {final_section!r}.")
+                    print(f"In iteration {iteration_num} using {model_size} text model, renamed draft section {draft_section!r} to final section {final_section!r}.")
 
     return articles_and_sections
