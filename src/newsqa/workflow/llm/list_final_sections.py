@@ -9,7 +9,7 @@ from typing import Callable, Final
 
 from scipy.spatial.distance import cosine
 
-from newsqa.config import PROMPTS
+from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import AnalyzedArticle
 from newsqa.util.openai_ import get_content, get_vector
@@ -165,12 +165,14 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     return draft_to_final_sections
 
 
-def list_final_sections(user_query: str, source_module: ModuleType, articles_and_draft_sections: list[AnalyzedArticle]) -> list[AnalyzedArticle]:
+def list_final_sections(user_query: str, source_module: ModuleType, *, articles_and_draft_sections: list[AnalyzedArticle], max_sections: int) -> list[AnalyzedArticle]:
     """Return a list of tuples containing the search article and respective final section names.
 
     The internal function `_list_final_sections_for_sample` raises `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
+    assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
+
     num_unique_original_sections: Final[int] = len({s for a in articles_and_draft_sections for s in a["sections"]})
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
@@ -180,6 +182,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
         "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
     ][0]
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the code condition and note in its usage for convergence.
+    assert max_sections <= max_section_sample_size, (max_sections, max_section_sample_size)
     num_successive_convergences_required_ordered_by_model = {
         "small": 1,  # Observed counts of sections for a user query: 1: 1569→86; 2: 86→19; 3: 19→19; 5: 11→11; (all w/ max_section_sample_size condition)
         # "large": 1,  # Observed counts of sections for a user query: 1: 86→7 (w/ max_section_sample_size condition); 1: 950→3 (w/o max_section_sample_size condition);
@@ -198,7 +201,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, articles_and
             num_unique_sections, num_prev_unique_sections = len(unique_sections), len(prev_unique_sections)
             print(f"After iteration {iteration_num} using {model_size} model, the section counts are: current={num_unique_sections} previous={num_prev_unique_sections} original={num_unique_original_sections}")
 
-            if (iteration_num > 0) and (num_unique_sections <= max_section_sample_size) and (unique_sections == prev_unique_sections):
+            if (iteration_num > 0) and (num_unique_sections <= max_section_sample_size) and (num_unique_sections <= max_sections) and (unique_sections == prev_unique_sections):
                 # Note: The condition `num_unique_sections <= max_section_sample_size` ensures that convergence is over the entire population, not the sample.
                 num_successive_convergences += 1
                 print(f"Convergence {num_successive_convergences}/{num_successive_convergences_required} using {model_size} model reached after {iteration_num} iterations for finalizing section names.")

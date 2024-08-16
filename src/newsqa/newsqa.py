@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
+from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newsqa.exceptions import InputError
 from newsqa.types import AnalyzedArticle, SearchArticle, SearchResult
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
@@ -13,14 +15,15 @@ from newsqa.workflow.llm.list_final_sections import list_final_sections
 from newsqa.workflow.llm.order_final_sections import order_final_sections
 
 
-def generate_response(source: str, query: str, output_path: Optional[Path] = None, confirm: bool = False) -> str:
-    """Return a response for the given source and query.
+def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
+    f"""Return a response for the given source and query.
 
     The progress is printed to stdout.
 
     Params:
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
+    * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its default is {NUM_SECTIONS_DEFAULT}.
     * `path`: Output file path. If given, the response is also written to this text file.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
@@ -35,6 +38,10 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
     ensure_query_is_valid(query)
     query_sep = "\n" if (len(query.splitlines()) > 1) else " "
     print(f"QUERY:{query_sep}{query}")
+
+    if not (NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX):
+        raise InputError(f"Invalid number of sections: {max_sections}. It must be between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}.")
+    print(f"MAX SECTIONS: {max_sections}")
 
     print(f"MODELS: text:large={MODELS["text"]["large"]}, text:small={MODELS["text"]["small"]}, embedding:large={MODELS["embedding"]["large"]}")
 
@@ -53,7 +60,7 @@ def generate_response(source: str, query: str, output_path: Optional[Path] = Non
 
     if confirm:
         get_confirmation("final sections")
-    articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections)
+    articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
     print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))
     final_sections_ordered: list[str] = sorted({section for a in articles_and_final_sections for section in a["sections"]}, key=lambda section: len([a for a in articles_and_final_sections if section in a["sections"]]), reverse=True)
     articles_by_section: dict[str, list[SearchArticle]] = {section: [a["article"] for a in articles_and_final_sections if section in a["sections"]] for section in final_sections_ordered}

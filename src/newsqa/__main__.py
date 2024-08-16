@@ -5,6 +5,7 @@ from typing import Optional
 import click
 
 import newsqa.exceptions
+from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.newsqa import generate_response
 from newsqa.util.openai_ import ensure_openai_key
 from newsqa.util.sys_ import print_error
@@ -15,9 +16,10 @@ from newsqa.workflow.user.source import get_source, get_source_module, ensure_so
 @click.command(context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 120})
 @click.option("--source", "-s", default=None, help="Name of supported news source. If not given, the user is prompted for it.")
 @click.option("--query", "-q", default=None, help="Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.")
+@click.option("--max-sections", "-m", default=NUM_SECTIONS_DEFAULT, type=click.IntRange(NUM_SECTIONS_MIN, NUM_SECTIONS_MAX), help=f"Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Default is {NUM_SECTIONS_DEFAULT}.")
 @click.option("--output-path", "-o", default=None, type=Path, help="Output file path. If given, the response is also written to this text file except if there is an error.")
 @click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
-def main(source: Optional[str], query: Optional[str], output_path: Optional[Path], confirm: bool) -> None:
+def main(source: Optional[str], query: Optional[str], max_sections: int, output_path: Optional[Path], confirm: bool) -> None:
     """Generate, print, and optionally write a response to a question or concern using a supported news source.
 
     The progress and response both are printed to stdout.
@@ -39,11 +41,14 @@ def main(source: Optional[str], query: Optional[str], output_path: Optional[Path
             query = query_path.read_text().strip()
         ensure_query_is_valid(query)
 
+        assert isinstance(max_sections, int), (max_sections, type(max_sections))
+        assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
+
         if output_path:
             assert isinstance(output_path, Path), (output_path, type(output_path))
         assert isinstance(confirm, bool), (confirm, type(confirm))
 
-        response = generate_response(source=source, query=query, output_path=output_path, confirm=confirm)
+        response = generate_response(source=source, query=query, max_sections=max_sections, output_path=output_path, confirm=confirm)
         print(response)
     except newsqa.exceptions.Error as exc:
         print_error(str(exc))
