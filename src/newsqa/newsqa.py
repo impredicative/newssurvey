@@ -23,7 +23,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     Params:
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
-    * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its default is {NUM_SECTIONS_DEFAULT}.
+    * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.
     * `path`: Output file path. If given, the response is also written to this text file.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 

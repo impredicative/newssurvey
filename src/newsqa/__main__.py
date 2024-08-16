@@ -16,7 +16,7 @@ from newsqa.workflow.user.source import get_source, get_source_module, ensure_so
 @click.command(context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 120})
 @click.option("--source", "-s", default=None, help="Name of supported news source. If not given, the user is prompted for it.")
 @click.option("--query", "-q", default=None, help="Question or concern answerable by the news source. If a path to a file, the file text is read. If not given, the user is prompted for it.")
-@click.option("--max-sections", "-m", default=NUM_SECTIONS_DEFAULT, type=click.IntRange(NUM_SECTIONS_MIN, NUM_SECTIONS_MAX), help=f"Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Default is {NUM_SECTIONS_DEFAULT}.")
+@click.option("--max-sections", "-m", default=NUM_SECTIONS_DEFAULT, type=click.IntRange(NUM_SECTIONS_MIN, NUM_SECTIONS_MAX), help=f"Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.")
 @click.option("--output-path", "-o", default=None, type=Path, help="Output file path. If given, the response is also written to this text file except if there is an error.")
 @click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
 def main(source: Optional[str], query: Optional[str], max_sections: int, output_path: Optional[Path], confirm: bool) -> None:
