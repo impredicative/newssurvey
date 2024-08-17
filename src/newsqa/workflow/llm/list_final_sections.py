@@ -93,7 +93,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, model_size: str, selection: str, max_attempts: int = 5) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, model_size: str, selection_method: str, max_attempts: int = 5) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
@@ -114,7 +114,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     for num_attempt in range(1, max_attempts + 1):
         read_cache = True
         if num_attempt > 1:
-            match selection:
+            match selection_method:
                 case "random":
                     rng.shuffle(draft_sections)  # Note: This is done to try to prevent the model from repeatedly failing on a fixed order of draft sections as has been observed.
                     # Note: read_cache remains true.
@@ -177,7 +177,7 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
-    sample_selection = [
+    sample_selection_method = [
         "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality
         "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
     ][0]
@@ -212,9 +212,9 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
             iteration_num += 1
             prev_unique_sections = unique_sections
 
-            if (sample_selection == "random") or (num_unique_sections <= max_section_sample_size):
+            if (sample_selection_method == "random") or (num_unique_sections <= max_section_sample_size):
                 sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
-            elif sample_selection == "embedding":
+            elif sample_selection_method == "embedding":
                 assert num_unique_sections > max_section_sample_size
                 for section in sorted(unique_sections):  # Note: `sorted` is used to log progress in an alphabetical order.
                     if section not in section_embeddings:
@@ -224,9 +224,9 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
                 sample_draft_section_distances = {s: cosine(sample_draft_section_embedding, section_embeddings[s]) for s in unique_sections}
                 sample_draft_sections = sorted(unique_sections, key=sample_draft_section_distances.__getitem__)[: min(max_section_sample_size, num_unique_sections)]  # Note: This doesn't make the sample fully sorted because `sample_draft_section` is still random and all other values in the sample depend on it.
             else:
-                raise ValueError(f"Invalid sample selection: {sample_selection!r}")
+                raise ValueError(f"Invalid sample selection method: {sample_selection_method!r}")
             # Note: sample_draft_sections is intentionally not fully sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
-            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection=sample_selection)
+            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection_method=sample_selection_method)
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
                     for article in articles_and_sections:
