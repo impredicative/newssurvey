@@ -133,8 +133,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         prompt_data["task"] = PROMPTS[prompt_key].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size=model_size, log=True, read_cache=read_cache)
-        # input("Press Enter to continue.")
+        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=read_cache)
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
