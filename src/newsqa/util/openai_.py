@@ -38,6 +38,7 @@ MAX_OUTPUT_TOKENS = {
     "gpt-4o-2024-05-13": 4096,
     "gpt-4o-mini-2024-07-18": 16_384,
 }
+MAX_WORKERS = 32
 
 
 def ensure_openai_key() -> None:
