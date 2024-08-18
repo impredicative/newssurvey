@@ -61,10 +61,10 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("final sections")
     articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
-    print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))
+    # print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))
     final_sections_ordered: list[str] = sorted({section for a in articles_and_final_sections for section in a["sections"]}, key=lambda section: len([a for a in articles_and_final_sections if section in a["sections"]]), reverse=True)
     articles_by_section: dict[str, list[SearchArticle]] = {section: [a["article"] for a in articles_and_final_sections if section in a["sections"]] for section in final_sections_ordered}
-    print("ARTICLES BY FINAL SECTION:\n" + "\n".join(f"{section_num}. {section} ({len(articles_by_section[section])} articles)\n\t" + "\n\t".join(f'{article_num}: {a["title"]}' for article_num, a in enumerate(articles_by_section[section], start=1)) for section_num, section in enumerate(final_sections_ordered, start=1)))
+    # print("ARTICLES BY FINAL SECTION:\n" + "\n".join(f"{section_num}. {section} ({len(articles_by_section[section])} articles)\n\t" + "\n\t".join(f'{article_num}: {a["title"]}' for article_num, a in enumerate(articles_by_section[section], start=1)) for section_num, section in enumerate(final_sections_ordered, start=1)))
     print(f"FINAL SECTIONS ORDERED BY ARTICLE COUNT ({len(final_sections_ordered)}):\n" + "\n".join(f"{num}: {section} ({len(articles_by_section[section])} articles)" for num, section in enumerate(final_sections_ordered, start=1)))
     del final_sections_ordered, articles_by_section
 
