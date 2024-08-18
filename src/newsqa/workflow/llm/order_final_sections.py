@@ -167,7 +167,7 @@ def _update_scores(scores: dict[str, dict[str, int]], ordered_sample: list[str],
 
 def _get_sort_solution(items: list[str], scores: dict[str, dict[str, int]]) -> list[str]:
     """Get a sort solution, whether full or partial, based on the current scores."""
-    min_hits_threshold = 5
+    min_hits_threshold = 3
     sorted_items = sorted(items, key=lambda item: scores[item]["adj_score"], reverse=True)
 
     ordered_items = []
