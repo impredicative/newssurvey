@@ -184,8 +184,8 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
     use_article_counts = [
-        False,  # Required 245 iterations to finalize to 60/1959 sections.
-        True,
+        False,  # Required 245 iterations to finalize to 60/1959 sections with random sampling.
+        True,  # Required 290 iterations to finalize to 80/1959 sections with random sampling
     ][1]
     sample_selection_method = [
         "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality
