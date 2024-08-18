@@ -5,7 +5,7 @@ import itertools
 import random
 import re
 from types import ModuleType
-from typing import Callable, Final
+from typing import Any, Callable, Final
 
 from scipy.spatial.distance import cosine
 
@@ -16,6 +16,7 @@ from newsqa.util.openai_ import get_content, get_vector
 from newsqa.util.sys_ import print_error, print_warning
 
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
+_DRAFT_SECTION_PATTERN_WITH_COUNT = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) \(refs=(?P<count>\d+)\)")
 _RESPONSE_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) → (?P<final>.+)")
 
 _ABSTAINED_FINAL_SECTION_NAME = "(abstain)"
@@ -23,7 +24,7 @@ _INVALID_FINAL_SECTION_NAMES_TITLECASED = {"Not Applicable", "Abstain"}
 assert all(s.istitle() for s in _INVALID_FINAL_SECTION_NAMES_TITLECASED)
 
 
-def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_sections: list[str]) -> bool:
+def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_sections: list[str], use_article_counts: bool) -> bool:
     """Return true if the draft and final section names are valid, otherwise false.
 
     A validation error is printed if a section name is invalid.
@@ -31,6 +32,8 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     Example of draft section: "123. Relation of Daytime Drowsiness to Alzheimer's Disease Risk"
     Example of response section: "123. Relation of Daytime Drowsiness to Alzheimer's Disease Risk → Alzheimer's Disease and Daytime Drowsiness"
     """
+    draft_section_pattern = {True: _DRAFT_SECTION_PATTERN_WITH_COUNT, False: _DRAFT_SECTION_PATTERN}[use_article_counts]
+
     if not numbered_draft_sections:
         print_error("No draft section names exist.")
         return False
@@ -53,7 +56,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
             print_error(f"Response section #{num} is missing.")
             return False
 
-        draft_match = _DRAFT_SECTION_PATTERN.fullmatch(numbered_draft_section)
+        draft_match = draft_section_pattern.fullmatch(numbered_draft_section)
         if not draft_match:
             print_error(f"Draft section string #{num} is invalid: {numbered_draft_section!r}")
             return False
@@ -93,7 +96,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[str], *, model_size: str, selection_method: str, max_attempts: int = 5) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[dict[str, Any]], *, model_size: str, selection_method: str, use_article_counts: bool, max_attempts: int = 3) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
@@ -104,6 +107,9 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     Specifically, its subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
     """
     # return {draft_section: draft_section.title() for draft_section in draft_sections}  # Placeholder.
+    draft_section_formatter = {True: "{num}. {section} (refs={count})", False: "{num}. {section}"}[use_article_counts]
+    prompt_key = {True: "4. list_final_sections_using_counts", False: "4. list_final_sections"}[use_article_counts]
+
     assert user_query
     assert draft_sections
     draft_sections = draft_sections.copy()  # Note: This is done to prevent an accidental modification of the input, such as by a random shuffle.
@@ -121,20 +127,21 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
                 case _:
                     read_cache = False
 
-        numbered_draft_sections = [f"{i}. {s}" for i, s in enumerate(draft_sections, start=1)]
+        numbered_draft_sections = [draft_section_formatter.format(num=i, **s) for i, s in enumerate(draft_sections, start=1)]
         numbered_draft_sections_str = "\n".join(numbered_draft_sections)
         prompt_data = copy.deepcopy(prompt_source_data)
-        prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
+        prompt_data["task"] = PROMPTS[prompt_key].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=read_cache)
+        response = get_content(prompt, model_size=model_size, log=True, read_cache=read_cache)
+        # input("Press Enter to continue.")
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = _are_sections_valid(numbered_draft_sections, numbered_response_sections)
+            response_is_valid = _are_sections_valid(numbered_draft_sections, numbered_response_sections, use_article_counts=use_article_counts)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
@@ -177,6 +184,10 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
+    use_article_counts = [
+        False,  # Required 245 iterations to finalize to 60/1959 sections.
+        True,
+    ][1]
     sample_selection_method = [
         "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality
         "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
@@ -226,7 +237,11 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
             else:
                 raise ValueError(f"Invalid sample selection method: {sample_selection_method!r}")
             # Note: sample_draft_sections is intentionally not fully sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
-            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection_method=sample_selection_method)
+            if use_article_counts:
+                sample_draft_sections = [{"section": s, "count": sum(s in a["sections"] for a in articles_and_sections)} for s in sample_draft_sections]
+            else:
+                sample_draft_sections = [{"section": s} for s in sample_draft_sections]
+            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection_method=sample_selection_method, use_article_counts=use_article_counts)
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
                     for article in articles_and_sections:
