@@ -1,3 +1,4 @@
+import concurrent.futures
 import contextlib
 import copy
 import io
@@ -12,7 +13,9 @@ from scipy.spatial.distance import cosine
 from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import AnalyzedArticle
-from newsqa.util.openai_ import get_content, get_vector
+from newsqa.util.dict import dereference_dict
+from newsqa.util.itertools_ import get_batches
+from newsqa.util.openai_ import get_content, get_vector, MAX_WORKERS
 from newsqa.util.sys_ import print_error, print_warning
 
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
@@ -20,8 +23,17 @@ _DRAFT_SECTION_PATTERN_WITH_COUNT = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) \
 _RESPONSE_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) → (?P<final>.+)")
 
 _ABSTAINED_FINAL_SECTION_NAME = "(abstain)"
-_INVALID_FINAL_SECTION_NAMES_TITLECASED = {"Not Applicable", "Abstain"}
+_INVALID_FINAL_SECTION_NAMES_TITLECASED = {
+    "Not Applicable",  # Observed.
+    "Abstain",  # Preemptive.
+    "(Duplicate)",  # Observed.
+    "Duplicate",  # Preemptive.
+    }
 assert all(s.istitle() for s in _INVALID_FINAL_SECTION_NAMES_TITLECASED)
+
+DraftSection = dict[str, Any]
+DraftSections = list[DraftSection]
+DraftSectionsBatch = list[DraftSections]
 
 
 def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_sections: list[str], use_article_counts: bool) -> bool:
@@ -96,7 +108,7 @@ def _are_sections_valid(numbered_draft_sections: list[str], numbered_response_se
     return True
 
 
-def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: list[dict[str, Any]], *, model_size: str, selection_method: str, use_article_counts: bool, max_attempts: int = 3) -> dict[str, str]:
+def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, draft_sections: DraftSections, *, model_size: str, selection_method: str, use_article_counts: bool, max_attempts: int = 3) -> dict[str, str]:
     """Return a mapping of the given sample of draft section names to their suggested final section names.
 
     Any draft section names that the model abstains from providing final section names for are skipped from the returned mapping.
@@ -121,11 +133,13 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         read_cache = True
         if num_attempt > 1:
             match selection_method:
-                case "random":
+                case "random" | "random_concurrent":
                     rng.shuffle(draft_sections)  # Note: This is done to try to prevent the model from repeatedly failing on a fixed order of draft sections as has been observed.
                     # Note: read_cache remains true.
-                case _:
+                case "embedding":
                     read_cache = False
+                case _:
+                    raise ValueError(f"Unsupported selection method: {selection_method!r}")
 
         numbered_draft_sections = [draft_section_formatter.format(num=i, **s) for i, s in enumerate(draft_sections, start=1)]
         numbered_draft_sections_str = "\n".join(numbered_draft_sections)
@@ -133,7 +147,7 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
         prompt_data["task"] = PROMPTS[prompt_key].format(**prompt_source_data, draft_sections=numbered_draft_sections_str)
         prompt = PROMPTS["0. common"].format(**prompt_data)
 
-        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=read_cache)
+        response = get_content(prompt, model_size=model_size, log=(num_attempt == max_attempts), read_cache=read_cache)
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -171,6 +185,35 @@ def _list_final_sections_for_sample(user_query: str, source_module: ModuleType, 
     return draft_to_final_sections
 
 
+def _list_final_sections_for_sample_concurrently(user_query: str, source_module: ModuleType, draft_sections_batch: DraftSectionsBatch, **kwargs) -> dict[str, str]:
+    num_batches = len(draft_sections_batch)
+    assert num_batches > 0
+    if num_batches == 1:
+        return _list_final_sections_for_sample(user_query=user_query, source_module=source_module, draft_sections=draft_sections_batch[0], **kwargs)
+
+    num_draft_sections = sum(len(draft_sections) for draft_sections in draft_sections_batch)
+    all_draft_to_final_sections = {}
+    print(f"Concurrently processing {num_batches} batches with a total of {num_draft_sections} draft sections.")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_draft_section = {executor.submit(_list_final_sections_for_sample, user_query=user_query, source_module=source_module, draft_sections=draft_sections, **kwargs): draft_sections for draft_sections in draft_sections_batch}
+        for future in concurrent.futures.as_completed(future_to_draft_section):
+            draft_to_final_sections = future.result()
+            assert isinstance(draft_to_final_sections, dict) and draft_to_final_sections
+            for draft_section, final_section in draft_to_final_sections.items():
+                assert (draft_section not in all_draft_to_final_sections), draft_section
+                all_draft_to_final_sections[draft_section] = final_section
+    all_draft_to_final_sections = dict(sorted(all_draft_to_final_sections.items()))  # Note: This is necessary to ensure deterministic order for caching.
+    num_final_sections = len(all_draft_to_final_sections)
+    print(f"Concurrently processed {num_batches} batches with a total of {num_final_sections}/{num_draft_sections} final sections.")
+
+    all_draft_to_final_sections = dereference_dict(all_draft_to_final_sections)
+    assert list(all_draft_to_final_sections) == sorted(all_draft_to_final_sections)
+    num_dereferenced_sections = len(all_draft_to_final_sections)
+    print(f"Dereferenced {num_dereferenced_sections}/{num_final_sections}/{num_draft_sections} sections.")
+
+    return all_draft_to_final_sections
+
+
 def list_final_sections(user_query: str, source_module: ModuleType, *, articles_and_draft_sections: list[AnalyzedArticle], max_sections: int) -> list[AnalyzedArticle]:
     """Return a list of tuples containing the search article and respective final section names.
 
@@ -183,13 +226,14 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     articles_and_sections = copy.deepcopy(articles_and_draft_sections)
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
+    sample_selection_method = [
+        "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality
+        "random_concurrent",  # Required 138 iterations to finalize to 70/1959 sections of fair quality.
+        "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
+    ][1]
     use_article_counts = [
         False,  # Required 245 iterations to finalize to 60/1959 sections with random sampling.
         True,  # Required 290 iterations to finalize to 80/1959 sections with random sampling
-    ][1]
-    sample_selection_method = [
-        "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality
-        "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
     ][0]
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the code condition and note in its usage for convergence.
     assert max_sections <= max_section_sample_size, (max_sections, max_section_sample_size)
@@ -224,6 +268,10 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
 
             if (sample_selection_method == "random") or (num_unique_sections <= max_section_sample_size):
                 sample_draft_sections = rng.sample(sorted(unique_sections), min(max_section_sample_size, num_unique_sections))  # Note: `sorted` is used to ensure deterministic sample selection.
+                # Note: sample_draft_sections is intentionally not fully sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
+            elif sample_selection_method == "random_concurrent":
+                sample_draft_sections = sorted(unique_sections)
+                rng.shuffle(sample_draft_sections)
             elif sample_selection_method == "embedding":
                 assert num_unique_sections > max_section_sample_size
                 for section in sorted(unique_sections):  # Note: `sorted` is used to log progress in an alphabetical order.
@@ -235,12 +283,19 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
                 sample_draft_sections = sorted(unique_sections, key=sample_draft_section_distances.__getitem__)[: min(max_section_sample_size, num_unique_sections)]  # Note: This doesn't make the sample fully sorted because `sample_draft_section` is still random and all other values in the sample depend on it.
             else:
                 raise ValueError(f"Invalid sample selection method: {sample_selection_method!r}")
-            # Note: sample_draft_sections is intentionally not fully sorted because that would be counterproductive when the sample size is equal to the number of remaining sections, preventing any order randomization.
+            
             if use_article_counts:
                 sample_draft_sections = [{"section": s, "count": sum(s in a["sections"] for a in articles_and_sections)} for s in sample_draft_sections]
             else:
                 sample_draft_sections = [{"section": s} for s in sample_draft_sections]
-            sample_draft_to_final_sections = _list_final_sections_for_sample(user_query, source_module, draft_sections=sample_draft_sections, model_size=model_size, selection_method=sample_selection_method, use_article_counts=use_article_counts)
+            
+            common_kwargs = {"user_query": user_query, "source_module": source_module, "model_size": model_size, "selection_method": sample_selection_method, "use_article_counts": use_article_counts}
+            if (sample_selection_method == "random_concurrent") and (len(sample_draft_sections) > max_section_sample_size):
+                batched_draft_sections = get_batches(sample_draft_sections, batch_size=max_section_sample_size, include_incomplete=False)  # Note: `include_incomplete=False` is used to ensure a minimum batch size.
+                sample_draft_to_final_sections = _list_final_sections_for_sample_concurrently(draft_sections_batch=batched_draft_sections, **common_kwargs)
+            else:
+                sample_draft_to_final_sections = _list_final_sections_for_sample(draft_sections=sample_draft_sections, **common_kwargs)
+            
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
                     for article in articles_and_sections:
