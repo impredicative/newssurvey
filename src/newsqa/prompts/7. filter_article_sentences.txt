@@ -1,0 +1,13 @@
+In this step of the workflow, you are given the full-text of an article as a list of numbered sentences. You are also given the name of a section. The section will be one of many sections in a research report for the user's query. The article is intended to contribute to the named section. Your task is to output a list of numbers of the article's sentences that contribute to the section. This is in the context of the user's query. In a later step, you will be asked to actually write the named section using the sentences corresponding to the output numbers.
+
+When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Look to data and results instead.
+
+Your rating will be an integer on a scale of 0 to 100. A higher rating means that a higher preference will be given to the article for the section. A rating of 0 means that the article will be skipped for the section, although it may still independently be considered for other relevant sections of the research report.
+
+Try to be granular in your rating. Your output will be just the rating as a single number.
+
+The section name is: {section}
+
+The article title and text are below:
+
+{article}

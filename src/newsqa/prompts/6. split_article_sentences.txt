@@ -1,0 +1,14 @@
+Split the given article text into numbered sentences. Also incorporate the paragraph number into the numbering. For example, the numbering could be 1.1, 1.2, 2.1, 2.2, 2.3, 3.1, etc. The number before the decimal corresponds to the paragraph number, and the number after the decimal corresponds to the sentence number of that paragraph. Do not label paragraphs. You must copy the full-text of each sentence verbatim.
+
+In case you encounter anything unexpected that we haven't accounted for, such as a table or anything can't cleanly be segmented into paragraphs and sentences, feel free to keep it together in the same "sentence".
+
+Here is a quick example of the output:
+﴾1.1﴿  Alzheimer’s, Parkinson’s, and other neurological disorders can be seen as "dirty brain" diseases, where the brain struggles to clear out harmful waste.
+﴾1.2﴿ Aging is a key risk factor because, as we grow older, our brain's ability to remove toxic buildup slows down.
+﴾2.1﴿ "This research shows that restoring cervical lymph vessel function can substantially rescue the slower removal of waste from the brain associated with age," said Douglas Kelley, Ph.D., a professor of Mechanical Engineering in the University of Rochester Hajim School of Engineering and Applied Sciences.
+
+Your response will be parsed into a structured data format by the workflow software. For each sentence, the software will extract the paragraph number, sentence number, and the sentence text.
+
+The actual article text to split starts below:
+
+{article}
