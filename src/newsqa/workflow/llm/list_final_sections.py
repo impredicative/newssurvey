@@ -227,13 +227,13 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
 
     sample_selection_method = [
-        "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality.
-        "random_concurrent",  # Required 138 iterations to finalize to 70/1959 sections of fair quality.
-        "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality.
+        "random",  # Required 245 iterations to finalize to 60/1959 sections of high quality. (w/ use_article_counts=False)
+        "random_concurrent",  # Required 138 iterations to finalize to 70/1959 sections of fair quality. (w/ use_article_counts=False)
+        "embedding",  # Required 103 iterations to finalize to 43/1959 sections of substandard quality. (w/ use_article_counts=False)
     ][1]
     use_article_counts = [
         False,  # Required 245 iterations to finalize to 60/1959 sections with random sampling.
-        True,  # Required 290 iterations to finalize to 80/1959 sections with random sampling.
+        True,  # Required 290 iterations to finalize to 80/1959 sections with random sampling. Required 208 iterations to finalize to 94/1959 sections with random_concurrent sampling.
     ][0]
     max_section_sample_size = 100  # Note: Using 200 or 300 led to a very slow response requiring over a minute. Also see the code condition and note in its usage for convergence.
     assert max_sections <= max_section_sample_size, (max_sections, max_section_sample_size)
