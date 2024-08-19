@@ -15,7 +15,7 @@ def dereference_dict(input_dict: dict[str, str]) -> dict[str, str]:
     - dict[str, str]: A dictionary where each key is associated with its resolved terminal value. Keys involved in cycles are not included.
 
     Example:
-    >>> dereference_dict({'a': 'b', 'b': 'c', 'c': 'a', 'd': 'e', 'e': 'f', 'f': 'g', 'h': 'i', 'i': 'h', 'j': 'j', 'k': 'l'})
+    >>> dereference_dict({'a': 'b', 'b': 'c', 'c': 'a',    'd': 'e', 'e': 'f', 'f': 'g',    'h': 'i', 'i': 'h',    'j': 'j',    'k': 'l',     'm': 'n', 'n': 'o', 'o': 'n',    'p': 'q', 'q': 'r', 'r': 's', 's': 'q'})
     {'d': 'g', 'e': 'g', 'f': 'g', 'k': 'l'}
     """
     output_dict = {}
