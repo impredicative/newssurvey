@@ -1,3 +1,4 @@
+import concurrent.futures
 import datetime
 import os
 import time
@@ -117,3 +118,10 @@ def get_vector(text: str, *, model_size: str, embedding: Optional[CreateEmbeddin
         print(f"\n{_COLOR_GRAY}TEXT:\n{text}\nEMBEDDING: {vector}{_COLOR_RESET}")
         # print(prefix_lines(f"TEXT\n{text}\nEMBEDDING: {embedding}"))
     return vector
+
+def get_vectors_concurrently(texts: list[str], *, model_size: str, log: bool = False) -> dict[str, list[float]]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
+    """Return the embedding vectors for the given texts."""
+    assert model_size in MODELS["embedding"], model_size
+    fn_get_vector = lambda text: (text, get_vector(text, model_size=model_size, log=log))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        return dict(executor.map(fn_get_vector, texts))
