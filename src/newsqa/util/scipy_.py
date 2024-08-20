@@ -3,16 +3,15 @@ from typing import Literal
 import numpy as np
 from scipy.spatial.distance import cosine, euclidean, seuclidean, sqeuclidean
 
-from newsqa.util.openai_ import EmbeddingModelSizeType, get_vector
+from newsqa.util.openai_ import EmbeddingModelSizeType, get_vector, get_vectors_concurrently
 
 DistanceType = Literal["cosine", "euclidean", "sqeuclidean", "seuclidean"]
 
 
 def sort_by_distance(reference: str, items: list[str], *, model_size: EmbeddingModelSizeType, distance: str = DistanceType) -> list[str]:
     """Return items sorted by distance to the reference using the distance function."""
-    fn_get_vector = lambda text: get_vector(text, model_size=model_size)
-    reference_vector = fn_get_vector(reference)
-    item_vectors = {item: fn_get_vector(item) for item in items}
+    reference_vector = get_vector(reference, model_size=model_size)
+    item_vectors = get_vectors_concurrently(items, model_size=model_size)
 
     match distance:
         case "cosine" | "euclidean" | "sqeuclidean":
