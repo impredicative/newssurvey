@@ -14,7 +14,7 @@ GiB = 1024**3
 NEWS_SOURCE_NAMESPACE: str = f"{PACKAGE_NAME}.sources"
 NEWS_SOURCES: dict[str, ModuleSpec] = {s.name: importlib.util.find_spec(f"{NEWS_SOURCE_NAMESPACE}.{s.name}") for s in (PACKAGE_PATH / "sources").iterdir()}  # Note: A direct import is not practicable here due to a circular import.
 NUM_SECTIONS_DEFAULT: int = 100
-NUM_SECTIONS_MIN: int = 10
+NUM_SECTIONS_MIN: int = 10  # Applies only to the `max_sections` argument. Does not apply to LLM output.
 NUM_SECTIONS_MAX: int = 100
 assert NUM_SECTIONS_MIN <= NUM_SECTIONS_DEFAULT <= NUM_SECTIONS_MAX
 PROMPTS: dict[str, str] = {p.stem: p.read_text().strip() for p in (PACKAGE_PATH / "prompts").glob("*.txt")}
