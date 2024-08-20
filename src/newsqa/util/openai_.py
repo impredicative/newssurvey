@@ -68,20 +68,24 @@ def get_content(prompt: str, *, model_size: str, completion: Optional[ChatComple
     model = MODELS["text"][model_size]
     if not completion:
         if read_cache:
+            cache_lookup_time_start = time.monotonic()
             cache_key = get_completion.__cache_key__(prompt, model=model)
             cache_key_existence_status = cache_key in _DISKCACHE
+            cache_lookup_time_used = time.monotonic() - cache_lookup_time_start
             if cache_key_existence_status:
-                print(f"Found cache key for prompt of length {len(prompt):,} using model {model}.")
+                print(f"Found cache key for prompt of length {len(prompt):,} using model {model} in {cache_lookup_time_used:.1f}s.")
             else:
-                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found.")
+                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found in {cache_lookup_time_used:.1f}s.")
             completion = get_completion(prompt, model=model)
         else:
+            cache_cleanup_time_start = time.monotonic()
             cache_key = get_completion.__cache_key__(prompt, model=model)
             cache_key_deletion_status = _DISKCACHE.delete(cache_key)
+            cache_cleanup_time_used = time.monotonic() - cache_cleanup_time_start
             if cache_key_deletion_status:
-                print(f"Deleted cache key for prompt of length {len(prompt):,} using model {model}.")
+                print(f"Deleted cache key for prompt of length {len(prompt):,} using model {model} in {cache_cleanup_time_used:.1f}s.")
             else:
-                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found.")
+                print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found in {cache_cleanup_time_used:.1f}s.")
             completion = get_completion(prompt, model=model)
     content = completion.choices[0].message.content
     content = content.strip()
