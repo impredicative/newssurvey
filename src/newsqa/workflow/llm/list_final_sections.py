@@ -215,7 +215,7 @@ def _list_final_sections_for_sample_concurrently(user_query: str, source_module:
 
 
 def list_final_sections(user_query: str, source_module: ModuleType, *, articles_and_draft_sections: list[AnalyzedArticle], max_sections: int) -> list[AnalyzedArticle]:
-    """Return a list of tuples containing the search article and respective final section names.
+    """Return a list of dictionaries containing the search article and respective final section names.
 
     The internal function `_list_final_sections_for_sample` raises `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
