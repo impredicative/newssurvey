@@ -6,7 +6,7 @@ from types import ModuleType
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.util.openai_ import MAX_WORKERS
-from newsqa.types import AnalyzedArticle, SearchArticle, SearchResult
+from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
 from newsqa.util.openai_ import get_content
 from newsqa.util.sys_ import print_error
 
@@ -38,7 +38,7 @@ def _are_sections_valid(sections: list[str]) -> bool:
     return True
 
 
-def _list_draft_sections_for_search_result(user_query: str, source_module: ModuleType, search_result: SearchResult) -> AnalyzedArticle:
+def _list_draft_sections_for_search_result(user_query: str, source_module: ModuleType, search_result: SearchResult) -> AnalyzedArticleGen1:
     """Return a tuple containing the search article and a list of draft section names for the given search result.
 
     `LanguageModelOutputError` is raised if the model output has an error.
@@ -58,7 +58,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     none_responses = ("none", "none.")
     if response.lower() in none_responses:
         print(f'No draft section names exist for article: {search_result['title']}')
-        return AnalyzedArticle(article=article, sections=[])
+        return AnalyzedArticleGen1(article=article, sections=[])
 
     sections = [line.strip() for line in response.splitlines()]  # Note: Trailing whitespace has been observed in a name.
     sections = [line for line in sections if line]  # Note: Empty intermediate lines have been observed between names.
@@ -70,10 +70,10 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
             raise LanguageModelOutputStructureError(error)
 
     print(f'Obtained {len(sections)} draft section names for article: {search_result['title']}: ' + ', '.join(sections))
-    return AnalyzedArticle(article=article, sections=sections)
+    return AnalyzedArticleGen1(article=article, sections=sections)
 
 
-def list_draft_sections(user_query: str, source_module: ModuleType, search_results: list[SearchResult]) -> list[AnalyzedArticle]:
+def list_draft_sections(user_query: str, source_module: ModuleType, search_results: list[SearchResult]) -> list[AnalyzedArticleGen1]:
     """Return a list of tuples containing the search article and respective draft section names.
 
     The internal function `_list_draft_sections_for_search_result` raises `LanguageModelOutputError` if the model output has an error.
@@ -81,7 +81,7 @@ def list_draft_sections(user_query: str, source_module: ModuleType, search_resul
 
     `SourceInsufficiencyError` is raised if no draft section names are available.
     """
-    def analyze_article(search_result: SearchResult) -> AnalyzedArticle:
+    def analyze_article(search_result: SearchResult) -> AnalyzedArticleGen1:
         return _list_draft_sections_for_search_result(user_query=user_query, source_module=source_module, search_result=search_result)
 
     num_search_results = len(search_results)

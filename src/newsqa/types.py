@@ -11,6 +11,6 @@ class SearchArticle(SearchResult):
     text: Required[str]
 
 
-class AnalyzedArticle(TypedDict):
+class AnalyzedArticleGen1(TypedDict):
     article: Required[SearchArticle]
     sections: NotRequired[list[str]]
