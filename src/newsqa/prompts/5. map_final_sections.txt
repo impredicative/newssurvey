@@ -1,8 +1,18 @@
-In this step of the workflow, you are given the exhaustive list of available draft section names that have been extracted from articles. Before this list, you are also given a single final section name. Your task is to identify all of the draft sections that can contribute to writing the final section. In the context of the user's query, a research report is to later be generated in a subsequent step. The research report will contain the named final section among all other final sections. In picking the draft section names, ensure that they maintain a relevance and specificity to both the user's query and the final section name. For your convenience, the draft section names are sorted using a semantic cosine embedding distance from the final section name in ascending order by distance.
+In this step of the workflow, you are given:
+1. The full list of final section names meant for the research report, in the order they are to appear in the report.
+2. A single final section name (from the above list) that is the current focus.
+3. The exhaustive list of draft section names that have been extracted from articles.
 
-You will be given one draft section name per line in the numbered format "{{num}}. {{draft}}", where:
+Your task is to identify all of the draft sections that can contribute to writing the current final section. In the context of the user's query, a research report is to later be generated in a subsequent step. The research report will contain all named final sections. In picking the draft section names for the current final section, ensure that they maintain a strong relevance and high specificity to both the user's query and the current final section name. For your convenience, the draft section names are sorted using a semantic cosine embedding distance from the current final section name in ascending order by distance.
+
+## Format
+For your contextual reference and holistic understanding, you will be given one final section name per line in the numbered format "{{num}}. {{section}}", where:
+* {{num}} is just an ordered incremented enumeration of the final section names.
+* {{section}} is the final section name.
+
+Similarly, you will importantly be given one draft section name per line in the same numbered format "{{num}}. {{section}}", where:
 * {{num}} is just an ordered incremented enumeration of the draft section names.
-* {{draft}} is the draft section name.
+* {{section}} is the draft section name.
 
 In your response, you are to list only the matching draft section numbers. In a later step, the matched draft sections will then be used to write the final section. Your response will be in a single line in a space-separated format. The basic output format is "<number> <number> ...". The extended output format is "<number> <number-range-start>-<number-range-inclusive-stop> ...". You may use either output format, or a mix of both, noting that the extended/mixed format is more compact for ranges. Bear in mind that the ranges are inclusive. The workflow software will evaluate your output, expanding any ranges.
 
@@ -19,8 +29,13 @@ Consider these examples of the extended/mixed output format:
 
 You may potentially be given a lot of draft section names, sometimes hundreds or thousands or even more, so just work through them as a stream. The user's well-being may depend on the comprehensiveness of your coverage. To save tokens, it is recommended that you use the extended/mixed output format (for greater compactness). Lastly, remember to output in a single line.
 
-The final section name is: {final_section}
+## Data
+The list of {num_final_sections} final section names is:
 
-The list of draft section names is below:
+{final_sections}
+
+The current final section is: {numbered_final_section}
+
+The list of {num_draft_sections} draft section names is below:
 
 {draft_sections}

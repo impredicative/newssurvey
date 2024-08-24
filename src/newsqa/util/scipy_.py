@@ -24,6 +24,6 @@ def sort_by_distance(reference: str, items: list[str], *, model_size: EmbeddingM
             assert False, distance
 
     items = sorted(items, key=distances.get)  # Note: The sort is intentionally not done in-place to avoid modifying the input list.
-    print(f"ITEM DISTANCES: ({distance})\n" + "\n".join([f"{num}. {item}: {distances[item]:.4f}" for num, item in enumerate(items, start=1)]))
+    # print(f"ITEM DISTANCES: ({distance})\n" + "\n".join([f"{num}. {item}: {distances[item]:.4f}" for num, item in enumerate(items, start=1)]))
 
     return items
