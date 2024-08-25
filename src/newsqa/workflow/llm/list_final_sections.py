@@ -5,17 +5,18 @@ import re
 from types import ModuleType
 
 from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
+from newsqa.exceptions import LanguageModelOutputStructureError
+from newsqa.types import AnalyzedArticleGen1
 from newsqa.util.openai_ import get_content
 from newsqa.util.scipy_ import sort_by_distance
 from newsqa.util.sys_ import print_error, print_warning
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 
+
 def _are_sections_valid(numbered_sections: list[str]) -> bool:
     """Return true if the section names are valid, otherwise false.
-    
+
     A validation error is printed if a section name is invalid.
 
     Example of valid section: "3. Epidemiology of daytime drowsiness"
@@ -34,12 +35,12 @@ def _are_sections_valid(numbered_sections: list[str]) -> bool:
         if not match:
             print_error(f"Section line #{num} does not match expected pattern. The section string is: {numbered_section!r}")
             return False
-        
+
         section_num = int(match["num"])
         if section_num != num:
             print_error(f"Section number #{num} is not sequential. The section string is: {numbered_section!r}")
             return False
-        
+
         section = match["section"]
         section_casefold = section.casefold()
         if section_casefold in seen:
@@ -55,7 +56,7 @@ def _list_final_sections(user_query: str, source_module: ModuleType, draft_secti
     assert draft_sections
 
     # TODO: Truncate sections if prompt is too long. Refer to:
-    #       https://platform.openai.com/docs/advanced-usage/managing-tokens 
+    #       https://platform.openai.com/docs/advanced-usage/managing-tokens
     #       https://github.com/openai/tiktoken/issues/305
     #       https://github.com/openai/tiktoken/issues/98
     #       https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
@@ -68,10 +69,10 @@ def _list_final_sections(user_query: str, source_module: ModuleType, draft_secti
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size="large", log=(num_attempt == max_attempts), read_cache=(num_attempt == 1))
-        
+
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
-    
+
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
             response_is_valid = _are_sections_valid(numbered_response_sections)
@@ -104,6 +105,6 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
     draft_sections = list({s for a in articles_and_sections for s in a["sections"]})
     draft_sections = sort_by_distance(user_query, draft_sections, model_size="large", distance="cosine")
     final_sections = _list_final_sections(user_query, source_module, draft_sections, max_sections=max_sections)
-    
+
     assert final_sections
     return final_sections

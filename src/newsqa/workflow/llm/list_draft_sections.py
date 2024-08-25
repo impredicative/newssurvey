@@ -69,7 +69,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
             error = error.getvalue().rstrip().removeprefix("Error: ")
             raise LanguageModelOutputStructureError(error)
 
-    print(f'Obtained {len(sections)} draft section names for article: {search_result['title']}: ' + ', '.join(sections))
+    print(f'Obtained {len(sections)} draft section names for article: {search_result['title']}: ' + ", ".join(sections))
     return AnalyzedArticleGen1(article=article, sections=sections)
 
 
@@ -81,6 +81,7 @@ def list_draft_sections(user_query: str, source_module: ModuleType, search_resul
 
     `SourceInsufficiencyError` is raised if no draft section names are available.
     """
+
     def analyze_article(search_result: SearchResult) -> AnalyzedArticleGen1:
         return _list_draft_sections_for_search_result(user_query=user_query, source_module=source_module, search_result=search_result)
 

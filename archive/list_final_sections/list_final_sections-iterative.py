@@ -28,7 +28,7 @@ _INVALID_FINAL_SECTION_NAMES_TITLECASED = {
     "Abstain",  # Preemptive.
     "(Duplicate)",  # Observed.
     "Duplicate",  # Preemptive.
-    }
+}
 assert all(s.istitle() for s in _INVALID_FINAL_SECTION_NAMES_TITLECASED)
 
 DraftSection = dict[str, Any]
@@ -200,7 +200,7 @@ def _list_final_sections_for_sample_concurrently(user_query: str, source_module:
             draft_to_final_sections = future.result()
             assert isinstance(draft_to_final_sections, dict) and draft_to_final_sections
             for draft_section, final_section in draft_to_final_sections.items():
-                assert (draft_section not in all_draft_to_final_sections), draft_section
+                assert draft_section not in all_draft_to_final_sections, draft_section
                 all_draft_to_final_sections[draft_section] = final_section
     all_draft_to_final_sections = dict(sorted(all_draft_to_final_sections.items()))  # Note: This is necessary to ensure deterministic order for caching.
     num_final_sections = len(all_draft_to_final_sections)
@@ -283,19 +283,19 @@ def list_final_sections(user_query: str, source_module: ModuleType, *, articles_
                 sample_draft_sections = sorted(unique_sections, key=sample_draft_section_distances.__getitem__)[: min(max_section_sample_size, num_unique_sections)]  # Note: This doesn't make the sample fully sorted because `sample_draft_section` is still random and all other values in the sample depend on it.
             else:
                 raise ValueError(f"Invalid sample selection method: {sample_selection_method!r}")
-            
+
             if use_article_counts:
                 sample_draft_sections = [{"section": s, "count": sum(s in a["sections"] for a in articles_and_sections)} for s in sample_draft_sections]
             else:
                 sample_draft_sections = [{"section": s} for s in sample_draft_sections]
-            
+
             common_kwargs = {"user_query": user_query, "source_module": source_module, "model_size": model_size, "selection_method": sample_selection_method, "use_article_counts": use_article_counts}
             if (sample_selection_method == "random_concurrent") and (len(sample_draft_sections) > max_section_sample_size):
                 batched_draft_sections = get_batches(sample_draft_sections, batch_size=max_section_sample_size, include_incomplete=False)  # Note: `include_incomplete=False` is used to ensure a minimum batch size.
                 sample_draft_to_final_sections = _list_final_sections_for_sample_concurrently(draft_sections_batch=batched_draft_sections, **common_kwargs)
             else:
                 sample_draft_to_final_sections = _list_final_sections_for_sample(draft_sections=sample_draft_sections, **common_kwargs)
-            
+
             for draft_section, final_section in sample_draft_to_final_sections.items():
                 if draft_section != final_section:
                     for article in articles_and_sections:

@@ -3,7 +3,7 @@ from typing import Optional
 
 from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import InputError
-from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
+from newsqa.types import AnalyzedArticleGen1, SearchResult
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid

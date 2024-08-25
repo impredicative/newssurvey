@@ -1,26 +1,21 @@
-import contextlib
-import copy
-import io
-import re
 from types import ModuleType
 
-from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
+from newsqa.config import PROMPTS
+from newsqa.types import AnalyzedArticleGen1
 from newsqa.util.openai_ import get_content
 from newsqa.util.scipy_ import sort_by_distance
-from newsqa.util.sys_ import print_error, print_warning
+
 
 def _map_final_sections(user_query: str, source_module: ModuleType, *, final_sections: list[str], final_section: str, draft_sections: list[str], max_attempts: int = 3) -> list[AnalyzedArticleGen1]:
     assert user_query
     assert draft_sections
 
     # TODO: Truncate sections if prompt is too long. Refer to:
-    #       https://platform.openai.com/docs/advanced-usage/managing-tokens 
+    #       https://platform.openai.com/docs/advanced-usage/managing-tokens
     #       https://github.com/openai/tiktoken/issues/305
     #       https://github.com/openai/tiktoken/issues/98
     #       https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
-    
+
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     numbered_final_sections = [f"{i}. {s}" for i, s in enumerate(final_sections, start=1)]
     numbered_final_sections_str = "\n".join(numbered_final_sections)
@@ -33,10 +28,10 @@ def _map_final_sections(user_query: str, source_module: ModuleType, *, final_sec
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size="large", log=True or (num_attempt == max_attempts), read_cache=(num_attempt == 1))
-        
+
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
-    
+
         # error = io.StringIO()
         # with contextlib.redirect_stderr(error):
         #     response_is_valid = _are_sections_valid(numbered_response_sections)
