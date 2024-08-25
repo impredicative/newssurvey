@@ -1,0 +1,1 @@
+5. **Map final sections**: For each final section, the list of draft sections is presented to the LLM, ordered by distance to the final section. A map of articles to final sections to draft sections is created. Using it, a map of articles to final sections is internally maintained.

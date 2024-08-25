@@ -12,7 +12,6 @@ from newsqa.workflow.llm.list_search_terms import list_search_terms
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.llm.list_draft_sections import list_draft_sections
 from newsqa.workflow.llm.list_final_sections import list_final_sections
-from newsqa.workflow.llm.map_final_sections import map_final_sections
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -62,10 +61,6 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         get_confirmation("listing final sections")
     final_sections: list[str] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
     print(f"FINAL SECTIONS ({len(final_sections)}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(final_sections, start=1)]))
-
-    if confirm:
-        get_confirmation("mapping final sections to draft sections")
-    articles_and_final_sections: list[AnalyzedArticleGen1] = map_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, final_sections=final_sections)
 
     # articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
     # # print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))
