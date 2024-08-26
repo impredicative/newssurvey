@@ -49,10 +49,13 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
     # Tests:
     # _=fit_input_parts_to_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 parts of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,583/111,606 tokens.
     # _=fit_input_parts_to_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 parts of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,410/111,606 tokens.
+    encoding = get_encoding(model).name
     text = sep.join(parts)
-    if is_input_token_usage_allowable(text, model=model):
-        return text
+    usage = calc_input_token_usage(text, model=model)
     num_parts = len(parts)
+    if is_input_token_usage_allowable(text, model=model, usage=usage):
+        print(f"Using all {num_parts:,} parts of text for model {model} and encoding {encoding}, with {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
+        return text
 
     iteration = 0
     match approach:
