@@ -4,6 +4,9 @@ import tiktoken
 
 from newsqa.util.openai_ import MAX_INPUT_TOKENS, MAX_OUTPUT_TOKENS
 
+HEADER_TOKENS_PER_MESSAGE: int = 4  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.
+FOOTER_TOKENS: int = 2  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.
+
 
 def count_tokens(text: str, *, model: str) -> int:
     """Return the number of tokens used by the given text and model."""
@@ -21,7 +24,8 @@ def calc_input_token_usage(text: str, *, model: str) -> dict[str, int]:
     """
     num_tokens = count_tokens(text, model=model)
     assert MAX_INPUT_TOKENS[model] >= MAX_OUTPUT_TOKENS[model]
-    max_tokens = max(0, MAX_INPUT_TOKENS[model] - MAX_OUTPUT_TOKENS[model])
+
+    max_tokens = max(0, MAX_INPUT_TOKENS[model] - MAX_OUTPUT_TOKENS[model] - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
     return {"num_tokens": num_tokens, "max_tokens": max_tokens}
 
 
@@ -38,8 +42,8 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
     The parts are joined by the given separator.
     """
     # Tests:
-    # _=fit_input_parts_to_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,488/10,000 parts of text for model gpt-4o-2024-08-06, with 111,615/111,616 tokens.
-    # _=fit_input_parts_to_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 parts of text for model gpt-4o-2024-08-06, with 111,410/111,616 tokens.
+    # _=fit_input_parts_to_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 parts of text for model gpt-4o-2024-08-06, with 111,583/111,606 tokens.
+    # _=fit_input_parts_to_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 parts of text for model gpt-4o-2024-08-06, with 111,410/111,606 tokens.
     text = sep.join(parts)
     if is_input_token_usage_allowable(text, model=model):
         return text
@@ -74,7 +78,7 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
                 rate = usage["num_tokens"] / usage["max_tokens"]
                 parts_to_rates[num_parts_used] = rate
                 print(f"Tried {num_parts_used:,}/{num_parts:,} parts of text for model {model} in iteration {iteration:,} using {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
-                num_parts_used = min(num_parts, round(num_parts_used / rate))
+                num_parts_used = min(num_parts, int(num_parts_used / rate))  # Note: Using `round` instead of `int` can lead to an infinite loop.
         case _:
             raise ValueError(f"Unsupported approach {approach!r}.")
 
