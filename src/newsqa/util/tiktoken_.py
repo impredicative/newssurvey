@@ -86,7 +86,9 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
                 rate = usage["num_tokens"] / usage["max_tokens"]
                 parts_to_rates[num_parts_used] = rate
                 print(f"Tried {num_parts_used:,}/{num_parts:,} parts of text for model {model} in iteration {iteration:,} using {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
-                num_parts_used = min(num_parts, int(num_parts_used / rate))  # Note: Using `round` instead of `int` can lead to an infinite loop.
+                num_parts_used = num_parts_used / rate
+                num_parts_used = int(num_parts_used)  # Note: Using `round` instead of `int` was observed to lead to an infinite loop.
+                num_parts_used = min(num_parts, num_parts_used)
         case _:
             raise ValueError(f"Unsupported approach {approach!r}.")
 
