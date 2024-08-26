@@ -77,14 +77,14 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
         case "rate":
             # Rate-based search
             num_parts_used = num_parts
-            parts_to_rates: dict[int, float] = {}
+            parts_to_excess_tokens: dict[int, int] = {}
             while True:
-                if (num_parts_used in parts_to_rates) and (parts_to_rates[num_parts_used] <= 1):
+                if (num_parts_used in parts_to_excess_tokens) and (parts_to_excess_tokens[num_parts_used] <= 0):
                     break
                 iteration += 1
                 usage = calc_input_token_usage(sep.join(parts[:num_parts_used]), model=model)
+                parts_to_excess_tokens[num_parts_used] = usage["num_tokens"] - usage["max_tokens"]
                 rate = usage["num_tokens"] / usage["max_tokens"]
-                parts_to_rates[num_parts_used] = rate
                 print(f"Tried {num_parts_used:,}/{num_parts:,} parts of text for model {model} in iteration {iteration:,} using {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
                 num_parts_used = num_parts_used / rate
                 num_parts_used = int(num_parts_used)  # Note: Always using `round` or `math.ceil` instead of `int` was observed to lead to an infinite loop.
