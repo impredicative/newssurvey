@@ -41,7 +41,7 @@ def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dic
     return usage["num_tokens"] <= usage["max_tokens"]
 
 
-def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "\n", approach: str = "rate") -> str:
+def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "\n", approach: str = "binary") -> str:
     """Return a text that fits the input token limit for the given parts and model.
 
     The parts are joined by the given separator.
