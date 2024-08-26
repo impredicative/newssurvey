@@ -80,7 +80,11 @@ def fit_input_parts_to_token_limit(parts: list[str], *, model: str, sep: str = "
             parts_to_excess_tokens: dict[int, int] = {}
             while True:
                 if (num_parts_used in parts_to_excess_tokens) and (parts_to_excess_tokens[num_parts_used] <= 0):
-                    break
+                    num_parts_used = max({p: e for p, e in parts_to_excess_tokens.items() if e < 0}, key=parts_to_excess_tokens.__getitem__)
+                    candidate_num_parts_used = num_parts_used + 1
+                    if (candidate_num_parts_used in parts_to_excess_tokens) and (parts_to_excess_tokens[candidate_num_parts_used] > 0):
+                        break
+                    num_parts_used = candidate_num_parts_used
                 iteration += 1
                 usage = calc_input_token_usage(sep.join(parts[:num_parts_used]), model=model)
                 parts_to_excess_tokens[num_parts_used] = usage["num_tokens"] - usage["max_tokens"]
