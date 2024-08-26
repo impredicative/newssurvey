@@ -41,7 +41,7 @@ def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dic
     return usage["num_tokens"] <= usage["max_tokens"]
 
 
-def fit_input_items_to_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = lambda seq: "\n".join(seq), approach: str = "binary") -> str:
+def fit_input_items_to_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> str:
     """Return a text that fits the input token limit for the given items and model.
 
     The items are formatted to a string using the given formatter function.
