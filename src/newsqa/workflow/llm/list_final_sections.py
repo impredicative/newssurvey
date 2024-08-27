@@ -7,9 +7,10 @@ from types import ModuleType
 from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import AnalyzedArticleGen1
-from newsqa.util.openai_ import get_content
+from newsqa.util.openai_ import get_content, MODELS
 from newsqa.util.scipy_ import sort_by_distance
 from newsqa.util.sys_ import print_error, print_warning
+from newsqa.util.tiktoken_ import fit_input_items_to_token_limit
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 
@@ -56,13 +57,19 @@ def _list_final_sections(user_query: str, source_module: ModuleType, draft_secti
     assert draft_sections
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
-    numbered_draft_sections = [f"{i}. {s}" for i, s in enumerate(draft_sections, start=1)]
-    numbered_draft_sections_str = "\n".join(numbered_draft_sections)
-    prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str, max_sections=max_sections)
-    prompt = PROMPTS["0. common"].format(**prompt_data)
+
+    def prompt_formatter(draft_sections_truncated: list[str]) -> str:
+        numbered_draft_sections = [f"{i}. {s}" for i, s in enumerate(draft_sections_truncated, start=1)]
+        numbered_draft_sections_str = "\n".join(numbered_draft_sections)
+        prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str, max_sections=max_sections)
+        prompt = PROMPTS["0. common"].format(**prompt_data)
+        return prompt
+
+    model_size = "large"
+    prompt = fit_input_items_to_token_limit(draft_sections, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size="large", log=(num_attempt == max_attempts), read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size=model_size, log=True or (num_attempt == max_attempts), read_cache=(num_attempt == 1))
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
