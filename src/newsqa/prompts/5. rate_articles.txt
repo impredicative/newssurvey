@@ -6,6 +6,8 @@ Your task is to rate how well the current article text can contribute to each se
 
 Be sure to have properly read and understood the article text before you start rating. When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to data and results instead.
 
+The article text may also includes its publication date which should inform you of its recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
+
 ## Format
 You will be given one section name per line in the numbered format "{{num}}. {{section}}", where:
 * {{num}} is just an ordered incremented enumeration of the section names.
@@ -14,7 +16,7 @@ You will be given one section name per line in the numbered format "{{num}}. {{s
 Each line of your output should be in the numbered format "{{num}}. {{section}} → {{rating}}", where:
 * {{num}} is an ordered incremented enumeration. It is copied verbatim from the input.
 * {{section}} is the section name, also copied verbatim from the input. Never alter or reorder any section name. It is used downstream as a part of the ID key for joining the rating to the section. To reiterate, the section name should not be altered even to correct any spelling or grammar changes, or the join will fail, and the entire response will be spurned!
-* {{rating}} is a granular integer rating between and including 0 to 100. Higher values indicate a higher relevance of the article for writing the respective named section in the context of the user's query. Accordingly, a value of 0 implies that the article will not be used to write the section.
+* {{rating}} is a granular integer rating between and including 0 to 100. Higher values indicate a higher relevance of the article for writing the respective named section in the context of the user's query. Accordingly, a value of 0 implies that the article will not be used to write the section. In fact, it is perfectly fine for irrelevant sections to receive a rating of 0.
 
 In effect, the input portion of each line is to remain wholly unaltered; you will copy it as-is for it to serve as an anchor to its respective rating.
 

@@ -2,6 +2,7 @@ In this step of the workflow, you are given the exhaustive list of draft section
 
 Before even looking at the list of draft section names, it may help for you to first think about what the final section names could independently be for the research report for the user's query. The reason for providing the draft section names to you is that references are actually available for them. There is no expectation of containment, however, meaning that your final section names do not need to be limited to being chosen from the draft section names. In fact, generalization is quite expected. Moreover, the final sections must conceptually all be complementary to each other, not overlapping or duplicative.
 
+## Format
 You will be given one draft section name per line in the numbered format "{{num}}. {{draft}}", where:
 * {{num}} is just an ordered incremented enumeration of the draft section names.
 * {{draft}} is the draft section name.
@@ -12,6 +13,7 @@ Each line of your output will have the numbered format "{{num}}. {{final}}", whe
 
 Remember to limit the list of final section names to a maximum of {max_sections}, although there isn't any minimum quota to meet. The user's well-being may depend on the comprehensiveness and well-roundedness of your coverage. Recall that each final section is intended to uniquely contribute to the report.
 
+## Data
 The list of draft section names is below:
 
 {draft_sections}
