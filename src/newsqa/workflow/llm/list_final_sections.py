@@ -93,7 +93,7 @@ def _list_final_sections(user_query: str, source_module: ModuleType, draft_secti
 
 
 def list_final_sections(user_query: str, source_module: ModuleType, *, articles_and_draft_sections: list[AnalyzedArticleGen1], max_sections: int) -> list[str]:
-    """Return a list of dictionaries containing the search article and respective final section names.
+    """Return a list of dictionaries containing the ordered final section names.
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
