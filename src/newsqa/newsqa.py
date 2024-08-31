@@ -74,5 +74,8 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         section_articles = [a for a in articles_and_final_sections if any(section == s["section"] for s in a["sections"])]
         section_rating = sum(s["rating"] for a in section_articles for s in a["sections"] if section == s["section"])
         print(f"{section_num}. {section} ({len(section_articles)} articles) (r={section_rating:,})")
+        section_articles.sort(key=lambda a: (next(s["rating"] for s in a["sections"] if section == s["section"]), sum(s["rating"] for s in a["sections"])), reverse=True)
         for article_num, article in enumerate(section_articles, start=1):
-            print(f"\t{article_num}: {article['article']['title']}")
+            article_section_pair_rating = next(s["rating"] for s in article["sections"] if section == s["section"])
+            article_rating = sum(s["rating"] for s in article["sections"])
+            print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
