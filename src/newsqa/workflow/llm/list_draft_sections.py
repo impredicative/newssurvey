@@ -5,9 +5,8 @@ from types import ModuleType
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.util.openai_ import MAX_WORKERS
 from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
-from newsqa.util.openai_ import get_content
+from newsqa.util.openai_ import get_content, MAX_WORKERS
 from newsqa.util.sys_ import print_error
 
 

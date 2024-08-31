@@ -1,13 +1,14 @@
 import contextlib
+import concurrent.futures
 import itertools
 import io
 import re
 from types import ModuleType
 
 from newsqa.config import PROMPTS
-from newsqa.exceptions import LanguageModelOutputStructureError
+from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.types import SearchArticle, AnalyzedArticleGen2
-from newsqa.util.openai_ import get_content
+from newsqa.util.openai_ import get_content, MAX_WORKERS
 from newsqa.util.sys_ import print_error, print_warning
 
 _INPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
@@ -120,19 +121,34 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+
+    `SourceInsufficiencyError` is raised if no usable articles remain for the query.
     """
-    articles = sorted(articles, key=lambda a: len(a["link"]), reverse=True)  # For reproducible testing.
+    # articles = sorted(articles, key=lambda a: len(a["link"]), reverse=True)  # For reproducible testing, but not necessary for cache.
     num_articles, num_sections = len(articles), len(sections)
-
     rated_articles: list[AnalyzedArticleGen2] = []
-    for article_num, article in enumerate(articles, start=1):
-        rated_sections: list[dict[str, int]] = _rate_article(user_query=user_query, source_module=source_module, article=article, sections=sections)
-        rated_sections = [s for s in rated_sections if s["rating"] > 0]
-        if not rated_sections:
-            print(f"No rated section names exist for article #{article_num}/{num_articles}: {article['title']}")
-            continue
-        print(f"#{article_num}/{num_articles}: {article['title']} ({len(rated_sections)}/{num_sections} sections):\n\t" + "\n\t".join(f'{section_num}. {s['section']} (r={s['rating']})' for section_num, s in enumerate(rated_sections, start=1)))
-        rated_articles.append(AnalyzedArticleGen2(article=article, sections=rated_sections))
+    skipped_articles: list[SearchArticle] = []
 
-    print(f"{len(rated_articles)}/{num_articles} articles remain with rated sections.")
+    def rate_article(article: SearchArticle) -> AnalyzedArticleGen2:
+        rated_sections=_rate_article(user_query=user_query, source_module=source_module, article=article, sections=sections)
+        rated_sections = [s for s in rated_sections if s["rating"] > 0]
+        return AnalyzedArticleGen2(article=article, sections=rated_sections)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(rate_article, article): article for article in articles}
+        for future_num, future in enumerate(concurrent.futures.as_completed(futures), start=1):
+            analyzed_article = future.result()
+            if rated_sections := analyzed_article["sections"]:
+                print(f"#{future_num}/{num_articles}: {analyzed_article['article']['title']} ({len(rated_sections)}/{num_sections} sections):\n\t" + "\n\t".join(f'{section_num}. {s['section']} (r={s['rating']})' for section_num, s in enumerate(rated_sections, start=1)))
+                rated_articles.append(analyzed_article)
+            else:
+                print(f"No positively rated section names exist for article #{future_num}/{num_articles}: {analyzed_article['article']['title']}")
+                skipped_articles.append(analyzed_article["article"])
+    
+    print(f"{len(skipped_articles)}/{num_articles} articles were skipped due to no positively rated sections:\n\t" + "\n\t".join(f'{num}. {a["title"]}' for num, a in enumerate(skipped_articles, start=1)))
+    print(f"{len(rated_articles)}/{num_articles} articles remain with positively rated sections.")
+
+    if not rated_articles:
+        raise SourceInsufficiencyError("No usable articles remain for query.")
+    input("Press Enter to continue...")
     return rated_articles
