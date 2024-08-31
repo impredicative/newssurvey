@@ -1,17 +1,14 @@
 import contextlib
-import copy
 import itertools
 import io
 import re
 from types import ModuleType
 
-from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import SearchArticle, AnalyzedArticleGen2
-from newsqa.util.openai_ import get_content, MODELS
-from newsqa.util.scipy_ import sort_by_distance
+from newsqa.util.openai_ import get_content
 from newsqa.util.sys_ import print_error, print_warning
-from newsqa.util.tiktoken_ import fit_input_items_to_token_limit
 
 _INPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 _OUTPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?) → (?P<rating>\d{1,3})")
@@ -26,7 +23,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     if not numbered_output_sections:
         print_error("No output section names exist.")
         return False
-    
+
     num_input_sections, num_output_sections = len(numbered_input_sections), len(numbered_output_sections)
     if num_input_sections != num_output_sections:
         print_error(f"The number of input sections ({num_input_sections}) and output sections ({num_output_sections}) are unequal.")
@@ -56,7 +53,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if input_num != output_num:
             print_error(f"The input section number ({input_num}) and output section number ({output_num}) are unequal. The output section string is: {numbered_output_section!r}")
             return False
-        
+
         input_section = input_match.group("section")
         if input_section != input_section.strip():
             print_error(f"The #{num} input section name has leading or trailing whitespace: {input_section!r}")
@@ -73,7 +70,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
         if not (0 <= rating <= 100):
             print_error(f"Section #{num} has an invalid output rating of {rating}. The output section string is: {numbered_output_section!r}")
             return False
-        
+
     return True
 
 
@@ -85,9 +82,9 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     numbered_input_sections_str = "\n".join(numbered_input_sections)
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
-    assert article['text'].startswith(article["title"]), article  # If this fails, fix the parsing to ensure it is true.
+    assert article["text"].startswith(article["title"]), article  # If this fails, fix the parsing to ensure it is true.
 
-    prompt_data["task"] = PROMPTS["5. rate_articles"].format(**prompt_data, num_sections=len(sections), sections=numbered_input_sections_str, article=article['text'])
+    prompt_data["task"] = PROMPTS["5. rate_articles"].format(**prompt_data, num_sections=len(sections), sections=numbered_input_sections_str, article=article["text"])
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
@@ -112,7 +109,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     rated_sections = [{"section": match.group("section"), "rating": int(match.group("rating"))} for match in output_matches]
 
     assert len(rated_sections) == len(sections)
-    assert [s['section'] for s in rated_sections] == sections
+    assert [s["section"] for s in rated_sections] == sections
     return rated_sections
 
 
@@ -124,13 +121,13 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
-    articles = sorted(articles, key=lambda a: len(a['link']), reverse=True)  # For reproducible testing.
+    articles = sorted(articles, key=lambda a: len(a["link"]), reverse=True)  # For reproducible testing.
     num_articles, num_sections = len(articles), len(sections)
 
     rated_articles: list[AnalyzedArticleGen2] = []
     for article_num, article in enumerate(articles, start=1):
         rated_sections: list[dict[str, int]] = _rate_article(user_query=user_query, source_module=source_module, article=article, sections=sections)
-        rated_sections = [s for s in rated_sections if s['rating'] > 0]
+        rated_sections = [s for s in rated_sections if s["rating"] > 0]
         if not rated_sections:
             print(f"No rated section names exist for article #{article_num}/{num_articles}: {article['title']}")
             continue
