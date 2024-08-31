@@ -61,13 +61,14 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("listing final sections")
     final_sections: list[str] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
-    print(f"FINAL SECTIONS ({len(final_sections)}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(final_sections, start=1)]))
+    num_final_sections = len(final_sections)
+    print(f"FINAL SECTIONS ({num_final_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(final_sections, start=1)]))
 
     if confirm:
         get_confirmation("rating articles")
     articles: list[SearchArticle] = [a["article"] for a in articles_and_draft_sections]
     articles_and_final_sections: list[AnalyzedArticleGen2] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=final_sections)
-    print("RATED FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_final_sections, start=1)))
+    print("RATED FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_final_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_final_sections, start=1)))
 
     # articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
     # # print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))

@@ -119,6 +119,8 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
 
     The rating represents how well the article can contribute to the section in the context of the user query.
 
+    Articles with no positively rated sections are skipped.
+
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
 
@@ -147,6 +149,8 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
 
     print(f"{len(skipped_articles)}/{num_articles} articles were skipped due to no positively rated sections:\n\t" + "\n\t".join(f'{num}. {a["title"]}' for num, a in enumerate(skipped_articles, start=1)))
     print(f"{len(rated_articles)}/{num_articles} articles remain with positively rated sections.")
+
+    rated_articles.sort(key=lambda a: sum(s["rating"] for s in a["sections"]), reverse=True)
 
     if not rated_articles:
         raise SourceInsufficiencyError("No usable articles remain for query.")
