@@ -69,6 +69,13 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     articles: list[SearchArticle] = [a["article"] for a in articles_and_draft_sections]
     articles_and_final_sections: list[AnalyzedArticleGen2] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=final_sections)
     print("RATED FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_final_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_final_sections, start=1)))
+    print(f"ARTICLES BY FINAL SECTION ({num_final_sections}):")
+    for section_num, section in enumerate(final_sections, start=1):
+        section_articles = [a for a in articles_and_final_sections if any(section == s["section"] for s in a["sections"])]
+        section_rating = sum(s["rating"] for a in section_articles for s in a["sections"] if section == s["section"])
+        print(f"{section_num}. {section} ({len(section_articles)} articles) (r={section_rating:,})")
+        for article_num, article in enumerate(section_articles, start=1):
+            print(f"\t{article_num}: {article['article']['title']}")
 
     # articles_and_final_sections: list[AnalyzedArticle] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
     # # print("FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{article_num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for article_num, a in enumerate(articles_and_final_sections, start=1)))
