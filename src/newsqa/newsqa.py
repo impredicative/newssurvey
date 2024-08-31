@@ -79,3 +79,4 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_section_pair_rating = next(s["rating"] for s in article["sections"] if section == s["section"])
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
+    print(f"ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_final_sections)} articles x {num_final_sections} sections = {sum(len(a['sections']) for a in articles_and_final_sections):,} actual pairs / {len(articles_and_final_sections) * num_final_sections:,} possible pairs")
