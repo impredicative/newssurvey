@@ -130,7 +130,7 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
     skipped_articles: list[SearchArticle] = []
 
     def rate_article(article: SearchArticle) -> AnalyzedArticleGen2:
-        rated_sections=_rate_article(user_query=user_query, source_module=source_module, article=article, sections=sections)
+        rated_sections = _rate_article(user_query=user_query, source_module=source_module, article=article, sections=sections)
         rated_sections = [s for s in rated_sections if s["rating"] > 0]
         return AnalyzedArticleGen2(article=article, sections=rated_sections)
 
@@ -144,11 +144,10 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
             else:
                 print(f"No positively rated section names exist for article #{future_num}/{num_articles}: {analyzed_article['article']['title']}")
                 skipped_articles.append(analyzed_article["article"])
-    
+
     print(f"{len(skipped_articles)}/{num_articles} articles were skipped due to no positively rated sections:\n\t" + "\n\t".join(f'{num}. {a["title"]}' for num, a in enumerate(skipped_articles, start=1)))
     print(f"{len(rated_articles)}/{num_articles} articles remain with positively rated sections.")
 
     if not rated_articles:
         raise SourceInsufficiencyError("No usable articles remain for query.")
-    input("Press Enter to continue...")
     return rated_articles
