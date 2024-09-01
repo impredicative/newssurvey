@@ -1,0 +1,1 @@
+6. **Split article sentences**: The LLM is given the text of each article. It outputs a list of numbered paragraphs and sentences in the article.

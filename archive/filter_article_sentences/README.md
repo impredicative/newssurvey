@@ -1,0 +1,1 @@
+7. **Get sentences by article and section**: For each article-section pair, the LLM is given the numbered sentences of the respective article. The LLM lists the sentence numbers relevant to the section from the text.
