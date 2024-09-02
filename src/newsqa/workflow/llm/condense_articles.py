@@ -51,15 +51,15 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
             if condensed_text is None:
                 print_warning(f"There is no text for the article {article_title!r} for the section {section_name!r}.")
                 continue
-            print(f'The text for the article {article_title!r} for the section {section_name!r} is:\n{textwrap.indent(condensed_text, prefix="\t")}')
+            print(f'The text for the article {article_title!r} for the section {section_name!r} with rating {section['rating']}/100 is:\n{textwrap.indent(condensed_text, prefix="\t")}')
             condensed_sections.append({**section, "text": condensed_text})
-
+            input("Press Enter to continue...")
+            
         if not condensed_sections:
             print_warning(f"There is no text for any section of the article {article_title!r}.")
             continue
 
         condensed_articles.append(AnalyzedArticleGen3(article=article["article"], sections=condensed_sections))
-        input("Press Enter to continue...")
 
     if not condensed_articles:
         raise SourceInsufficiencyError("No usable articles exist for the query.")
