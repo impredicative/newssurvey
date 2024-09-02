@@ -45,6 +45,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
 
         condensed_sections = []
         for section in article["sections"]:
+            assert section["rating"] > 0
             section_name = section["section"]
             condensed_text = _condense_article(user_query, source_module, article=article["article"], sections=sections, section=section_name)
             if condensed_text is None:
