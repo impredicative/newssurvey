@@ -153,5 +153,5 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
     rated_articles.sort(key=lambda a: sum(s["rating"] for s in a["sections"]), reverse=True)
 
     if not rated_articles:
-        raise SourceInsufficiencyError("No usable articles remain for query.")
+        raise SourceInsufficiencyError("No usable articles remain for the query.")
     return rated_articles
