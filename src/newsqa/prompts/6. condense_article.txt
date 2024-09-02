@@ -5,15 +5,17 @@ In this step of the workflow, you are given:
 
 Your task is to write a condensed version of the article text for the given section name in the context of the user's query. In a later step, you will be asked to actually write each of the named sections using a collection of condensed texts specific to each section. The user's well-being may depend on the thoroughness of your work.
 
-Rules:
+What to do:
+1. Linearly flow through the article text, preserving all necessary objective details that could be relevant to the given section name in the context of the user's query. Condense what you can without losing clarity, readability, or detail.
+2. Assuming the article contains these, always include them in your output: article title, publication date, and key references supporting the article.
+3. Preserve the same formatting style as the article text.
+
+What not to do:
 1. When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to data and results instead.
-2. Linearly flow through the article text, preserving all necessary objective details that could be relevant to the given section name in the context of the user's query. Condense what you can without losing detail.
+2. Do not include unessential information that would be better off being covered by a different section of the report.
 3. Do not engage in any synthesis of new information; that will be done in a later step when the report is written.
 
-Assuming the article contains these, always include these in your output:
-1. Article title.
-2. Article publication date.
-3. Key references supporting the article.
+In the unexpected case that the article does not contribute to the given section for the user's query, just say the magic word "none" instead. This will cause the workflow software to reject this article from further consideration for the section.
 
 ## Data
 The list of {num_sections} section names is:
