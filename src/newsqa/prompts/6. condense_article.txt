@@ -22,7 +22,7 @@ The list of {num_sections} section names is:
 
 {sections}
 
-The current section is: {numbered_final_section}
+The current section is: {section}
 
 The article title and text are below:
 

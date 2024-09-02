@@ -16,11 +16,22 @@ class AnalyzedArticleGen1(TypedDict):
     sections: NotRequired[list[str]]
 
 
-class AnalyzedSection(TypedDict):
+class AnalyzedSectionGen1(TypedDict):
     section: Required[str]
     rating: Required[int]
 
 
 class AnalyzedArticleGen2(TypedDict):
     article: Required[SearchArticle]
-    sections: Required[list[AnalyzedSection]]
+    sections: Required[list[AnalyzedSectionGen1]]
+
+
+class AnalyzedSectionGen2(TypedDict):
+    section: Required[str]
+    rating: Required[int]
+    text: Required[str]
+
+
+class AnalyzedArticleGen3(TypedDict):
+    article: Required[SearchArticle]
+    sections: Required[list[AnalyzedSectionGen2]]
