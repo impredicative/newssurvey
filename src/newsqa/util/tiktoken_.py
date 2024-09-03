@@ -41,14 +41,14 @@ def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dic
     return usage["num_tokens"] <= usage["max_tokens"]
 
 
-def fit_input_items_to_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> str:
+def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> str:
     """Return a text that fits the input token limit for the given items and model.
 
     The items are formatted to a string using the given formatter function.
     """
     # Tests:
-    # _=fit_input_items_to_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,583/111,606 tokens.
-    # _=fit_input_items_to_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,410/111,606 tokens.
+    # _=fit_items_to_input_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,583/111,606 tokens.
+    # _=fit_items_to_input_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,410/111,606 tokens.
     encoding = get_encoding(model).name
     text = formatter(items)
     usage = calc_input_token_usage(text, model=model)

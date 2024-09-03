@@ -6,11 +6,10 @@ from types import ModuleType
 
 from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import LanguageModelOutputStructureError
-from newsqa.types import AnalyzedArticleGen1
 from newsqa.util.openai_ import get_content, MODELS
 from newsqa.util.scipy_ import sort_by_distance
 from newsqa.util.sys_ import print_error, print_warning
-from newsqa.util.tiktoken_ import fit_input_items_to_token_limit
+from newsqa.util.tiktoken_ import fit_items_to_input_token_limit
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 
@@ -52,24 +51,24 @@ def _are_sections_valid(numbered_sections: list[str]) -> bool:
     return True
 
 
-def _list_final_sections(user_query: str, source_module: ModuleType, draft_sections: list[str], *, max_sections: int, max_attempts: int = 3) -> list[str]:
+def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[str], max_sections: int, max_attempts: int = 3) -> list[str]:
     assert user_query
-    assert draft_sections
+    assert titles
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
 
-    def prompt_formatter(draft_sections_truncated: list[str]) -> str:
-        numbered_draft_sections = [f"{i}. {s}" for i, s in enumerate(draft_sections_truncated, start=1)]
-        numbered_draft_sections_str = "\n".join(numbered_draft_sections)
-        prompt_data["task"] = PROMPTS["4. list_final_sections"].format(**prompt_data, draft_sections=numbered_draft_sections_str, max_sections=max_sections)
+    def prompt_formatter(titles_truncated: list[str]) -> str:
+        numbered_titles = [f"{i}. {s}" for i, s in enumerate(titles_truncated, start=1)]
+        numbered_titles_str = "\n".join(numbered_titles)
+        prompt_data["task"] = PROMPTS["3. list_sections"].format(**prompt_data, num_titles=len(titles_truncated), titles=numbered_titles_str, max_sections=max_sections)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
     model_size = "large"
-    prompt = fit_input_items_to_token_limit(draft_sections, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
+    prompt = fit_items_to_input_token_limit(titles, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size=model_size, log=True or (num_attempt == max_attempts), read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size=model_size, log=True, read_cache=(num_attempt == 1))
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -82,30 +81,26 @@ def _list_final_sections(user_query: str, source_module: ModuleType, draft_secti
             if num_attempt == max_attempts:
                 raise LanguageModelOutputStructureError(error)
             else:
-                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting final section names: {error}")
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting section names: {error}")
                 continue
 
         break
 
     numbered_response_matches = [_SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
-    final_sections = [match["section"] for match in numbered_response_matches]
-    return final_sections
+    sections = [match["section"] for match in numbered_response_matches]
+    return sections
 
 
-def list_final_sections(user_query: str, source_module: ModuleType, *, articles_and_draft_sections: list[AnalyzedArticleGen1], max_sections: int) -> list[str]:
-    """Return a list of dictionaries containing the ordered final section names.
+def list_sections(user_query: str, source_module: ModuleType, *, titles: list[str], max_sections: int) -> list[str]:
+    """Return an ordered list of section names.
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
     assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
 
-    articles_and_sections = copy.deepcopy(articles_and_draft_sections)
-    del articles_and_draft_sections  # Note: This prevents accidental modification of draft sections.
+    titles = sort_by_distance(user_query, titles, model_size="large", distance="cosine")
+    sections = _list_sections(user_query, source_module, titles=titles, max_sections=max_sections)
 
-    draft_sections = list({s for a in articles_and_sections for s in a["sections"]})
-    draft_sections = sort_by_distance(user_query, draft_sections, model_size="large", distance="cosine")
-    final_sections = _list_final_sections(user_query, source_module, draft_sections, max_sections=max_sections)
-
-    assert final_sections
-    return final_sections
+    assert sections
+    return sections

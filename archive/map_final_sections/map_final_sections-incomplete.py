@@ -10,11 +10,7 @@ def _map_final_sections(user_query: str, source_module: ModuleType, *, final_sec
     assert user_query
     assert draft_sections
 
-    # TODO: Truncate sections if prompt is too long. Refer to:
-    #       https://platform.openai.com/docs/advanced-usage/managing-tokens
-    #       https://github.com/openai/tiktoken/issues/305
-    #       https://github.com/openai/tiktoken/issues/98
-    #       https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
+    # Pending: Truncate sections if prompt is too long.
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     numbered_final_sections = [f"{i}. {s}" for i, s in enumerate(final_sections, start=1)]

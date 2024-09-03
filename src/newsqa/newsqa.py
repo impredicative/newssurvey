@@ -10,10 +10,10 @@ from newsqa.workflow.user.query import ensure_query_is_valid
 from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
 from newsqa.workflow.llm.list_search_terms import list_search_terms
 from newsqa.workflow.llm.filter_search_results import filter_search_results
-from newsqa.workflow.llm.list_draft_sections import list_draft_sections
-from newsqa.workflow.llm.list_final_sections import list_final_sections
+from newsqa.workflow.llm.list_sections import list_sections
 from newsqa.workflow.llm.rate_articles import rate_articles
 from newsqa.workflow.llm.condense_articles import condense_articles
+from newsqa.workflow.source.get_articles import get_articles
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -55,28 +55,27 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"SEARCH RESULTS ({len(search_results)}):\n" + "\n".join(f'#{num}: {r['title']}\n{r['link']}\n{r['description']}' for num, r in enumerate(search_results, start=1)))
 
     if confirm:
-        get_confirmation("listing draft sections")
-    articles_and_draft_sections: list[AnalyzedArticleGen1] = list_draft_sections(user_query=query, source_module=source_module, search_results=search_results)
-    print("DRAFT SECTIONS BY ARTICLE:\n" + "\n".join(f'#{num}: {a["article"]["title"]} ({len(a["sections"])} sections)\n\t{"\n\t".join(a["sections"])}' for num, a in enumerate(articles_and_draft_sections, start=1)))
+        get_confirmation("getting articles")
+    articles: list[SearchArticle] = get_articles(source_module=source_module, search_results=search_results)
 
     if confirm:
-        get_confirmation("listing final sections")
-    final_sections: list[str] = list_final_sections(user_query=query, source_module=source_module, articles_and_draft_sections=articles_and_draft_sections, max_sections=max_sections)
-    num_final_sections = len(final_sections)
-    print(f"FINAL SECTIONS ({num_final_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(final_sections, start=1)]))
+        get_confirmation("listing sections")
+    sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r['title'] for r in articles], max_sections=max_sections)
+    num_sections = len(sections)
+    print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]))
 
     if confirm:
         get_confirmation("rating articles")
-    articles: list[SearchArticle] = [a["article"] for a in articles_and_draft_sections]
-    articles_and_final_sections: list[AnalyzedArticleGen2] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=final_sections)
+    articles_and_sections: list[AnalyzedArticleGen2] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=sections)
+    print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
     if confirm:
         get_confirmation("condensing articles")
-    articles_and_final_sections: list[AnalyzedArticleGen2] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_final_sections, sections=final_sections)
-    print("RATED FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_final_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_final_sections, start=1)))
-    print(f"ARTICLES BY FINAL SECTION ({num_final_sections}):")
-    for section_num, section in enumerate(final_sections, start=1):
-        section_articles = [a for a in articles_and_final_sections if any(section == s["section"] for s in a["sections"])]
+    articles_and_sections: list[AnalyzedArticleGen2] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    print("RATED SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_sections, start=1)))
+    print(f"ARTICLES BY SECTION ({num_sections}):")
+    for section_num, section in enumerate(sections, start=1):
+        section_articles = [a for a in articles_and_sections if any(section == s["section"] for s in a["sections"])]
         section_rating = sum(s["rating"] for a in section_articles for s in a["sections"] if section == s["section"])
         print(f"{section_num}. {section} ({len(section_articles)} articles) (r={section_rating:,})")
         section_articles.sort(key=lambda a: (next(s["rating"] for s in a["sections"] if section == s["section"]), sum(s["rating"] for s in a["sections"])), reverse=True)
@@ -84,4 +83,4 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_section_pair_rating = next(s["rating"] for s in article["sections"] if section == s["section"])
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
-    print(f"ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_final_sections)} articles x {num_final_sections} sections = {sum(len(a['sections']) for a in articles_and_final_sections):,} actual pairs / {len(articles_and_final_sections) * num_final_sections:,} possible pairs")
+    print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")

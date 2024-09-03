@@ -88,7 +88,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     assert article["text"].startswith(article["title"]), article  # If this fails, fix the parsing to ensure it is true.
 
-    prompt_data["task"] = PROMPTS["5. rate_article"].format(**prompt_data, num_sections=len(sections), sections=numbered_input_sections_str, article=article["text"])
+    prompt_data["task"] = PROMPTS["4. rate_article"].format(**prompt_data, num_sections=len(sections), sections=numbered_input_sections_str, article=article["text"])
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):

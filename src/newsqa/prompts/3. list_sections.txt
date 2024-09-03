@@ -1,0 +1,21 @@
+In this step of the workflow, you are given an exhaustive list of article titles. In a subsequent step, in the context of the user's query, a research report is to be generated using the text from these articles.
+
+Your task is to produce an ordered single-level list of up to {max_sections} section names for the research report. The research report will comprise the named sections. In suggesting the section names, ensure that the section names maintain a strong relevance and high specificity to the user's query. Use a sensible ordering. For your convenience, the article titles are sorted using a semantic cosine embedding distance from the user's query in ascending order by distance.
+
+Before even looking at the list of article titles, it may help for you to first think about which section names could independently be desirable for a research report for the user's query. The sections must conceptually all be complementary to each other, not overlapping or duplicative.
+
+## Format
+You will be given one article title per line in the numbered format "{{num}}. {{title}}", where:
+* {{num}} is just an ordered incremented enumeration of the article titles.
+* {{title}} is the article title.
+
+Each line of your output will have the numbered format "{{num}}. {{section}}", where:
+* {{num}} is your ordered incremented enumeration of the section names. It is intended to help you keep a running count of how many sections you have listed.
+* {{section}} is the section name.
+
+Remember to limit the list of section names to a maximum of {max_sections}, although there isn't any minimum quota to meet. The user's well-being may depend on the comprehensiveness and well-roundedness of your coverage. Recall that each section is intended to uniquely contribute to the report.
+
+## Data
+The list of {num_titles} article titles is below:
+
+{titles}
