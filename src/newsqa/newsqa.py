@@ -3,7 +3,7 @@ from typing import Optional
 
 from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import InputError
-from newsqa.types import AnalyzedArticleGen1, AnalyzedArticleGen2, SearchResult, SearchArticle
+from newsqa.types import AnalyzedArticleGen2, SearchResult, SearchArticle
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
@@ -60,7 +60,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
 
     if confirm:
         get_confirmation("listing sections")
-    sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r['title'] for r in articles], max_sections=max_sections)
+    sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r["title"] for r in articles], max_sections=max_sections)
     num_sections = len(sections)
     print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]))
 

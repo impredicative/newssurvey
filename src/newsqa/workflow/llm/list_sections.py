@@ -1,5 +1,4 @@
 import contextlib
-import copy
 import io
 import re
 from types import ModuleType
