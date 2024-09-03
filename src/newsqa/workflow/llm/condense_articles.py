@@ -124,7 +124,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
                 condensed_sections.append(condensed_section)
         if not condensed_sections:
             num_article_sections = len(article["sections"])
-            print_warning(f"There is no condensed text for any of the {num_article_sections} sections of the article {article_title!r}.")
+            print_warning(f"There is no condensed text for any of the {num_article_sections} sections for the article {article_title!r}.")
             continue
         condensed_articles.append(AnalyzedArticleGen3(article=article["article"], sections=condensed_sections))
 
