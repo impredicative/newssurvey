@@ -7,7 +7,7 @@ from types import ModuleType
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedSectionGen1
+from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedSectionGen2
 from newsqa.util.openai_ import get_content, MAX_WORKERS
 from newsqa.util.sys_ import print_error, print_warning
 
@@ -110,7 +110,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
         break
 
     output_matches = [_OUTPUT_SECTION_PATTERN.fullmatch(line) for line in numbered_output_sections]
-    rated_sections = [AnalyzedSectionGen1(section=match.group("section"), rating=int(match.group("rating"))) for match in output_matches]
+    rated_sections = [AnalyzedSectionGen2(section=match.group("section"), rating=int(match.group("rating"))) for match in output_matches]
 
     assert len(rated_sections) == len(sections)
     assert [s["section"] for s in rated_sections] == sections

@@ -7,7 +7,7 @@ from typing import Optional
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3, AnalyzedSectionGen1, AnalyzedSectionGen2
+from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3, AnalyzedSectionGen2, AnalyzedSectionGen3
 from newsqa.util.openai_ import get_content, MAX_WORKERS
 from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_warning, print_error
@@ -91,7 +91,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
     assert sections
     articles = sorted(articles, key=lambda a: len(a["article"]["link"]), reverse=True)  # For reproducible testing, but not necessary for cache.
 
-    def condense_article_section(article: SearchArticle, section: AnalyzedSectionGen1) -> Optional[str]:
+    def condense_article_section(article: SearchArticle, section: AnalyzedSectionGen2) -> Optional[str]:
         assert section["rating"] > 0
         return _condense_article(user_query, source_module, article=article, sections=sections, section=section["section"])
 
@@ -120,7 +120,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
             result_key = (article_title, section_name)
             if result_key in article_section_results:
                 condensed_text = article_section_results[result_key]
-                condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
+                condensed_section = AnalyzedSectionGen3(**section, text=condensed_text)
                 condensed_sections.append(condensed_section)
         if not condensed_sections:
             num_article_sections = len(article["sections"])
