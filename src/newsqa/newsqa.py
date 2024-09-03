@@ -69,6 +69,10 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         get_confirmation("rating articles")
     articles: list[SearchArticle] = [a["article"] for a in articles_and_draft_sections]
     articles_and_final_sections: list[AnalyzedArticleGen2] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=final_sections)
+
+    if confirm:
+        get_confirmation("condensing articles")
+    articles_and_final_sections: list[AnalyzedArticleGen2] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_final_sections, sections=final_sections)
     print("RATED FINAL SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_final_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_final_sections, start=1)))
     print(f"ARTICLES BY FINAL SECTION ({num_final_sections}):")
     for section_num, section in enumerate(final_sections, start=1):
@@ -81,7 +85,3 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
     print(f"ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_final_sections)} articles x {num_final_sections} sections = {sum(len(a['sections']) for a in articles_and_final_sections):,} actual pairs / {len(articles_and_final_sections) * num_final_sections:,} possible pairs")
-
-    if confirm:
-        get_confirmation("condensing articles")
-    articles_and_final_sections: list[AnalyzedArticleGen2] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_final_sections, sections=final_sections)

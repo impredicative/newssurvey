@@ -90,7 +90,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
     assert articles
     assert sections
     articles = sorted(articles, key=lambda a: len(a["article"]["link"]), reverse=True)  # For reproducible testing, but not necessary for cache.
-    
+
     def condense_article_section(article: SearchArticle, section: AnalyzedSectionGen1) -> Optional[str]:
         assert section["rating"] > 0
         return _condense_article(user_query, source_module, article=article, sections=sections, section=section["section"])
@@ -123,7 +123,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
                 condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
                 condensed_sections.append(condensed_section)
         if not condensed_sections:
-            num_article_sections = len(article['sections'])
+            num_article_sections = len(article["sections"])
             print_warning(f"There is no condensed text for any of the {num_article_sections} sections of the article {article_title!r}.")
             continue
         condensed_articles.append(AnalyzedArticleGen3(article=article["article"], sections=condensed_sections))
