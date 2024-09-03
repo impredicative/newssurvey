@@ -6,7 +6,7 @@ from typing import Optional
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3
+from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3, AnalyzedSectionGen2
 from newsqa.util.openai_ import get_content
 from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_warning, print_error
@@ -103,14 +103,16 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
                 print(f"There is no text for the article {article_title!r} for the section {section_name!r}.")
                 continue
             print(f'The text for the article {article_title!r} for the section {section_name!r} with rating {section['rating']}/100 is:\n{textwrap.indent(condensed_text, prefix="\t")}')
-            condensed_sections.append({**section, "text": condensed_text})
-            input("Press Enter to continue...")
+            condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
+            condensed_sections.append(condensed_section)
 
         if not condensed_sections:
             print_warning(f"There is no text for any section of the article {article_title!r}.")
             continue
 
         condensed_articles.append(AnalyzedArticleGen3(article=article["article"], sections=condensed_sections))
+
+    condensed_articles.sort(key=lambda a: sum(s["rating"] for s in a["sections"]), reverse=True)
 
     if not condensed_articles:
         raise SourceInsufficiencyError("No usable articles exist for the query.")
