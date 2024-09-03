@@ -8,39 +8,56 @@ from newsqa.types import SearchResult
 from newsqa.config import PROMPTS
 from newsqa.util.dict import dict_str
 from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error
+from newsqa.util.sys_ import print_error, print_warning
 
 _RESPONSE_PATTERN = re.compile(r"\d+(?: \d+)*")
 
 
-def _are_responses_valid(responses: list[str]) -> bool:
-    """Return true if the responses are valid, otherwise false.
+def _is_response_valid(response: str, num_search_results: int) -> bool:
+    """Return true if the response is valid, otherwise false.
 
-    :param responses: Expected sample: ['3', '5', '8']
+    :param response: Valid example: '3 5 8'
 
     A validation error is printed if a search term is invalid.
     """
-    if not responses:
-        print_error("No responses exist.")
+    if not response:
+        print_error("No response exists.")
+        return False
+
+    if response != response.strip():
+        print_error(f"Response is invalid because it has leading or trailing whitespace: {response!r}")
+        return False
+
+    num_response_lines = len(response.splitlines())
+    if num_response_lines > 1:
+        print_error(f"Response is invalid because it has multiple lines: {response!r}")
+        return False
+
+    if _RESPONSE_PATTERN.fullmatch(response) is None:
+        print_error(f"Response is invalid because it does not match the expected pattern: {response!r}")
+        return False
+
+    responses = response.split(" ")
+    num_responses = len(responses)
+    if num_responses > num_search_results:
+        print_error(f"Response is invalid because it has more entries ({num_responses}) than expected for the search results ({num_search_results}): {response!r}")
         return False
 
     seen = set()
     for count, response in enumerate(responses, start=1):
-        if not response.isdigit():
-            print_error(f"Response {count} is invalid because it is not digits: {response}")
-            return False
+        assert response.isdigit()  # This is already checked by the regex.
         number = int(response)
 
-        if number < 0:
-            print_error(f"Response {count} is invalid because it is negative: {number}")
+        if number > num_search_results:
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of search results: {response!r}")
             return False
 
         if number in seen:
-            print_error(f"Response {count} is invalid because it is a duplicate: {number}")
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {response!r}")
             return False
         seen.add(number)
 
-        # Note: This fails sometimes when using the small gpt-4o-mini-2024-07-18 model, and is therefore disabled.
+        # Note: This fails sometimes when using the small gpt-4o-mini-2024-07-18 model. It is not strictly necessary.
         # if number < max(seen):
         #     print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
         #     return False
@@ -48,7 +65,7 @@ def _are_responses_valid(responses: list[str]) -> bool:
     return True
 
 
-def _filter_search_results(user_query: str, source_module: ModuleType, results: list[SearchResult]) -> list[SearchResult]:
+def _filter_search_results(user_query: str, source_module: ModuleType, *, results: list[SearchResult], max_attempts: int = 3) -> list[SearchResult]:
     """Return the list of relevant search results.
 
     `LanguageModelOutputError` is raised if the model output has an error.
@@ -64,29 +81,27 @@ def _filter_search_results(user_query: str, source_module: ModuleType, results: 
     }
     prompt_data["task"] = PROMPTS["2. filter_search_results"].format(**prompt_data)
     prompt = PROMPTS["0. common"].format(**prompt_data)
-    response = get_content(prompt, model_size="small", log=False)
 
-    if response == "0":
-        return []
+    for num_attempt in range(1, max_attempts + 1):
+        response = get_content(prompt, model_size="small", log=False)
 
-    num_response_lines = len(response.splitlines())
-    if num_response_lines > 1:
-        raise LanguageModelOutputStructureError(f"While filtering search results, the received completion was expected to have a single line, but it has {num_response_lines} lines:\n{response}")
+        if response == "0":
+            return []
 
-    if _RESPONSE_PATTERN.fullmatch(response) is None:
-        raise LanguageModelOutputStructureError(f"While filtering search results, the received completion does not match the expected regular expression pattern {_RESPONSE_PATTERN.pattern}:\n{response}")
+        error = io.StringIO()
+        with contextlib.redirect_stderr(error):
+            response_is_valid = _is_response_valid(response, len(results))
+        if not response_is_valid:
+            error = error.getvalue().rstrip().removeprefix("Error: ")
+            if num_attempt == max_attempts:
+                raise LanguageModelOutputStructureError(error)
+            else:
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while filtering search results: {error}")
+                continue
+
+        break
 
     responses = response.split(" ")
-    num_results, num_responses = len(results), len(responses)
-    if num_responses > num_results:
-        raise LanguageModelOutputStructureError(f"While filtering search results, the received completion has {num_responses} responses for {num_results} original results:\n{response}")
-
-    error = io.StringIO()
-    with contextlib.redirect_stderr(error):
-        if not _are_responses_valid(responses):
-            error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise LanguageModelOutputStructureError(f"While filtering search results, the received completion has an error. {error}")
-
     responses = [int(r) for r in responses]
     responses = [r for r in responses if (r != 0)]
     responses.sort()
