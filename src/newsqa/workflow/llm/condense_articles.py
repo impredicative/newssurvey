@@ -1,3 +1,4 @@
+import concurrent.futures
 import contextlib
 import io
 import textwrap
@@ -6,8 +7,8 @@ from typing import Optional
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3, AnalyzedSectionGen2
-from newsqa.util.openai_ import get_content
+from newsqa.types import SearchArticle, AnalyzedArticleGen2, AnalyzedArticleGen3, AnalyzedSectionGen1, AnalyzedSectionGen2
+from newsqa.util.openai_ import get_content, MAX_WORKERS
 from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_warning, print_error
 
@@ -75,7 +76,7 @@ def _condense_article(user_query: str, source_module: ModuleType, *, article: Se
 
 
 def condense_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[AnalyzedArticleGen3]:
-    """Return a list of dictionaries containing the given search article, the given rated section names, with the corresponding text for each section.
+    """Return a list of dictionaries containing the given search article, the given rated section names, with the corresponding condensed text for each section.
 
     The returned text for each article-section pair is the condensed version of the article in the context of the section and the user query.
 
@@ -89,31 +90,45 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
     assert articles
     assert sections
     articles = sorted(articles, key=lambda a: len(a["article"]["link"]), reverse=True)  # For reproducible testing, but not necessary for cache.
+    
+    def condense_article_section(article: SearchArticle, section: AnalyzedSectionGen1) -> Optional[str]:
+        assert section["rating"] > 0
+        return _condense_article(user_query, source_module, article=article, sections=sections, section=section["section"])
 
     condensed_articles = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_section = {executor.submit(condense_article_section, article["article"], section): (article, section) for article in articles for section in article["sections"]}
+
+        article_section_results = {}
+        for future in concurrent.futures.as_completed(future_to_section):
+            article, section = future_to_section[future]
+            article_title = article["article"]["title"]
+            section_name = section["section"]
+            condensed_text = future.result()
+            if condensed_text is None:
+                print(f"There is no condensed text for the article {article_title!r} for the section {section_name!r}.")
+                continue
+            print(f'The condensed text for the article {article_title!r} for the section {section_name!r} with rating {section['rating']} is:\n{textwrap.indent(condensed_text, prefix="\t")}')
+            article_section_results[(article_title, section_name)] = condensed_text
+
     for article in articles:
         article_title = article["article"]["title"]
-
         condensed_sections = []
         for section in article["sections"]:
-            assert section["rating"] > 0
             section_name = section["section"]
-            condensed_text = _condense_article(user_query, source_module, article=article["article"], sections=sections, section=section_name)
-            if condensed_text is None:
-                print(f"There is no text for the article {article_title!r} for the section {section_name!r}.")
-                continue
-            print(f'The text for the article {article_title!r} for the section {section_name!r} with rating {section['rating']}/100 is:\n{textwrap.indent(condensed_text, prefix="\t")}')
-            condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
-            condensed_sections.append(condensed_section)
-
+            result_key = (article_title, section_name)
+            if result_key in article_section_results:
+                condensed_text = article_section_results[result_key]
+                condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
+                condensed_sections.append(condensed_section)
         if not condensed_sections:
-            print_warning(f"There is no text for any section of the article {article_title!r}.")
+            num_article_sections = len(article['sections'])
+            print_warning(f"There is no condensed text for any of the {num_article_sections} sections of the article {article_title!r}.")
             continue
-
         condensed_articles.append(AnalyzedArticleGen3(article=article["article"], sections=condensed_sections))
 
     condensed_articles.sort(key=lambda a: sum(s["rating"] for s in a["sections"]), reverse=True)
-
     if not condensed_articles:
         raise SourceInsufficiencyError("No usable articles exist for the query.")
     return condensed_articles
