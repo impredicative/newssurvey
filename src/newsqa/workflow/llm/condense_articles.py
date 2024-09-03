@@ -39,7 +39,7 @@ def _is_output_valid(text: str, article_title: str, section_name: str) -> bool:
     return True
 
 
-def _condense_article(user_query: str, source_module: ModuleType, *, article: SearchArticle, sections: list[str], section: str, max_attempts: int = 1) -> Optional[str]:
+def _condense_article(user_query: str, source_module: ModuleType, *, article: SearchArticle, sections: list[str], section: str, max_attempts: int = 3) -> Optional[str]:
     assert user_query
     assert sections
 
