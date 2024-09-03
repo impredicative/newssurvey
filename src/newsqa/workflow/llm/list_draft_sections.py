@@ -7,6 +7,7 @@ from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
 from newsqa.util.openai_ import get_content, MAX_WORKERS
+from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_error
 
 
@@ -54,8 +55,7 @@ def _list_draft_sections_for_search_result(user_query: str, source_module: Modul
     prompt = PROMPTS["0. common"].format(**prompt_data)
     response = get_content(prompt, model_size="small", log=False)
 
-    none_responses = ("none", "none.")
-    if response.lower() in none_responses:
+    if is_none_response(response):
         print(f'No draft section names exist for article: {search_result['title']}')
         return AnalyzedArticleGen1(article=article, sections=[])
 

@@ -16,7 +16,10 @@ _OUTPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?) → (?P<r
 
 
 def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sections: list[str]) -> bool:
-    """Return true if the output sections have a valid rating of the input sections."""
+    """Return true if the output sections have a valid rating of the input sections, otherwise false.
+
+    A validation error is printed if a rating is invalid.
+    """
     if not numbered_input_sections:
         print_error("No input section names exist.")
         return False
@@ -101,7 +104,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
             if num_attempt == max_attempts:
                 raise LanguageModelOutputStructureError(error)
             else:
-                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting ranked section names: {error}")
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting section ratings: {error}")
                 continue
 
         break

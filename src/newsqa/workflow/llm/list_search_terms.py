@@ -5,6 +5,7 @@ from types import ModuleType
 from newsqa.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
 from newsqa.config import PROMPTS
 from newsqa.util.openai_ import get_content
+from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_error
 
 
@@ -49,10 +50,10 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
 
     response = get_content(prompt, model_size="large", log=False)
 
-    none_responses = ("none", "none.")
-    if response.lower() in none_responses:
+    if is_none_response(response):
         raise LanguageModelOutputRejectionError("No search terms exist for query.")
 
+    none_responses = ("none", "none.")
     invalid_terms = ("", *none_responses)
     terms = [t.strip() for t in response.splitlines() if t.strip().lower() not in invalid_terms]  # Note: A terminal "None" line has been observed with valid entries before it.
 
