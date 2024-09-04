@@ -9,11 +9,30 @@ When reading article texts, do not be biased by mere opinions even if they are b
 
 Considerations:
 1. Each article's text may optionally include its publication date or year which should inform you of its relative recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
-2. Articles that note one or more strong references could prove more relevant than ones that don't, although the need for references varies by the unexpectedness of the claims.
+2. Articles that note one or more strong references could prove more relevant than ones that don't, although the need for references may vary by the unexpectedness of the claims.
 
 What not to do:
 1. Do not include unessential information that would be better off being covered by a different section of the report. Focus on what's best for the current section.
 2. Do not start your output with the section title. You are to leave it out, as it will be prepended automatically by the workflow software.
+
+## Format
+Each condensed article will be in the multiline format:
+
+    [ARTICLE {{number}}]
+
+    {{title}}
+
+    {{text}}
+
+    ---
+
+Note the article number which will be an ordered incremented enumeration. The article numbers will be used by you to add the correct citations at the end of each material sentence or paragraph of your output. The citations will be the respective identifying numbers of the articles that substantiate the sentence or paragraph. The following example illustrates the expected structure of citations in a dummy output:
+
+    If there is a surplus of solar power available in the summer months, it can be used to split water to produce hydrogen.〚1〛 This hydrogen is then fed into a stainless steel reactor filled with natural iron ore at 400 degrees Celsius.〚1,8〛 There, the hydrogen extracts the oxygen from the iron ore—which in chemical terms is simply iron oxide—resulting in elemental iron and water.〚5,7-9,19-22〛 When the energy is needed again in winter, the researchers reverse the process: they feed hot steam into the reactor to turn the iron and water back into iron oxide and hydrogen.〚5-7〛
+
+As shown in the example, the characters 〚 〛 are to be used by you at the end of sentences to enclose the respective citation numbers which are expressed as a mix of integers and inclusive ranges. As noted before, the citation numbers will come from the article numbers. The citation numbers in your output will subsequently be parsed by the workflow software which will look for the special characters.
+
+Adding accurate citation numbers will assist the user in verifying the correctness of your output against the respective articles. Without accurate citation numbers, the user can be left in the dark, unable to verify the output. It is most important for a citation number to never be incorrect, as that would lead to distrust in the output. Consequently, it is better that the number be missing than it be wrong. Iff adding precise citations at the end of each material sentence is too burdensome, at least they can be added at the end of paragraphs.
 
 ## Data
 The list of {num_sections} section names of the report is:
