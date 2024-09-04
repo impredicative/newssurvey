@@ -86,8 +86,8 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
     print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
-    print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
     # if confirm:
     #     get_confirmation("generate section texts")
     # sections: list[Section] = write_sections(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    # print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section['title']}:\n {section['text']}" for num, section in enumerate(sections, start=1)]))
+    
+    print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section['title']}:\n {section['text']}" for num, section in enumerate(sections, start=1)]))
