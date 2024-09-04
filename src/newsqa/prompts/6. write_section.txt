@@ -24,7 +24,7 @@ Each condensed article will be in the multiline format:
 
     {{text}}
 
-    ---
+    ---  # article separator
 
 Note the article number which will be an ordered incremented enumeration. The article numbers will be used by you to add the correct citations at the end of each material sentence or paragraph of your output. The citations will be the respective identifying numbers of the articles that substantiate the sentence or paragraph. The following example illustrates the expected structure of citations in a dummy output:
 
