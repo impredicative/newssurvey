@@ -5,7 +5,7 @@ In this step of the workflow, you are given:
 
 As noted, your task is to comprehensively write the named section of the report using the input texts. This is in the context of the user's query. Create a coherent and integrated narrative. Your output will be final; it will be added to the report by the workflow software, and presented to the end user. The user's well-being depends on the thoroughness of your work.
 
-When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to evidence, data, and results instead.
+When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively prefer evidence, data, and results instead.
 
 Considerations:
 1. Each article's text may optionally include its publication date or year which should inform you of its relative recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
@@ -30,7 +30,7 @@ Note the article number which will be an ordered incremented enumeration. The ar
 
     If there is a surplus of solar power available in the summer months, it can be used to split water to produce hydrogen.〚1〛 This hydrogen is then fed into a stainless steel reactor filled with natural iron ore at 400 degrees Celsius.〚1,8〛 There, the hydrogen extracts the oxygen from the iron ore—which in chemical terms is simply iron oxide—resulting in elemental iron and water.〚5,7-9,19-22〛 When the energy is needed again in winter, the researchers reverse the process: they feed hot steam into the reactor to turn the iron and water back into iron oxide and hydrogen.〚5-7〛
 
-As shown in the example, the characters 〚 〛 are to be used by you at the end of sentences to enclose the respective citation numbers which are expressed as a mix of integers and inclusive ranges. As noted before, the citation numbers will come from the article numbers. The citation numbers in your output will subsequently be parsed by the workflow software which will look for the special characters.
+As shown in the example, the characters 〚 〛 are to be used by you at the end of sentences to enclose the respective citation numbers which are expressed as a mix of integers and inclusive ranges. As noted before, the citation numbers will come from the article numbers. The citation numbers in your output will subsequently be parsed and reformatted by the workflow software which will look for the special characters.
 
 Adding accurate citation numbers will assist the user in verifying the correctness of your output against the respective articles. Without accurate citation numbers, the user can be left in the dark, unable to verify the output. It is most important for a citation number to never be incorrect, as that would lead to distrust in the output. Consequently, it is better that the number be missing than it be wrong. Iff adding precise citations at the end of each material sentence is too burdensome, at least they can be added at the end of paragraphs.
 
