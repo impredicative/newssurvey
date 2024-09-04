@@ -2,11 +2,13 @@ import contextlib
 import io
 import re
 from types import ModuleType
+from typing import Optional
 
 from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import LanguageModelOutputStructureError
+from newsqa.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
 from newsqa.util.openai_ import get_content, MODELS
 from newsqa.util.scipy_ import sort_by_distance
+from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_error, print_warning
 from newsqa.util.tiktoken_ import fit_items_to_input_token_limit
 
@@ -50,7 +52,7 @@ def _are_sections_valid(numbered_sections: list[str]) -> bool:
     return True
 
 
-def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[str], max_sections: int, max_attempts: int = 3) -> list[str]:
+def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[str], max_sections: int, max_attempts: int = 3) -> Optional[list[str]]:
     assert user_query
     assert titles
 
@@ -68,6 +70,9 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size=model_size, log=True, read_cache=(num_attempt == 1))
+
+        if is_none_response(response):
+            return
 
         numbered_response_sections = [line.strip() for line in response.splitlines()]
         numbered_response_sections = [line for line in numbered_response_sections if line]
@@ -95,11 +100,16 @@ def list_sections(user_query: str, source_module: ModuleType, *, titles: list[st
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+
+    The subclass `LanguageModelOutputRejectionError` is raised if the output is rejected.
     """
     assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
 
     titles = sort_by_distance(user_query, titles, model_size="large", distance="cosine")
     sections = _list_sections(user_query, source_module, titles=titles, max_sections=max_sections)
+
+    if sections is None:
+        raise LanguageModelOutputRejectionError("No sections were listed for the query based on the available articles.")
 
     assert sections
     return sections

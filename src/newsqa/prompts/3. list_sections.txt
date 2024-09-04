@@ -15,6 +15,8 @@ Each line of your output will have the numbered format "{{num}}. {{section}}", w
 
 Remember to limit the list of section names to a maximum of {max_sections}, although there isn't any minimum quota to meet. The user's well-being may depend on the comprehensiveness and well-roundedness of your coverage. Recall that each section is intended to uniquely contribute to the report.
 
+In the unexpected event that no articles relate to the user's query, implying that no sections can therefore be written, just say the word "none" instead. This will cause the workflow software to abort the workflow due to the unavailability of relevant references.
+
 ## Data
 The list of {num_titles} article titles is below:
 
