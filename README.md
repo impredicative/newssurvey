@@ -9,4 +9,4 @@ Each step in this workflow corresponds to an action taken by the LLM.
 3. **List section names**: The list of article titles is presented to the LLM, ordered by distance to the user query. The LLM suggests a coherent single-level list of sections.
 4. **Rate articles for sections**: For each article, the LLM numerically rates on a scale of 0 to 100 how well the article can contribute to each section.
 5. **Condense article by section**: For each article and section pairing, limited to ones with nonzero ratings, the LLM condenses the article text.
-6. **Get response by section**: For each section, its condensed articles are concatenated together, ordered by their corresponding ratings, up to the maximum input context length of the LLM. The LLM formulates the response for each section.
+6. **Get text by section**: For each section, its condensed articles are concatenated together, ordered by their corresponding ratings, up to the maximum input context length of the LLM. The LLM formulates the text for each section.

@@ -30,3 +30,8 @@ class AnalyzedSectionGen2(TypedDict):
 class AnalyzedArticleGen2(TypedDict):
     article: Required[SearchArticle]
     sections: Required[list[AnalyzedSectionGen2]]
+
+
+class Section(TypedDict):
+    title: Required[str]
+    text: Required[str]
