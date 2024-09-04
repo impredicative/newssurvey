@@ -3,7 +3,7 @@ In this step of the workflow, you are given:
 2. A single section name (from the above list), the text for which is to be written by you in the current step.
 3. The concatenated condensed texts of numerous relevant articles that you are to use to write the aforementioned section. The texts are sorted by their estimated relevance to the section name in descending order, implying that ones with a higher estimated relevance are sorted higher.
 
-As noted, your task is to comprehensively write the named section of the report using the input texts. This is in the context of the user's query. Your output is final; it will be added to the report by the workflow software, and presented to the end user. The user's well-being depends on the thoroughness of your work.
+As noted, your task is to comprehensively write the named section of the report using the input texts. This is in the context of the user's query. Create a coherent and integrated narrative. Your output will be final; it will be added to the report by the workflow software, and presented to the end user. The user's well-being depends on the thoroughness of your work.
 
 When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to evidence, data, and results instead.
 
