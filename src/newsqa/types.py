@@ -11,27 +11,22 @@ class SearchArticle(SearchResult):
     text: Required[str]
 
 
+class AnalyzedSectionGen1(TypedDict):
+    section: Required[str]
+    rating: Required[int]
+
+
 class AnalyzedArticleGen1(TypedDict):
     article: Required[SearchArticle]
-    sections: Required[list[str]]
+    sections: Required[list[AnalyzedSectionGen1]]
 
 
 class AnalyzedSectionGen2(TypedDict):
     section: Required[str]
     rating: Required[int]
+    text: Required[str]
 
 
 class AnalyzedArticleGen2(TypedDict):
     article: Required[SearchArticle]
     sections: Required[list[AnalyzedSectionGen2]]
-
-
-class AnalyzedSectionGen3(TypedDict):
-    section: Required[str]
-    rating: Required[int]
-    text: Required[str]
-
-
-class AnalyzedArticleGen3(TypedDict):
-    article: Required[SearchArticle]
-    sections: Required[list[AnalyzedSectionGen3]]
