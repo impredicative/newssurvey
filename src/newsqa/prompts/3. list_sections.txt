@@ -1,6 +1,6 @@
 In this step of the workflow, you are given an exhaustive list of article titles. In a subsequent step, in the context of the user's query, a research report is to be generated using the text from these articles.
 
-Your task is to produce an ordered single-level list of up to {max_sections} section names for the research report. The research report will comprise the named sections. In suggesting the section names, ensure that the section names maintain a strong relevance and high specificity to the user's query. Use a sensible ordering. For your convenience, the article titles are sorted using a semantic cosine embedding distance from the user's query in ascending order by distance.
+Your task is to produce an ordered single-level list of up to {max_sections} section names for the research report. The research report will comprise the named sections. In suggesting the section names, limit them to the ones that the articles can strongly substantiate, while also ensuring that the section names maintain a strong relevance and high specificity to the user's query. Use a sensible ordering. For your convenience, the article titles are sorted using a semantic cosine embedding distance from the user's query in ascending order by distance.
 
 Before even looking at the list of article titles, it may help for you to first think about which section names could independently be desirable for a research report for the user's query. The sections must conceptually all be complementary to each other, not overlapping or duplicative.
 
