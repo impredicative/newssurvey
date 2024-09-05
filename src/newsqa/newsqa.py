@@ -13,7 +13,7 @@ from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.llm.list_sections import list_sections
 from newsqa.workflow.llm.rate_articles import rate_articles
 from newsqa.workflow.llm.condense_articles import condense_articles
-# from newsqa.workflow.llm.write_sections import write_sections
+from newsqa.workflow.llm.combine_articles import combine_articles
 from newsqa.workflow.source.get_articles import get_articles
 
 
@@ -86,8 +86,8 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
     print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
-    # if confirm:
-    #     get_confirmation("generate section texts")
-    # sections: list[Section] = write_sections(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    if confirm:
+        get_confirmation("generate section texts")
+    sections: list[dict] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
     
     print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section['title']}:\n {section['text']}" for num, section in enumerate(sections, start=1)]))
