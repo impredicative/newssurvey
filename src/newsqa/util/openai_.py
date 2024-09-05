@@ -23,6 +23,7 @@ _COLOR_RESET = "\033[0m"
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
+        "deprecated": "gpt-4-0125-preview",  # Note: Can require more prompt tuning for successful use. gpt-4-turbo-2024-04-09 is worse.
         "large": "gpt-4o-2024-08-06",
         "small": "gpt-4o-mini-2024-07-18",
     },
@@ -31,14 +32,16 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
         "small": "text-embedding-3-small",  # Output vector length is 1536.
     },
 }
-TextModelSizeType = Literal["large", "small"]
+TextModelSizeType = Literal["deprecated", "large", "small"]
 EmbeddingModelSizeType = Literal["large", "small"]
 
 MAX_INPUT_TOKENS = {
+    "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-08-06": 128_000,
     "gpt-4o-mini-2024-07-18": 128_000,
 }
 MAX_OUTPUT_TOKENS = {
+    "gpt-4-0125-preview": 4096,
     "gpt-4o-2024-08-06": 16_384,
     "gpt-4o-mini-2024-07-18": 16_384,
 }

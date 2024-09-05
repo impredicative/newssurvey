@@ -15,7 +15,11 @@ from newsqa.util.sys_ import print_warning, print_error
 from newsqa.util.textwrap import tab_indent
 from newsqa.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
 
-_MODEL_SIZE = ['small', 'large'][1]
+_MODEL_SIZE = [
+    'small',  # Do not use. Does not generate citations well.
+    'large',  # Good.
+    'deprecated',  # Do not use. Too expensive and older. Does not follow instructions equally well. Does not generate citations.
+    ][1]
 _MODEL = MODELS['text'][_MODEL_SIZE]
 
 
