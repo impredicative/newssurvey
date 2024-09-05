@@ -23,7 +23,7 @@ _COLOR_RESET = "\033[0m"
 _DISKCACHE = get_diskcache(__file__, size_gib=10)
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
-        "large": ["gpt-4o-2024-05-13", "gpt-4o-2024-08-06"][-1],
+        "large": "gpt-4o-2024-08-06",
         "small": "gpt-4o-mini-2024-07-18",
     },
     "embedding": {
@@ -36,12 +36,10 @@ EmbeddingModelSizeType = Literal["large", "small"]
 
 MAX_INPUT_TOKENS = {
     "gpt-4o-2024-08-06": 128_000,
-    "gpt-4o-2024-05-13": 128_000,
     "gpt-4o-mini-2024-07-18": 128_000,
 }
 MAX_OUTPUT_TOKENS = {
     "gpt-4o-2024-08-06": 16_384,
-    "gpt-4o-2024-05-13": 4096,
     "gpt-4o-mini-2024-07-18": 16_384,
 }
 MAX_WORKERS = 16
