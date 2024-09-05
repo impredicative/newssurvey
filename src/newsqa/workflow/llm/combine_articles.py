@@ -9,7 +9,7 @@ from typing import Optional
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
 from newsqa.types import SearchArticle, AnalyzedArticleGen1, AnalyzedArticleGen2, AnalyzedSectionGen1, AnalyzedSectionGen2
-from newsqa.util.openai_ import get_content, MODELS
+from newsqa.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS
 from newsqa.util.str import is_none_response
 from newsqa.util.sys_ import print_warning, print_error
 from newsqa.util.textwrap import tab_indent
@@ -29,10 +29,11 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
     numbered_sections_str = '\n'.join(numbered_sections)
     section_number = sections.index(section) + 1
     numbered_section = f"{section_number}. {section}"
+    max_output_tokens = MAX_OUTPUT_TOKENS[_MODEL]
 
     def prompt_formatter(articles_truncated: list[str]) -> str:
         numbered_articles = '\n\n---\n\n'.join([f'[ARTICLE {num}]\n\n{article}' for num, article in enumerate(articles_truncated, start=1)])
-        prompt_data['task'] = PROMPTS["6. combine_articles"].format(**prompt_data, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
+        prompt_data['task'] = PROMPTS["6. combine_articles"].format(**prompt_data, max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
     
