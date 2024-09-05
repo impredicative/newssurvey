@@ -69,6 +69,21 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     return completion
 
 
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_dual_prompt_completion")
+def get_dual_prompt_completion(system_prompt: str, user_prompt: str, model: str) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
+    """Return the completion for the given prompt."""
+    assert model in MODELS["text"].values(), model
+    assert model in MAX_OUTPUT_TOKENS, model
+    client = openai.OpenAI()
+    print(f"Requesting completion for system prompt of length {len(system_prompt):,} and user prompt of length {len(user_prompt):,} using model {model}.")
+    time_start = time.monotonic()
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
+    completion = client.chat.completions.create(model=model, messages=messages, max_tokens=MAX_OUTPUT_TOKENS[model])
+    time_used = time.monotonic() - time_start
+    print(f"Received completion for system prompt of length {len(system_prompt):,} and user prompt of length {len(user_prompt):,} using model {model} in {time_used:.1f}s.")
+    return completion
+
+
 def get_content(prompt: str, *, model_size: str, completion: Optional[ChatCompletion] = None, log: bool = False, read_cache: bool = True) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the completion content for the given prompt."""
     assert model_size in MODELS["text"], model_size
