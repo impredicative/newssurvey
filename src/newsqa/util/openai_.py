@@ -62,7 +62,8 @@ def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` 
     client = openai.OpenAI()
     print(f"Requesting completion for prompt of length {len(prompt):,} using model {model}.")
     time_start = time.monotonic()
-    completion = client.chat.completions.create(model=model, messages=[{"role": "user", "content": prompt}], max_tokens=MAX_OUTPUT_TOKENS[model])
+    messages = [{"role": "user", "content": prompt}]
+    completion = client.chat.completions.create(model=model, messages=messages, max_tokens=MAX_OUTPUT_TOKENS[model])
     time_used = time.monotonic() - time_start
     print(f"Received completion for prompt of length {len(prompt):,} using model {model} in {time_used:.1f}s.")
     return completion
