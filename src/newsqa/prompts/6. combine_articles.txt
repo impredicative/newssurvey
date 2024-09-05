@@ -14,6 +14,7 @@ Considerations:
 What not to do:
 1. Do not include unessential information that would be better off being covered by a different section of the report. Focus on what's best for the current section.
 2. Do not start your output with the section title. You are to leave it out, as it will be prepended automatically by the workflow software.
+3. Do not refer to, mention, or bring up the user's query directly in your output.
 
 ## Format
 Each condensed article will be in the multiline format:
