@@ -1,15 +1,15 @@
 In this step of the workflow, you are given:
 1. The list of section names of a research report which is to eventually be written in the context of the user's query.
 2. A single section name (from the above list), the text for which is to be written by you in the current step.
-3. The concatenated condensed texts of numerous relevant articles that you are to use to write the aforementioned section. The texts are sorted by their estimated relevance to the section name in descending order, implying that ones with a higher estimated relevance are sorted higher.
+3. The concatenated condensed texts of numerous relevant articles that you are to use to write the aforementioned section. The texts are sorted by their estimated relevance to the section name in descending order, implying that texts with a higher estimated relevance are sorted higher.
 
 As noted, your task is to comprehensively write the named section of the report using the input texts. This is in the context of the user's query. Create a coherent and integrated narrative. Your output will be final; it will be added to the report by the workflow software, and presented to the end user. The user's well-being may depend on the thoroughness of your thesis.
 
 When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively prefer evidence, data, and results instead.
 
 Considerations:
-1. Each article's text may optionally include its publication date or year which should inform you of its relative recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
-2. Articles that note one or more strong references could prove more relevant than ones that don't, although the need for references may vary by the unexpectedness of the claims.
+1. Each article's text may optionally include its publication date which should inform you of its relative recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
+2. Articles that note one or more strong references could prove more relevant than ones that don't, although the benefit from references may vary by the unexpectedness of the claims.
 
 What not to do:
 1. Do not include unessential information that would be better off being covered by a different section of the report. Focus on what's best for the current section.
@@ -26,13 +26,13 @@ Each condensed article will be in the multiline format:
 
     ---  # article separator
 
-Note the article number which will be an ordered incremented enumeration. The article numbers will be used by you to add the correct citations at the end of each material sentence or paragraph of your output. The citations will be the respective identifying numbers of the articles that substantiate the sentence or paragraph. The following example illustrates the expected structure of citations in a dummy output:
+Note the article number which will be an ordered incremented enumeration. The article numbers will be used by you to add the correct citations at the end of each material sentence or paragraph of your output. The citations will be the respective identifying numbers of the articles that substantiate the sentence or paragraph of your output. The following example illustrates the expected structure of citations in a dummy output:
 
     If there is a surplus of solar power available in the summer months, it can be used to split water to produce hydrogen.〚1〛 This hydrogen is then fed into a stainless steel reactor filled with natural iron ore at 400 degrees Celsius.〚1,8〛 There, the hydrogen extracts the oxygen from the iron ore—which in chemical terms is simply iron oxide—resulting in elemental iron and water.〚5,7-9,19-22〛 When the energy is needed again in winter, the researchers reverse the process: they feed hot steam into the reactor to turn the iron and water back into iron oxide and hydrogen.〚5-7〛
 
-As shown in the example, the characters 〚 〛 are to be used by you at the end of sentences to enclose the respective citation numbers which are expressed as a mix of integers and inclusive ranges. As noted before, the citation numbers will come from the article numbers. The citation numbers in your output will subsequently be parsed and reformatted by the workflow software which will look for the special characters.
+As shown in the example, the special characters 〚 〛 are to be used by you to enclose the respective citation numbers which are expressed as a mix of integers and inclusive ranges. As noted before, the citation numbers will come from the article numbers. The citation numbers in your output will subsequently be parsed and reformatted by the workflow software which will look for the special characters.
 
-Adding accurate citation numbers will assist the user in verifying the correctness of your output against the respective articles. Without accurate citation numbers, the user can be left in the dark, unable to verify the output. It is most important for a citation number to never be incorrect, as that would lead to distrust in the output. Consequently, it is better that the number be missing than it be wrong. Iff adding precise citations at the end of each material sentence is too burdensome, at least they can be added at the end of paragraphs.
+Adding accurate citation numbers will assist the user in verifying the correctness of your output against the respective articles. Without accurate citation numbers, the user can be left in the dark, unable to verify the output. It is most important for a citation number to never be incorrect, as that would lead to distrust in the output. Consequently, it is better that the number be missing than it be wrong. Iff adding precise citations at the end of each material sentence is too burdensome, at least they can be aggregated and added at the end of paragraphs.
 
 ## Data
 The list of {num_sections} section names of the report is:
