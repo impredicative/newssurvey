@@ -80,6 +80,7 @@ def get_search_results(**kwargs) -> list[SearchResult]:
 
     for result in results:
         result["title"] = result["title"].rstrip("\xa0")
+        # result['title'] = result['title'].replace('\xa0', ' ')  # This is not done because it will then also be have to be done in the article text. Keeping it causes an assertion to fail whereby the article text does not start with the article title.
         assert result["title"] == result["title"].strip(), result
 
     return results
