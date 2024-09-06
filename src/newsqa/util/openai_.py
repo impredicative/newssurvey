@@ -8,6 +8,7 @@ import dotenv
 import openai
 
 import newsqa.exceptions
+from newsqa.util.dict import dict_str
 from newsqa.util.diskcache_ import get_diskcache
 
 dotenv.load_dotenv()
@@ -55,15 +56,22 @@ def ensure_openai_key() -> None:
 
 
 @_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_completion")
-def get_completion(prompt: str, model: str) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
-    """Return the completion for the given prompt."""
+def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
+    """Return the completion for the given prompt and model
+    
+    `kwargs` are forwarded to the create call.
+    ."""
     assert model in MODELS["text"].values(), model
     assert model in MAX_OUTPUT_TOKENS, model
+
+    assert model not in kwargs
+    kwargs.setdefault("max_tokens", MAX_OUTPUT_TOKENS[model])
+
     client = openai.OpenAI()
-    print(f"Requesting completion for prompt of length {len(prompt):,} using model {model}.")
+    print(f"Requesting completion for prompt of length {len(prompt):,} using model {model} with keyword arguments: {dict_str(kwargs)}")
     time_start = time.monotonic()
     messages = [{"role": "user", "content": prompt}]
-    completion = client.chat.completions.create(model=model, messages=messages, max_tokens=MAX_OUTPUT_TOKENS[model])  # Ref: https://platform.openai.com/docs/api-reference/chat/create
+    completion = client.chat.completions.create(model=model, messages=messages, **kwargs)  # Ref: https://platform.openai.com/docs/api-reference/chat/create
     time_used = time.monotonic() - time_start
     print(f"Received completion for prompt of length {len(prompt):,} using model {model} in {time_used:.1f}s.")
     return completion
@@ -84,31 +92,31 @@ def get_dual_prompt_completion(system_prompt: str, user_prompt: str, model: str)
     return completion
 
 
-def get_content(prompt: str, *, model_size: str, completion: Optional[ChatCompletion] = None, log: bool = False, read_cache: bool = True) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
-    """Return the completion content for the given prompt."""
+def get_content(prompt: str, *, model_size: TextModelSizeType, completion: Optional[ChatCompletion] = None, log: bool = False, read_cache: bool = True, **kwargs) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
+    """Return the completion content for the given prompt.
+    
+    `kwargs` are forwarded to the create call.
+    """
     assert model_size in MODELS["text"], model_size
     model = MODELS["text"][model_size]
     if not completion:
+        cache_lookup_time_start = time.monotonic()
+        cache_key = get_completion.__cache_key__(prompt, model=model, **kwargs)
         if read_cache:
-            cache_lookup_time_start = time.monotonic()
-            cache_key = get_completion.__cache_key__(prompt, model=model)
             cache_key_existence_status = cache_key in _DISKCACHE
             cache_lookup_time_used = time.monotonic() - cache_lookup_time_start
             if cache_key_existence_status:
                 print(f"Found cache key for prompt of length {len(prompt):,} using model {model} in {cache_lookup_time_used:.1f}s.")
             else:
                 print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found in {cache_lookup_time_used:.1f}s.")
-            completion = get_completion(prompt, model=model)
         else:
-            cache_cleanup_time_start = time.monotonic()
-            cache_key = get_completion.__cache_key__(prompt, model=model)
             cache_key_deletion_status = _DISKCACHE.delete(cache_key)
-            cache_cleanup_time_used = time.monotonic() - cache_cleanup_time_start
+            cache_cleanup_time_used = time.monotonic() - cache_lookup_time_start
             if cache_key_deletion_status:
                 print(f"Deleted cache key for prompt of length {len(prompt):,} using model {model} in {cache_cleanup_time_used:.1f}s.")
             else:
                 print(f"Cache key for prompt of length {len(prompt):,} using model {model} was not found in {cache_cleanup_time_used:.1f}s.")
-            completion = get_completion(prompt, model=model)
+        completion = get_completion(prompt, model=model, **kwargs)
     content = completion.choices[0].message.content
     content = content.strip()
     assert content
