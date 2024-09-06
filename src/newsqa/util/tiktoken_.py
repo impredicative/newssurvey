@@ -41,8 +41,8 @@ def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dic
     return usage["num_tokens"] <= usage["max_tokens"]
 
 
-def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> str:
-    """Return a text that fits the input token limit for the given items and model.
+def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> tuple[int, str]:
+    """Return the number of items used and the text that fits the input token limit for the given items and model.
 
     The items are formatted to a string using the given formatter function.
     """
@@ -55,7 +55,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
     num_items = len(items)
     if is_input_token_usage_allowable(text, model=model, usage=usage):
         print(f"Using all {num_items:,} items of text for model {model} and encoding {encoding}, with {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
-        return text
+        return num_items, text
 
     iteration = 0
     match approach:
@@ -100,4 +100,4 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
     text_used = formatter(items[:num_items_used])
     usage = calc_input_token_usage(text_used, model=model)
     print(f"Using {num_items_used:,}/{num_items:,} items of text for model {model} and encoding {encoding}, with {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
-    return text_used
+    return num_items_used, text_used

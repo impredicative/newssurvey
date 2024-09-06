@@ -66,7 +66,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
         return prompt
 
     model_size = "large"
-    prompt = fit_items_to_input_token_limit(titles, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
+    num_titles_used, prompt = fit_items_to_input_token_limit(titles, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size=model_size, log=True, read_cache=(num_attempt == 1))

@@ -23,7 +23,7 @@ _MODEL_SIZE = [
 _MODEL = MODELS['text'][_MODEL_SIZE]
 
 
-def _combine_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[str], max_attempts: int = 3) -> str:
+def _combine_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[str], max_attempts: int = 3) -> tuple[int, str]:
     assert user_query
     assert section
 
@@ -41,9 +41,10 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
     
-    prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach='rate')
-
+    num_articles_used, prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach='rate')
+      
     for num_attempt in range(1, max_attempts + 1):
+        print(f'Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.')
         response = get_content(prompt, model_size=_MODEL_SIZE, log=True, read_cache=(num_attempt == 1))
         # Note:
         # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return. 
@@ -51,7 +52,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
         
         break
 
-    return response
+    return num_articles_used, response
 
 
 def combine_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[dict]:
@@ -76,9 +77,9 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
 
         section_articles.sort(key=lambda a: (a['section']['rating'], a['article']['rating'], a['article']['link']), reverse=True)  # Link is used as a tiebreaker for reproducibility to facilitate a cache hit and also because it often contains the article's publication date.
         section_texts = [f'{a['article']['title']}\n\n{a['section']['text']}' for a in section_articles]
-        section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_texts)
+        section_articles_used_num, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_texts)
         num_section_text_tokens = count_tokens(section_text, model=_MODEL)
-        print(f'Generated section {section_num}/{num_sections} {section!r} given {len(section_articles)}/{num_articles} articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}')
+        print(f'Generated section {section_num}/{num_sections} {section!r} from {section_articles_used_num} used articles out of {len(section_articles)} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}')
         section_text = {'section': section, 'text': section_text, 'articles': section_articles}
         section_texts.append(section_text)
         input('Press Enter to continue with next section...')
