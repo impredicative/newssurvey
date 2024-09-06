@@ -5,7 +5,7 @@ In this step of the workflow, you are given:
 
 Your task is to write a condensed version of the article text for the given section name in the context of the user's query. In a later step, you will be asked to actually write each of the named sections using a collection of condensed texts specific to each section. The user's well-being may depend on the thoroughness of your work.
 
-When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively prefer evidence, data, and results instead.
+When reading the article text, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to concrete evidence, data, and results instead.
 
 What to do:
 1. Linearly flow through the article text, preserving all necessary objective details that could be relevant to the given section name in the context of the user's query. Condense what you can without losing reproducibility or detail.

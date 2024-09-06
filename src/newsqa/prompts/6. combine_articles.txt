@@ -5,7 +5,7 @@ In this step of the workflow, you are given:
 
 As noted, your task is to comprehensively write the named section of the report using the input texts. This is in the context of the user's query. Create a coherent and integrated narrative. Your output will be final; it will be added to the report by the workflow software, and presented to the end user. The user's well-being may depend on the thoroughness of your thesis. You are permitted up to {max_output_tokens:,} output tokens which is a fairly generous number, so be exhaustive in your output.
 
-When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively prefer evidence, data, and results instead.
+When reading article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to concrete evidence, data, and results instead.
 
 Considerations:
 1. Each article's text may optionally include its publication date which should inform you of its relative recency. All else being equal, a newer article could prove slightly more relevant than an older one, although this will typically be secondary to its content.
