@@ -1,3 +1,6 @@
+import contextlib
+import io
+import re
 from types import ModuleType
 from typing import Optional
 
@@ -16,6 +19,80 @@ _MODEL_SIZE = [
     "deprecated",  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
+
+_CITATION_OPEN_CHAR, _CITATION_CLOSE_CHAR = "〚〛"
+_CITATION_GROUP_PATTERN = re.compile(_CITATION_OPEN_CHAR + r'(.*?)' + _CITATION_CLOSE_CHAR)
+
+
+def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
+    """Return true if the output text is valid, otherwise false.
+
+    A validation error is printed if the output text is invalid.
+    """
+    if text != text.strip():
+        print_error(f"The text for the section {section!r} has leading or trailing whitespace.")
+        return False
+
+    if not text:
+        print_error(f"The text for the section {section!r} is empty.")
+        return False
+    
+    if text.startswith(_CITATION_OPEN_CHAR):
+        print_error(f"The text for the section {section!r} starts with an opening bracket meant for a citation group.")
+        return False
+    
+    if text.endswith(_CITATION_CLOSE_CHAR):
+        print_error(f"The text for the section {section!r} ends with a closing bracket meant for a citation group.")
+        return False
+    
+    if f'{_CITATION_OPEN_CHAR}{_CITATION_CLOSE_CHAR}' in text:
+        print_error(f"The text for the section {section!r} contains an empty citation group.")
+        return False
+    
+    if f'{_CITATION_CLOSE_CHAR}{_CITATION_OPEN_CHAR}' in text:
+        print_error(f"The text for the section {section!r} could contain two adjacent citation groups.")
+        return False
+    
+    num_opens, num_closes = text.count(_CITATION_OPEN_CHAR), text.count(_CITATION_CLOSE_CHAR)
+    if num_opens != num_closes:
+        print_error(f"The text for the section {section!r} has {num_opens} opening brackets but {num_closes} closing brackets meant for citation groups.")
+        return False
+
+    # Ensure citation brackets are balanced.
+    # Passing example: "〚1,2,3〛"
+    # Failing example: "〚1,2,〚3〛〛"
+    balance = 0
+    for char in text:
+        if char == _CITATION_OPEN_CHAR:
+            balance += 1
+        elif char == _CITATION_CLOSE_CHAR:
+            balance -= 1
+        if balance not in (0, 1):
+            print_error(f"The text for the section {section!r} has unbalanced citation brackets.")
+            return False
+        
+    # Note: Having no citations is allowed for now.
+
+    citation_groups = _CITATION_GROUP_PATTERN.findall(text)
+    for num_citation_group, citation_group_str in enumerate(citation_groups, start=1):
+        if not citation_group_str:
+            print_error(f"The citation group #{num_citation_group} for the section {section!r} is empty.")
+            return False
+        
+        citation_group = [g.strip() for g in citation_group_str.split(",")]
+        for citation_str in citation_group:
+            if not citation_str.isdigit():
+                print_error(f"The citation {citation_str!r} in citation group #{num_citation_group} ({citation_group_str!r}) for the section {section!r} is not a number.")
+                return False
+            
+            citation = int(citation_str)
+            if not 1 <= citation <= num_articles:
+                print_error(f"The citation {citation} in citation group #{num_citation_group} ({citation_group_str!r}) for the section {section!r} is not within the expected range of 1 to {num_articles}.")
+                return False
+            
+            # Note: Duplicates are not checked because they can be managed.
+
+    return True
 
 
 def _combine_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[str], max_attempts: int = 3) -> tuple[int, str]:
@@ -44,6 +121,17 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
         # Note:
         # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return.
         # Specifying presence_penalty<0 helped produce more tokens only with presence_penalty=-2 which is risky to use.
+
+        error = io.StringIO()
+        with contextlib.redirect_stderr(error):
+            response_is_valid = _is_output_valid(response, section=section, num_articles=num_articles_used)
+        if not response_is_valid:
+            error = error.getvalue().rstrip().removeprefix("Error: ")
+            if num_attempt == max_attempts:
+                raise LanguageModelOutputStructureError(error)
+            else:
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting a section: {error}")
+                continue
 
         break
 
@@ -77,6 +165,5 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         print(f"Generated section {section_num}/{num_sections} {section!r} from {section_articles_used_num} used articles out of {len(section_articles)} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}")
         section_text = {"section": section, "text": section_text, "articles": section_articles}
         section_texts.append(section_text)
-        input("Press Enter to continue with next section...")
 
     return section_texts
