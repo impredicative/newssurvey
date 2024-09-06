@@ -3,7 +3,7 @@ from typing import Optional
 
 from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import InputError
-from newsqa.types import AnalyzedArticleGen1, SearchResult, SearchArticle, Section
+from newsqa.types import AnalyzedArticleGen1, SearchResult, SearchArticle
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
@@ -89,5 +89,5 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("generate section texts")
     sections: list[dict] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    
+
     print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section['title']}:\n {section['text']}" for num, section in enumerate(sections, start=1)]))

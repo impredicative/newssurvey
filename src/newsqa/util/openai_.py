@@ -58,7 +58,7 @@ def ensure_openai_key() -> None:
 @_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_completion")
 def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the completion for the given prompt and model
-    
+
     `kwargs` are forwarded to the create call.
     ."""
     assert model in MODELS["text"].values(), model
@@ -94,7 +94,7 @@ def get_dual_prompt_completion(system_prompt: str, user_prompt: str, model: str)
 
 def get_content(prompt: str, *, model_size: TextModelSizeType, completion: Optional[ChatCompletion] = None, log: bool = False, read_cache: bool = True, **kwargs) -> str:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the completion content for the given prompt.
-    
+
     `kwargs` are forwarded to the create call.
     """
     assert model_size in MODELS["text"], model_size
