@@ -18,7 +18,7 @@ from newsqa.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
 _MODEL_SIZE = [
     'small',  # Do not use. Does not generate citations well.
     'large',  # Good.
-    'deprecated',  # Do not use. Too expensive and older. Does not follow instructions equally well. Does not generate citations.
+    'deprecated',  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
     ][1]
 _MODEL = MODELS['text'][_MODEL_SIZE]
 
@@ -45,6 +45,9 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size=_MODEL_SIZE, log=True, read_cache=(num_attempt == 1))
+        # Note:
+        # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return. 
+        # Specifying presence_penalty<0 helped produce more tokens only with presence_penalty=-2 which is risky to use.
         
         break
 
