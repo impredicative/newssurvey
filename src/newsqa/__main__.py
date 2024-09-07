@@ -53,7 +53,7 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         response = generate_response(source=source, query=query, max_sections=max_sections, output_path=output_path, confirm=confirm)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(response)
-        print(f"Wrote response to {output_path}.")
+        print(f"Wrote response to {output_path.resolve()}.")
     except newsqa.exceptions.Error as exc:
         print_error(str(exc))
         query_sep = "\n" if (isinstance(query, str) and (len(query.splitlines()) > 1)) else " "

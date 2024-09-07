@@ -11,6 +11,7 @@ from newsqa.workflow.user.source import ensure_source_is_valid, get_source_modul
 from newsqa.workflow.llm.list_search_terms import list_search_terms
 from newsqa.workflow.llm.filter_search_results import filter_search_results
 from newsqa.workflow.llm.list_sections import list_sections
+from newsqa.workflow.llm.create_title import create_title
 from newsqa.workflow.llm.rate_articles import rate_articles
 from newsqa.workflow.llm.condense_articles import condense_articles
 from newsqa.workflow.llm.combine_articles import combine_articles
@@ -67,6 +68,11 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(section_names_str)
 
     if confirm:
+        get_confirmation("creating title")
+    title: str = create_title(user_query=query, source_module=source_module, sections=sections)
+    print(f"TITLE: {title}")
+
+    if confirm:
         get_confirmation("rating articles")
     articles_and_sections: list[AnalyzedArticleGen1] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=sections)
     print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
@@ -92,7 +98,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("generate section texts")
     section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    report_text = "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
-    print(f"REPORT:\n\n{report_text}")
+    response_text = f"{title}\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
+    print(f"REPORT:\n\n{response_text}")
 
-    return report_text
+    return response_text

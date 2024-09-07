@@ -61,7 +61,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
     def prompt_formatter(titles_truncated: list[str]) -> str:
         numbered_titles = [f"{i}. {s}" for i, s in enumerate(titles_truncated, start=1)]
         numbered_titles_str = "\n".join(numbered_titles)
-        prompt_data["task"] = PROMPTS["3. list_sections"].format(**prompt_data, num_titles=len(titles_truncated), titles=numbered_titles_str, max_sections=max_sections)
+        prompt_data["task"] = PROMPTS["3. list_sections"].format(num_titles=len(titles_truncated), titles=numbered_titles_str, max_sections=max_sections)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 

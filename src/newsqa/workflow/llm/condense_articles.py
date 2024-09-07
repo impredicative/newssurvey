@@ -50,7 +50,7 @@ def _condense_article(user_query: str, source_module: ModuleType, *, article: Se
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     assert article["text"].startswith(article["title"]), article  # If this fails, fix the parsing to ensure it is true.
 
-    prompt_data["task"] = PROMPTS["5. condense_article"].format(**prompt_data, num_sections=len(sections), sections=numbered_sections_str, section=numbered_section, article=article["text"])
+    prompt_data["task"] = PROMPTS["6. condense_article"].format(num_sections=len(sections), sections=numbered_sections_str, section=numbered_section, article=article["text"])
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
