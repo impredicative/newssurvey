@@ -3,7 +3,7 @@ from typing import Optional
 
 from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newsqa.exceptions import InputError
-from newsqa.types import AnalyzedArticleGen1, SearchResult, SearchArticle
+from newsqa.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
 from newsqa.util.input import get_confirmation
 from newsqa.util.openai_ import ensure_openai_key, MODELS
 from newsqa.workflow.user.query import ensure_query_is_valid
@@ -63,12 +63,14 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         get_confirmation("listing sections")
     sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r["title"] for r in articles], max_sections=max_sections)
     num_sections = len(sections)
-    print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]))
+    section_names_str = f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)])
+    print(section_names_str)
 
     if confirm:
         get_confirmation("rating articles")
     articles_and_sections: list[AnalyzedArticleGen1] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=sections)
     print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    print(section_names_str)
 
     if confirm:
         get_confirmation("condensing articles")
@@ -85,9 +87,12 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
     print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    print(section_names_str)
 
     if confirm:
         get_confirmation("generate section texts")
-    sections: list[dict] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    report_text = "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
+    print(f"REPORT:\n\n{report_text}")
 
-    print(f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section['title']}:\n {section['text']}" for num, section in enumerate(sections, start=1)]))
+    return report_text

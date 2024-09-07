@@ -5,7 +5,7 @@ from types import ModuleType
 
 from newsqa.config import PROMPTS
 from newsqa.exceptions import LanguageModelOutputStructureError
-from newsqa.types import AnalyzedArticleGen2
+from newsqa.types import AnalyzedArticleGen2, SectionGen1
 from newsqa.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS
 from newsqa.util.sys_ import print_warning, print_error
 from newsqa.util.textwrap import tab_indent
@@ -136,12 +136,16 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
     return num_articles_used, response
 
 
-def combine_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[dict]:
+def combine_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[SectionGen1]:
+    """Return a list of sections with texts generated from the given articles.
+    
+    The internal functions raise `LanguageModelOutputError` if the model output has an error.
+    Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+    """
     num_articles = len(articles)
     num_sections = len(sections)
     section_texts = []
 
-    # articles = copy.deepcopy(articles)
     for article in articles:
         article["article"]["rating"] = sum(article_section["rating"] for article_section in article["sections"])
 
@@ -155,13 +159,14 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
                     section_articles.append(section_article)
                     break
         assert section_articles, section
-
-        section_articles.sort(key=lambda a: (a["section"]["rating"], a["article"]["rating"], a["article"]["link"]), reverse=True)  # Link is used as a tiebreaker for reproducibility to facilitate a cache hit and also because it often contains the article's publication date.
-        section_texts = [f'{a['article']['title']}\n\n{a['section']['text']}' for a in section_articles]
-        section_articles_used_num, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_texts)
+        num_section_articles = len(section_articles)
+        section_articles.sort(key=lambda a: (a["section"]["rating"], a["article"]["rating"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
+        section_articles_texts = [f'{a['article']['title']}\n\n{a['section']['text']}' for a in section_articles]
+        num_section_articles_used, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_articles_texts)
         num_section_text_tokens = count_tokens(section_text, model=_MODEL)
-        print(f"Generated section {section_num}/{num_sections} {section!r} from {section_articles_used_num} used articles out of {len(section_articles)} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}")
-        section_text = {"section": section, "text": section_text, "articles": section_articles}
-        section_texts.append(section_text)
+        print(f"Generated section {section_num}/{num_sections} {section!r} from {num_section_articles_used} used articles out of {num_section_articles} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}")
+        section_articles_used = [a['article'] for a in section_articles[:num_section_articles_used]]
+        section_data = SectionGen1(title=section, text=section_text, articles=section_articles_used)
+        section_texts.append(section_data)
 
     return section_texts
