@@ -48,7 +48,7 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
     prompt_data["task"] = PROMPTS["1. list_search_terms"].format(**prompt_data)
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
-    response = get_content(prompt, model_size="large", log=False)
+    response = get_content(prompt, model_size="large", log=True)
 
     if is_none_response(response):
         raise LanguageModelOutputRejectionError("No search terms exist for query.")
