@@ -1,5 +1,5 @@
 # newssurvey
-**newssurvey** is a Python 3.12 application to extensively survey a question or concern using a single supported news site. The specific news site is used to conduct searches and read article texts. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
+**newssurvey** is a Python 3.12 application to extensively survey a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
 ## Approach
 Each step in this workflow corresponds to an action taken by the LLM.
