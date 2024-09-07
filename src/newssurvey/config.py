@@ -18,4 +18,4 @@ NUM_SECTIONS_MIN: int = 10  # Applies only to the `max_sections` argument. Does 
 NUM_SECTIONS_MAX: int = 100
 assert NUM_SECTIONS_MIN <= NUM_SECTIONS_DEFAULT <= NUM_SECTIONS_MAX
 PROMPTS: dict[str, str] = {p.stem: p.read_text().strip() for p in (PACKAGE_PATH / "prompts").glob("*.txt")}
-REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"}
+REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:129.0) Gecko/20100101 Firefox/129.0"}
