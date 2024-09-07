@@ -115,11 +115,13 @@ def _filter_search_results_for_search_term(user_query: str, source_module: Modul
     def insert_paged_results(**kwargs) -> None:
         assert "query" not in kwargs, kwargs
         assert "page_num" not in kwargs, kwargs
+        num_total_results = 0
         page_num = 1
         while True:
             page_results = source_module.get_search_results(query=search_term, page_num=page_num, **kwargs)
             if not page_results:
                 break
+            num_total_results += len(page_results)
             filtered_page_results = _filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
             print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with arguments: {dict_str(kwargs)}")
             if not filtered_page_results:
@@ -129,7 +131,7 @@ def _filter_search_results_for_search_term(user_query: str, source_module: Modul
                 if result_link not in results:
                     results[result_link] = result
             page_num += 1
-        print(f"Obtained {len(results)} filtered results for search term {search_term!r}.")
+        print(f"Obtained {len(results)} filtered results out of {num_total_results} total results for search term {search_term!r}.")
 
     source_module.run_searches(insert_paged_results)
 
