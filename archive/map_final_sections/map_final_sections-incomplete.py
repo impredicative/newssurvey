@@ -1,9 +1,9 @@
 from types import ModuleType
 
-from newsqa.config import PROMPTS
-from newsqa.types import AnalyzedArticleGen1
-from newsqa.util.openai_ import get_content
-from newsqa.util.scipy_ import sort_by_distance
+from newssurvey.config import PROMPTS
+from newssurvey.types import AnalyzedArticleGen1
+from newssurvey.util.openai_ import get_content
+from newssurvey.util.scipy_ import sort_by_distance
 
 
 def _map_final_sections(user_query: str, source_module: ModuleType, *, final_sections: list[str], final_section: str, draft_sections: list[str], max_attempts: int = 3) -> list[AnalyzedArticleGen1]:

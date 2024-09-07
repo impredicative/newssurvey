@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.distance import cosine, euclidean, seuclidean, sqeuclidean
 
-from newsqa.util.openai_ import get_vector
+from newssurvey.util.openai_ import get_vector
 
 
 def order_final_sections(user_query: str, sections: list[str], distance: str) -> list[str]:

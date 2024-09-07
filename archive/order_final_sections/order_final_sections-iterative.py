@@ -6,11 +6,11 @@ import random
 import re
 from types import ModuleType
 
-from newsqa.config import PROMPTS
-from newsqa.exceptions import LanguageModelOutputStructureError
-from newsqa.util.int import triangular_number
-from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error, print_warning
+from newssurvey.config import PROMPTS
+from newssurvey.exceptions import LanguageModelOutputStructureError
+from newssurvey.util.int import triangular_number
+from newssurvey.util.openai_ import get_content
+from newssurvey.util.sys_ import print_error, print_warning
 
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")

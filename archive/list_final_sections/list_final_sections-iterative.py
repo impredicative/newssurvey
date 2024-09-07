@@ -10,13 +10,13 @@ from typing import Any, Callable, Final
 
 from scipy.spatial.distance import cosine
 
-from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import LanguageModelOutputStructureError
-from newsqa.types import AnalyzedArticleGen1
-from newsqa.util.dict import dereference_dict
-from newsqa.util.itertools_ import get_batches
-from newsqa.util.openai_ import get_content, get_vector, MAX_WORKERS
-from newsqa.util.sys_ import print_error, print_warning
+from newssurvey.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newssurvey.exceptions import LanguageModelOutputStructureError
+from newssurvey.types import AnalyzedArticleGen1
+from newssurvey.util.dict import dereference_dict
+from newssurvey.util.itertools_ import get_batches
+from newssurvey.util.openai_ import get_content, get_vector, MAX_WORKERS
+from newssurvey.util.sys_ import print_error, print_warning
 
 _DRAFT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?)")
 _DRAFT_SECTION_PATTERN_WITH_COUNT = re.compile(r"(?P<num>\d+)\. (?P<draft>.+?) \(refs=(?P<count>\d+)\)")

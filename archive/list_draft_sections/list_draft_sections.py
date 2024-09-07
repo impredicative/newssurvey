@@ -3,12 +3,12 @@ import contextlib
 import io
 from types import ModuleType
 
-from newsqa.config import PROMPTS
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import AnalyzedArticleGen1, SearchArticle, SearchResult
-from newsqa.util.openai_ import get_content, MAX_WORKERS
-from newsqa.util.str import is_none_response
-from newsqa.util.sys_ import print_error
+from newssurvey.config import PROMPTS
+from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
+from newssurvey.types import AnalyzedArticleGen1, SearchArticle, SearchResult
+from newssurvey.util.openai_ import get_content, MAX_WORKERS
+from newssurvey.util.str import is_none_response
+from newssurvey.util.sys_ import print_error
 
 
 def _are_sections_valid(sections: list[str]) -> bool:
