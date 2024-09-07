@@ -4,7 +4,7 @@ When reading the article text, do not be biased by mere opinions even if they ar
 
 Do not provide a nested hierarchy of section names; emit only a flattened single-level instead of a hierarchy, even if it means duplicating a few words. Each listed section must be self-sufficient. Different articles will contribute to different sections of the report, although some overlap is also naturally expected.
 
-List one applicable section name per line that the article can contribute to. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad sections, ensure that the section names preserve a close connection to the user's input. Do not prefix the section names with bullets or anything else.
+List one applicable section name per line that the article can contribute to. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad sections, ensure that the section names preserve a close connection to the user's query. Do not prefix the section names with bullets or anything else.
 
 In case there are no pertinent sections names to list, just say "none" instead. This can happen if this particular article were to not be relevant to the user's query.
 

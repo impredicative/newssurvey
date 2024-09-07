@@ -1,4 +1,4 @@
-You are executing a sophisticated multistep {source_type} research workflow. For this, the {source_site_name} resource is used. You will be given a research query as supplied by a user, and a task description. Perform the task instructed below in the context of the user's query. Your response will be parsed by the automated workflow execution software, and forwarded to the next step in the workflow. Do not otherwise comment on the task.
+You are executing a sophisticated multistep {source_type} research workflow. For this, the {source_site_name} resource is used. You will be given a {source_type} research query as supplied by a user, and a task description. Perform the task instructed below in the context of the user's query. Your response will be parsed by the automated workflow execution software, and forwarded to the next step in the workflow. Do not otherwise comment on the task.
 
 ## Query
 For context, the user's {source_type} question or concern is below:
