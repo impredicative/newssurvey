@@ -1,5 +1,5 @@
 [project]
-name = "newsqa"
+name = "newssurvey"
 version = "0.1.0"
 description = "News Q&A using a supported news site and GPT-4"
 authors = [
@@ -32,10 +32,10 @@ universal = true
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/newsqa"]
+packages = ["src/newssurvey"]
 
 [project.scripts]
-newsqa = "newsqa.__main__:main"
+newssurvey = "newssurvey.__main__:main"
 
 [tool.rye.scripts]  # Run as "rye run <command>"
 check = { chain = ["check-lint", "check-fmt" ] }
