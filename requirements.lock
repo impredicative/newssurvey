@@ -22,18 +22,18 @@ certifi==2024.8.30
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
-    # via newsqa
+    # via newssurvey
 colorama==0.4.6 ; platform_system == 'Windows'
     # via click
     # via tqdm
 diskcache==5.6.3
-    # via newsqa
+    # via newssurvey
 distro==1.9.0
     # via openai
 h11==0.14.0
     # via httpcore
 hext==1.0.9
-    # via newsqa
+    # via newssurvey
 httpcore==1.0.5
     # via httpx
 httpx==0.27.2
@@ -44,35 +44,37 @@ idna==3.8
     # via requests
 jiter==0.5.0
     # via openai
-numpy==2.1.0
-    # via newsqa
+numpy==2.1.1
+    # via newssurvey
     # via scipy
-openai==1.43.0
-    # via newsqa
-pydantic==2.8.2
+openai==1.44.0
+    # via newssurvey
+pydantic==2.9.0
     # via openai
-pydantic-core==2.20.1
+pydantic-core==2.23.2
     # via pydantic
 python-dotenv==1.0.1
-    # via newsqa
+    # via newssurvey
 regex==2024.7.24
     # via tiktoken
 requests==2.32.3
-    # via newsqa
+    # via newssurvey
     # via tiktoken
 scipy==1.14.1
-    # via newsqa
+    # via newssurvey
 sniffio==1.3.1
     # via anyio
     # via httpx
     # via openai
 tiktoken==0.7.0
-    # via newsqa
+    # via newssurvey
 tqdm==4.66.5
     # via openai
 typing-extensions==4.12.2
     # via openai
     # via pydantic
     # via pydantic-core
+tzdata==2024.1
+    # via pydantic
 urllib3==2.2.2
     # via requests
