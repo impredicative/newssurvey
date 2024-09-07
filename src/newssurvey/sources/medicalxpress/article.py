@@ -5,8 +5,8 @@ import re
 import hext
 import requests
 
-from newsqa.util.diskcache_ import get_diskcache
-from newsqa.util.sys_ import print_error
+from newssurvey.util.diskcache_ import get_diskcache
+from newssurvey.util.sys_ import print_error
 
 from ._common import REQUEST_HEADERS, request_cooldown_lock
 

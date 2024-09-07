@@ -1,6 +1,6 @@
 from typing import Optional
 
-import newsqa.exceptions
+import newssurvey.exceptions
 
 
 def get_confirmation(next_task: Optional[str] = None) -> None:
@@ -17,4 +17,4 @@ def get_confirmation(next_task: Optional[str] = None) -> None:
             case "y" | "yes":
                 break
             case "n" | "no":
-                raise newsqa.exceptions.InputError("User canceled.")
+                raise newssurvey.exceptions.InputError("User canceled.")

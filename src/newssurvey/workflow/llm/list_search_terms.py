@@ -2,11 +2,11 @@ import contextlib
 import io
 from types import ModuleType
 
-from newsqa.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
-from newsqa.config import PROMPTS
-from newsqa.util.openai_ import get_content
-from newsqa.util.str import is_none_response
-from newsqa.util.sys_ import print_error
+from newssurvey.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
+from newssurvey.config import PROMPTS
+from newssurvey.util.openai_ import get_content
+from newssurvey.util.str import is_none_response
+from newssurvey.util.sys_ import print_error
 
 
 def is_search_terms_list_valid(terms: list[str]) -> bool:

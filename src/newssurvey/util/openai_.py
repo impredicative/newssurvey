@@ -7,9 +7,9 @@ from typing import Literal, Optional
 import dotenv
 import openai
 
-import newsqa.exceptions
-from newsqa.util.dict import dict_str
-from newsqa.util.diskcache_ import get_diskcache
+import newssurvey.exceptions
+from newssurvey.util.dict import dict_str
+from newssurvey.util.diskcache_ import get_diskcache
 
 dotenv.load_dotenv()
 
@@ -52,7 +52,7 @@ MAX_WORKERS = 16
 def ensure_openai_key() -> None:
     """Raise `EnvError` if the environment variable OPENAI_API_KEY is unavailable."""
     if not os.environ.get("OPENAI_API_KEY"):
-        raise newsqa.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
+        raise newssurvey.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
 
 
 @_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_completion")

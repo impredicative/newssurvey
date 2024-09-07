@@ -1,5 +1,5 @@
-# from newsqa.config import REQUEST_HEADERS  # Not used due to longer cooldown period required for it.
-from newsqa.util.threading_ import CooldownLock
+# from newssurvey.config import REQUEST_HEADERS  # Not used due to longer cooldown period required for it.
+from newssurvey.util.threading_ import CooldownLock
 
 # _REQUEST_COOLDOWN = 3  # Applicable to default Mozilla Firefox user agent.
 _REQUEST_COOLDOWN = 1.1  # Applicable to Yahoo! Slurp user agent.

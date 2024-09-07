@@ -1,6 +1,6 @@
 import concurrent.futures
 from types import ModuleType
-from newsqa.types import SearchArticle, SearchResult
+from newssurvey.types import SearchArticle, SearchResult
 
 
 def _get_article(source_module: ModuleType, search_result: SearchResult) -> SearchArticle:

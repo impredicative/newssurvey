@@ -3,7 +3,7 @@ from typing import Literal
 import numpy as np
 from scipy.spatial.distance import cosine, euclidean, seuclidean, sqeuclidean
 
-from newsqa.util.openai_ import EmbeddingModelSizeType, get_vector, get_vectors_concurrently
+from newssurvey.util.openai_ import EmbeddingModelSizeType, get_vector, get_vectors_concurrently
 
 DistanceType = Literal["cosine", "euclidean", "sqeuclidean", "seuclidean"]
 

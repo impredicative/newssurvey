@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 import tiktoken
 
-from newsqa.util.openai_ import MAX_INPUT_TOKENS, MAX_OUTPUT_TOKENS
+from newssurvey.util.openai_ import MAX_INPUT_TOKENS, MAX_OUTPUT_TOKENS
 
 HEADER_TOKENS_PER_MESSAGE: int = 4  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.
 FOOTER_TOKENS: int = 2  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.

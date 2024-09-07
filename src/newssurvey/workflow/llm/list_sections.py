@@ -4,13 +4,13 @@ import re
 from types import ModuleType
 from typing import Optional
 
-from newsqa.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
-from newsqa.util.openai_ import get_content, MODELS
-from newsqa.util.scipy_ import sort_by_distance
-from newsqa.util.str import is_none_response
-from newsqa.util.sys_ import print_error, print_warning
-from newsqa.util.tiktoken_ import fit_items_to_input_token_limit
+from newssurvey.config import PROMPTS, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newssurvey.exceptions import LanguageModelOutputRejectionError, LanguageModelOutputStructureError
+from newssurvey.util.openai_ import get_content, MODELS
+from newssurvey.util.scipy_ import sort_by_distance
+from newssurvey.util.str import is_none_response
+from newssurvey.util.sys_ import print_error, print_warning
+from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
 _SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 

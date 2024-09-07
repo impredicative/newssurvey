@@ -3,12 +3,12 @@ import contextlib
 import re
 from types import ModuleType
 
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchResult
-from newsqa.config import PROMPTS
-from newsqa.util.dict import dict_str
-from newsqa.util.openai_ import get_content
-from newsqa.util.sys_ import print_error, print_warning
+from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
+from newssurvey.types import SearchResult
+from newssurvey.config import PROMPTS
+from newssurvey.util.dict import dict_str
+from newssurvey.util.openai_ import get_content
+from newssurvey.util.sys_ import print_error, print_warning
 
 _RESPONSE_PATTERN = re.compile(r"\d+(?: \d+)*")
 

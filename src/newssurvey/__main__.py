@@ -4,13 +4,13 @@ from typing import Optional
 
 import click
 
-import newsqa.exceptions
-from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.newsqa import generate_response
-from newsqa.util.openai_ import ensure_openai_key
-from newsqa.util.sys_ import print_error
-from newsqa.workflow.user.query import get_query, ensure_query_is_valid
-from newsqa.workflow.user.source import get_source, get_source_module, ensure_source_is_valid
+import newssurvey.exceptions
+from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newssurvey.newssurvey import generate_response
+from newssurvey.util.openai_ import ensure_openai_key
+from newssurvey.util.sys_ import print_error
+from newssurvey.workflow.user.query import get_query, ensure_query_is_valid
+from newssurvey.workflow.user.source import get_source, get_source_module, ensure_source_is_valid
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"], "max_content_width": 120})
@@ -54,7 +54,7 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(response)
         print(f"Wrote response to {output_path.resolve()}.")
-    except newsqa.exceptions.Error as exc:
+    except newssurvey.exceptions.Error as exc:
         print_error(str(exc))
         query_sep = "\n" if (isinstance(query, str) and (len(query.splitlines()) > 1)) else " "
         print_error(f"Failed to generate response for source {source} for query:{query_sep}{query}")

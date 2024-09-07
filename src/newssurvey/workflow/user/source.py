@@ -3,9 +3,9 @@ import importlib
 import io
 from types import ModuleType
 
-import newsqa.exceptions
-from newsqa.config import NEWS_SOURCES, NEWS_SOURCE_NAMESPACE
-from newsqa.util.sys_ import print_error
+import newssurvey.exceptions
+from newssurvey.config import NEWS_SOURCES, NEWS_SOURCE_NAMESPACE
+from newssurvey.util.sys_ import print_error
 
 
 def is_source_valid(source: str) -> bool:
@@ -38,7 +38,7 @@ def ensure_source_is_valid(source: str) -> None:
     with contextlib.redirect_stderr(error):
         if not is_source_valid(source):
             error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise newsqa.exceptions.InputError(error)
+            raise newssurvey.exceptions.InputError(error)
 
 
 def get_source() -> str:

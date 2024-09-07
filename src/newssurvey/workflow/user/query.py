@@ -3,8 +3,8 @@ import io
 
 import click
 
-import newsqa.exceptions
-from newsqa.util.sys_ import print_error
+import newssurvey.exceptions
+from newssurvey.util.sys_ import print_error
 
 
 def is_query_valid(query: str) -> bool:
@@ -37,7 +37,7 @@ def ensure_query_is_valid(query: str) -> None:
     with contextlib.redirect_stderr(error):
         if not is_query_valid(query):
             error = error.getvalue().rstrip().removeprefix("Error: ")
-            raise newsqa.exceptions.InputError(error)
+            raise newssurvey.exceptions.InputError(error)
 
 
 def get_query(*, source_type: str, approach: str = "click.edit") -> str:
@@ -56,7 +56,7 @@ def get_query(*, source_type: str, approach: str = "click.edit") -> str:
                 query = click.edit(text=f"\n# Specify the {source_type} question or concern in one or more lines.\n# Lines starting with # will be skipped.", require_save=False) or ""
                 query = "\n".join(ln for ln in query.splitlines() if not ln.lstrip().startswith("#"))
                 if not query.strip():
-                    raise newsqa.exceptions.InputError("No query was provided.")  # Note: This is the only way for the user to abort the editor.
+                    raise newssurvey.exceptions.InputError("No query was provided.")  # Note: This is the only way for the user to abort the editor.
             case _:
                 assert False, approach
         query = query.strip()

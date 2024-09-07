@@ -4,10 +4,10 @@ from typing import Callable
 import hext
 import requests
 
-from newsqa.exceptions import RequestError
-from newsqa.types import SearchResult
-from newsqa.util.diskcache_ import get_diskcache
-from newsqa.util.sys_ import print_error
+from newssurvey.exceptions import RequestError
+from newssurvey.types import SearchResult
+from newssurvey.util.diskcache_ import get_diskcache
+from newssurvey.util.sys_ import print_error
 
 from ._common import REQUEST_HEADERS, request_cooldown_lock
 

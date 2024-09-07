@@ -5,12 +5,12 @@ import textwrap
 from types import ModuleType
 from typing import Optional
 
-from newsqa.config import PROMPTS
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen1, AnalyzedArticleGen2, AnalyzedSectionGen1, AnalyzedSectionGen2
-from newsqa.util.openai_ import get_content, MAX_WORKERS
-from newsqa.util.str import is_none_response
-from newsqa.util.sys_ import print_warning, print_error
+from newssurvey.config import PROMPTS
+from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
+from newssurvey.types import SearchArticle, AnalyzedArticleGen1, AnalyzedArticleGen2, AnalyzedSectionGen1, AnalyzedSectionGen2
+from newssurvey.util.openai_ import get_content, MAX_WORKERS
+from newssurvey.util.str import is_none_response
+from newssurvey.util.sys_ import print_warning, print_error
 
 
 def _is_output_valid(text: str, article_title: str, section_name: str) -> bool:

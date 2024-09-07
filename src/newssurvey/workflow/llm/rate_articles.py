@@ -5,11 +5,11 @@ import io
 import re
 from types import ModuleType
 
-from newsqa.config import PROMPTS
-from newsqa.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newsqa.types import SearchArticle, AnalyzedArticleGen1, AnalyzedSectionGen1
-from newsqa.util.openai_ import get_content, MAX_WORKERS
-from newsqa.util.sys_ import print_error, print_warning
+from newssurvey.config import PROMPTS
+from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
+from newssurvey.types import SearchArticle, AnalyzedArticleGen1, AnalyzedSectionGen1
+from newssurvey.util.openai_ import get_content, MAX_WORKERS
+from newssurvey.util.sys_ import print_error, print_warning
 
 _INPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 _OUTPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?) → (?P<rating>\d{1,3})")

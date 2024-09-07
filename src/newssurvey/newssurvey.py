@@ -1,21 +1,21 @@
 from pathlib import Path
 from typing import Optional
 
-from newsqa.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
-from newsqa.exceptions import InputError
-from newsqa.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
-from newsqa.util.input import get_confirmation
-from newsqa.util.openai_ import ensure_openai_key, MODELS
-from newsqa.workflow.user.query import ensure_query_is_valid
-from newsqa.workflow.user.source import ensure_source_is_valid, get_source_module
-from newsqa.workflow.llm.list_search_terms import list_search_terms
-from newsqa.workflow.llm.filter_search_results import filter_search_results
-from newsqa.workflow.llm.list_sections import list_sections
-from newsqa.workflow.llm.create_title import create_title
-from newsqa.workflow.llm.rate_articles import rate_articles
-from newsqa.workflow.llm.condense_articles import condense_articles
-from newsqa.workflow.llm.combine_articles import combine_articles
-from newsqa.workflow.source.get_articles import get_articles
+from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newssurvey.exceptions import InputError
+from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
+from newssurvey.util.input import get_confirmation
+from newssurvey.util.openai_ import ensure_openai_key, MODELS
+from newssurvey.workflow.user.query import ensure_query_is_valid
+from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
+from newssurvey.workflow.llm.list_search_terms import list_search_terms
+from newssurvey.workflow.llm.filter_search_results import filter_search_results
+from newssurvey.workflow.llm.list_sections import list_sections
+from newssurvey.workflow.llm.create_title import create_title
+from newssurvey.workflow.llm.rate_articles import rate_articles
+from newssurvey.workflow.llm.condense_articles import condense_articles
+from newssurvey.workflow.llm.combine_articles import combine_articles
+from newssurvey.workflow.source.get_articles import get_articles
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -30,7 +30,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     * `path`: Output file path. If given, the response is also written to this text file.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
-    If failed, a subclass of the `newsqa.exceptions.Error` exception is raised.
+    If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
     """
     ensure_openai_key()
 
