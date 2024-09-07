@@ -1,3 +1,4 @@
+import concurrent.futures
 import contextlib
 import io
 import re
@@ -6,7 +7,7 @@ from types import ModuleType
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError
 from newssurvey.types import AnalyzedArticleGen2, SectionGen1
-from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS
+from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
@@ -115,7 +116,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
-        response = get_content(prompt, model_size=_MODEL_SIZE, log=True, read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt > 1), read_cache=(num_attempt == 1))
         # Note:
         # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return.
         # Specifying presence_penalty<0 helped produce more tokens only with presence_penalty=-2 which is risky to use.
@@ -146,10 +147,11 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
     num_sections = len(sections)
     section_texts = []
 
+    # Add ratings to articles based on their sections
     for article in articles:
         article["article"]["rating"] = sum(article_section["rating"] for article_section in article["sections"])
 
-    for section_num, section in enumerate(sections, start=1):
+    def process_section(section_num: int, section: str) -> SectionGen1:
         section_articles = []
         for article in articles:
             for article_section in article["sections"]:
@@ -161,12 +163,22 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         assert section_articles, section
         num_section_articles = len(section_articles)
         section_articles.sort(key=lambda a: (a["section"]["rating"], a["article"]["rating"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
-        section_articles_texts = [f'{a['article']['title']}\n\n{a['section']['text']}' for a in section_articles]
+        section_articles_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in section_articles]
         num_section_articles_used, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_articles_texts)
+        
+        # Token counting and logging
         num_section_text_tokens = count_tokens(section_text, model=_MODEL)
         print(f"Generated section {section_num}/{num_sections} {section!r} from {num_section_articles_used} used articles out of {num_section_articles} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}")
+        
+        # Get the articles used in this section and prepare the final section data
         section_articles_used = [a['article'] for a in section_articles[:num_section_articles_used]]
         section_data = SectionGen1(title=section, text=section_text, articles=section_articles_used)
-        section_texts.append(section_data)
+        return section_data
+
+    # Use concurrent section processing
+    max_workers = min(8, MAX_WORKERS)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)]
+        section_texts = [future.result() for future in futures]
 
     return section_texts
