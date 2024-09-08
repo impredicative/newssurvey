@@ -3,11 +3,12 @@ from typing import Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newssurvey.exceptions import InputError
-from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
+from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1, SectionGen2
 from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
+from newssurvey.workflow.user.output import format_text_output
 from newssurvey.workflow.llm.list_search_terms import list_search_terms
 from newssurvey.workflow.llm.filter_search_results import filter_search_results
 from newssurvey.workflow.llm.list_sections import list_sections
@@ -99,11 +100,11 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("generate section texts")
     section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
+    # response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
     # print(f"REPORT:\n\n{response_text}")
-
     section_texts, citations = map_citations(sections=section_texts)
-    response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1)) + "\n\n" + "Citations:\n\n" + "\n\n".join([f"{c['number']}: {c['title']}\n{c['link']}" for c in citations])
+    
+    response_text: str = format_text_output(title=title, sections=section_texts, citations=citations)
     print(f"REPORT:\n\n{response_text}")
 
     return response_text
