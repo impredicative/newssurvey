@@ -5,6 +5,7 @@ import re
 import hext
 import requests
 
+from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG
 from newssurvey.util.diskcache_ import get_diskcache
 from newssurvey.util.sys_ import print_error
 
@@ -57,7 +58,7 @@ _POST_CONTENT_STARTSWITH_BLACKLIST = ()
 _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 
-@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_article_response")
+@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG['get_article_response'], tag="get_article_response")
 def _get_article_response(url: str) -> requests.Response:
     with request_cooldown_lock:
         print(f"Reading {url}.")
