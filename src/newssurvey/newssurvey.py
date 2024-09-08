@@ -3,7 +3,7 @@ from typing import Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newssurvey.exceptions import InputError
-from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1, SectionGen2
+from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
 from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
@@ -103,7 +103,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     # response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
     # print(f"REPORT:\n\n{response_text}")
     section_texts, citations = map_citations(sections=section_texts)
-    
+
     response_text: str = format_text_output(title=title, sections=section_texts, citations=citations)
     print(f"REPORT:\n\n{response_text}")
 
