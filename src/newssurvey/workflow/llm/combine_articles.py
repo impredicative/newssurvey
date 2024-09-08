@@ -6,7 +6,7 @@ from types import ModuleType
 
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError
-from newssurvey.types import AnalyzedArticleGen2, Citation, SectionGen1
+from newssurvey.types import AnalyzedArticleGen2, CitationGen1, SectionGen1
 from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
@@ -172,7 +172,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         
         # Get the articles used in this section and prepare the final section data
         section_articles_used = [a['article'] for a in section_articles[:num_section_articles_used]]
-        section_citations = [Citation(title=a["title"], link=a["link"]) for a in section_articles_used]
+        section_citations = [CitationGen1(title=a["title"], link=a["link"]) for a in section_articles_used]
         section_data = SectionGen1(title=section, text=section_text, citations=section_citations)
         return section_data
 
