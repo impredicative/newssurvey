@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Literal, Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
@@ -20,7 +19,7 @@ from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
 
 
-def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[Literal['txt', 'md']] = 'txt', confirm: bool = False) -> str:
+def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[Literal["txt", "md"]] = "txt", confirm: bool = False) -> str:
     f"""Return a response for the given source and query.
 
     The progress is printed to stdout.
@@ -48,7 +47,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         raise InputError(f"Invalid number of sections: {max_sections}. It must be between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}.")
     print(f"MAX SECTIONS: {max_sections}")
 
-    supported_output_formats = ('txt', 'md')
+    supported_output_formats = ("txt", "md")
     if output_format not in supported_output_formats:
         raise InputError(f"Invalid output format: {output_format}. It must be one of: {', '.join(supported_output_formats)}.")
     print(f"FORMAT: {output_format}")
@@ -113,9 +112,9 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"REPORT:\n\n{response_text}")
 
     match output_format:
-        case 'txt':
+        case "txt":
             response = response_text
-        case 'md':
+        case "md":
             response = format_markdown_output(title=title, sections=section_texts, citations=citations)
         case _:
             assert False, output_format  # Previously validated.
