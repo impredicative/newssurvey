@@ -1,4 +1,3 @@
-import datetime
 import itertools
 import re
 
@@ -58,7 +57,7 @@ _POST_CONTENT_STARTSWITH_BLACKLIST = ()
 _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 
-@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG['get_article_response'], tag="get_article_response")
+@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG["get_article_response"], tag="get_article_response")
 def _get_article_response(url: str) -> requests.Response:
     with request_cooldown_lock:
         print(f"Reading {url}.")
