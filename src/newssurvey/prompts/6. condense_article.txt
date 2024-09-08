@@ -15,9 +15,10 @@ What to do:
 3. Preserve the same formatting style as the article text.
 
 What not to do:
-1. Do not include unessential information that would be better off being covered by a different section of the report.
-2. Do not engage in any synthesis of new information; that will be done in a later step when the report is written. Critically assess and present information without inadvertently introducing something new.
-3. Do not start your output with the article title or the section title. You are to leave them out (but keep the publication date). The article title and section title will be prepended automatically by the workflow software.
+1. Do not start your output with the article title or the section title. You are to leave them out (but keep the publication date). The article title and section title will be prepended automatically by the workflow software.
+2. Do not include unessential information that would be better off being covered by a different section of the report.
+3. Do not engage in any synthesis of new information; that will be done in a later step when the report is written. Critically assess and present information without inadvertently introducing something new.
+4. Do not emit any markdown formatting because the output is required to be in plaintext. This means no bold or italics formatting, etc.
 
 In the unexpected case that the article does not contribute to the given section for the user's query, just say the word "none" instead. This will cause the workflow software to reject this article from further consideration for the section.
 

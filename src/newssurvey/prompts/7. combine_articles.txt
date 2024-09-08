@@ -12,9 +12,10 @@ Considerations:
 2. Articles that note one or more strong references could prove more relevant than ones that don't, although the benefit from references may vary by the unexpectedness of the claims.
 
 What not to do:
-1. Do not include unessential information that would be better off being covered by a different section of the report. Focus on what's best for the current section.
-2. Do not start your output with the section title. You are to leave it out, as it will be prepended automatically by the workflow software.
+1. Do not start your output with the section title. You are to leave it out, as it will be prepended automatically by the workflow software.
+2. Do not include unessential information that would be better off being covered by a different section of the report. Focus on what's best for the current section.
 3. Do not refer to, mention, or bring up the user's query directly in your output.
+4. Do not emit any markdown formatting because the output is required to be in plaintext. This means no bold or italics formatting, etc.
 
 ## Format
 Each condensed article will be in the multiline format:
