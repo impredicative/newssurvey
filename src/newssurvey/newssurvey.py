@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newssurvey.exceptions import InputError
@@ -8,7 +8,7 @@ from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
-from newssurvey.workflow.user.output import format_text_output
+from newssurvey.workflow.user.output import format_text_output, format_markdown_output
 from newssurvey.workflow.llm.list_search_terms import list_search_terms
 from newssurvey.workflow.llm.filter_search_results import filter_search_results
 from newssurvey.workflow.llm.list_sections import list_sections
@@ -20,7 +20,7 @@ from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
 
 
-def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
+def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[Literal['txt', 'md']] = 'txt', confirm: bool = False) -> str:
     f"""Return a response for the given source and query.
 
     The progress is printed to stdout.
@@ -29,7 +29,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
     * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.
-    * `path`: Output file path. If given, the response is also written to this text file.
+    * `output_format`: Output format. It can be `txt` (for text) or `md` (for GitHub Flavored markdown). Its default is `txt`.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
@@ -47,6 +47,11 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if not (NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX):
         raise InputError(f"Invalid number of sections: {max_sections}. It must be between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}.")
     print(f"MAX SECTIONS: {max_sections}")
+
+    supported_output_formats = ('txt', 'md')
+    if output_format not in supported_output_formats:
+        raise InputError(f"Invalid output format: {output_format}. It must be one of: {', '.join(supported_output_formats)}.")
+    print(f"FORMAT: {output_format}")
 
     print(f"MODELS: text:large={MODELS["text"]["large"]}, text:small={MODELS["text"]["small"]}, embedding:large={MODELS["embedding"]["large"]}")
 
@@ -107,4 +112,12 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     response_text: str = format_text_output(title=title, sections=section_texts, citations=citations)
     print(f"REPORT:\n\n{response_text}")
 
-    return response_text
+    match output_format:
+        case 'txt':
+            response = response_text
+        case 'md':
+            response = format_markdown_output(title=title, sections=section_texts, citations=citations)
+        case _:
+            assert False, output_format  # Previously validated.
+
+    return response
