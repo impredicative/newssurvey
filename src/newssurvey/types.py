@@ -44,9 +44,9 @@ class SectionGen1(TypedDict):
 
 
 class CitationGen2(TypedDict):
+    number: Required[int]
     title: Required[str]
     link: Required[str]
-    number: Required[int]
 
 
 class SectionGen2(TypedDict):
