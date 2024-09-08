@@ -79,9 +79,8 @@ def get_search_results(**kwargs) -> list[SearchResult]:
     results = rule.extract(html)
 
     for result in results:
-        result["title"] = result["title"].rstrip("\xa0")
-        # result['title'] = result['title'].replace('\xa0', ' ')  # This is not done because it will then also be have to be done in the article text. Keeping it causes an assertion to fail whereby the article text does not start with the article title.
-        assert result["title"] == result["title"].strip(), result
+        result["title"] = result["title"].rstrip()  # Removes observed trailing character like \xa0, \u202f, etc.
+        assert result["title"] == result["title"].strip(), (result["title"], result["title"].strip())  # If leading whitespace is observed, it may then have to be removed from both the title and the text.
 
     return results
 
