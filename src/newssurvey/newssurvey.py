@@ -16,6 +16,7 @@ from newssurvey.workflow.llm.rate_articles import rate_articles
 from newssurvey.workflow.llm.condense_articles import condense_articles
 from newssurvey.workflow.llm.combine_articles import combine_articles
 from newssurvey.workflow.source.get_articles import get_articles
+from newssurvey.workflow.source.map_citations import map_citations
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_path: Optional[Path] = None, confirm: bool = False) -> str:
@@ -99,6 +100,10 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         get_confirmation("generate section texts")
     section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
     response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
+    # print(f"REPORT:\n\n{response_text}")
+
+    section_texts, citations = map_citations(sections=section_texts)
+    response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1)) + "\n\n" + "Citations:\n\n" + "\n\n".join([f"{c['number']}: {c['title']}\n{c['link']}" for c in citations])
     print(f"REPORT:\n\n{response_text}")
 
     return response_text
