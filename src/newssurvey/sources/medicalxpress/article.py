@@ -57,7 +57,7 @@ _POST_CONTENT_STARTSWITH_BLACKLIST = ()
 _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 
-@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="_get_article_response")
+@_DISKCACHE.memoize(expire=datetime.timedelta(weeks=52).total_seconds(), tag="get_article_response")
 def _get_article_response(url: str) -> requests.Response:
     with request_cooldown_lock:
         print(f"Reading {url}.")
