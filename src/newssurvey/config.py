@@ -1,6 +1,7 @@
 import importlib.util
 from importlib.machinery import ModuleSpec
 from pathlib import Path
+import re
 
 import dotenv
 
@@ -10,6 +11,8 @@ dotenv.load_dotenv()
 PACKAGE_PATH: Path = Path(__file__).parent
 PACKAGE_NAME: str = PACKAGE_PATH.name
 
+CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR = "〚〛"
+CITATION_GROUP_PATTERN = re.compile(CITATION_OPEN_CHAR + r"(.*?)" + CITATION_CLOSE_CHAR)
 GiB = 1024**3
 NEWS_SOURCE_NAMESPACE: str = f"{PACKAGE_NAME}.sources"
 NEWS_SOURCES: dict[str, ModuleSpec] = {s.name: importlib.util.find_spec(f"{NEWS_SOURCE_NAMESPACE}.{s.name}") for s in (PACKAGE_PATH / "sources").iterdir()}  # Note: A direct import is not practicable here due to a circular import.

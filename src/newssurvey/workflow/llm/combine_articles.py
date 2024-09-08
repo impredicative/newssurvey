@@ -1,10 +1,9 @@
 import concurrent.futures
 import contextlib
 import io
-import re
 from types import ModuleType
 
-from newssurvey.config import PROMPTS
+from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
 from newssurvey.exceptions import LanguageModelOutputStructureError
 from newssurvey.types import AnalyzedArticleGen2, CitationGen1, SectionGen1
 from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_WORKERS
@@ -18,9 +17,6 @@ _MODEL_SIZE = [
     "deprecated",  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
-
-_CITATION_OPEN_CHAR, _CITATION_CLOSE_CHAR = "〚〛"
-_CITATION_GROUP_PATTERN = re.compile(_CITATION_OPEN_CHAR + r"(.*?)" + _CITATION_CLOSE_CHAR)
 
 
 def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
@@ -36,23 +32,23 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
         print_error(f"The text for the section {section!r} is empty.")
         return False
 
-    if text.startswith(_CITATION_OPEN_CHAR):
+    if text.startswith(CITATION_OPEN_CHAR):
         print_error(f"The text for the section {section!r} starts with an opening bracket meant for a citation group.")
         return False
 
-    if text.endswith(_CITATION_CLOSE_CHAR):
+    if text.endswith(CITATION_CLOSE_CHAR):
         print_error(f"The text for the section {section!r} ends with a closing bracket meant for a citation group.")
         return False
 
-    if f"{_CITATION_OPEN_CHAR}{_CITATION_CLOSE_CHAR}" in text:
+    if f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}" in text:
         print_error(f"The text for the section {section!r} contains an empty citation group.")
         return False
 
-    if f"{_CITATION_CLOSE_CHAR}{_CITATION_OPEN_CHAR}" in text:
+    if f"{CITATION_CLOSE_CHAR}{CITATION_OPEN_CHAR}" in text:
         print_error(f"The text for the section {section!r} could contain two adjacent citation groups.")
         return False
 
-    num_opens, num_closes = text.count(_CITATION_OPEN_CHAR), text.count(_CITATION_CLOSE_CHAR)
+    num_opens, num_closes = text.count(CITATION_OPEN_CHAR), text.count(CITATION_CLOSE_CHAR)
     if num_opens != num_closes:
         print_error(f"The text for the section {section!r} has {num_opens} opening brackets but {num_closes} closing brackets meant for citation groups.")
         return False
@@ -62,9 +58,9 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     # Failing example: "〚1,2,〚3〛〛"
     balance = 0
     for char in text:
-        if char == _CITATION_OPEN_CHAR:
+        if char == CITATION_OPEN_CHAR:
             balance += 1
-        elif char == _CITATION_CLOSE_CHAR:
+        elif char == CITATION_CLOSE_CHAR:
             balance -= 1
         if balance not in (0, 1):
             print_error(f"The text for the section {section!r} has unbalanced citation brackets.")
@@ -72,7 +68,7 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
 
     # Note: Having no citations is allowed for now.
 
-    citation_groups = _CITATION_GROUP_PATTERN.findall(text)
+    citation_groups = CITATION_GROUP_PATTERN.findall(text)
     for num_citation_group, citation_group_str in enumerate(citation_groups, start=1):
         if not citation_group_str:
             print_error(f"The citation group #{num_citation_group} for the section {section!r} is empty.")
