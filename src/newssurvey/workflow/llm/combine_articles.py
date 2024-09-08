@@ -135,7 +135,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
 def combine_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[SectionGen1]:
     """Return a list of sections with texts generated from the given articles.
-    
+
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
@@ -161,13 +161,13 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         section_articles.sort(key=lambda a: (a["section"]["rating"], a["article"]["rating"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
         section_articles_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in section_articles]
         num_section_articles_used, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_articles_texts)
-        
+
         # Token counting and logging
         num_section_text_tokens = count_tokens(section_text, model=_MODEL)
         print(f"Generated section {section_num}/{num_sections} {section!r} from {num_section_articles_used} used articles out of {num_section_articles} supplied articles out of {num_articles} total articles, with {num_section_text_tokens:,} tokens generated using the {_MODEL_SIZE} model {_MODEL}:\n{tab_indent(section_text)}")
-        
+
         # Get the articles used in this section and prepare the final section data
-        section_articles_used = [a['article'] for a in section_articles[:num_section_articles_used]]
+        section_articles_used = [a["article"] for a in section_articles[:num_section_articles_used]]
         section_citations = [CitationGen1(title=a["title"], link=a["link"]) for a in section_articles_used]
         section_data = SectionGen1(title=section, text=section_text, citations=section_citations)
         return section_data

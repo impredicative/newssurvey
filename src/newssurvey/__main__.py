@@ -45,8 +45,8 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
 
         assert isinstance(output_path, Path), (output_path, type(output_path))
-        assert (not output_path.is_dir()), output_path
-        assert (output_path.suffix == ".txt"), (output_path, output_path.suffix)
+        assert not output_path.is_dir(), output_path
+        assert output_path.suffix == ".txt", (output_path, output_path.suffix)
 
         assert isinstance(confirm, bool), (confirm, type(confirm))
 

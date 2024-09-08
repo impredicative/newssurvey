@@ -20,7 +20,7 @@ def _is_title_valid(title: str) -> bool:
     if title != title.strip():
         print_error(f"The title has leading or trailing whitespace: {title!r}")
         return False
-    
+
     num_lines = title.splitlines()
     if len(num_lines) != 1:
         print_error(f"The title has {num_lines} lines but a single line was expected: {title!r}")
@@ -31,7 +31,7 @@ def _is_title_valid(title: str) -> bool:
 
 def create_title(user_query: str, source_module: ModuleType, *, sections: list[str], max_attempts: int = 1) -> str:
     """Return a title using the given section names.
-    
+
     `LanguageModelOutputError` is raised if the model output has an error.
     Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
@@ -57,7 +57,7 @@ def create_title(user_query: str, source_module: ModuleType, *, sections: list[s
             else:
                 print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting title: {error}")
                 continue
-        
+
         break
 
     return response

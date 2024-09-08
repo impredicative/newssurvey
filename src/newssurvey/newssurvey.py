@@ -98,7 +98,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("generate section texts")
     section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    response_text = f"{title}\n\n" + f"Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + '\n\n' + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
+    response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
     print(f"REPORT:\n\n{response_text}")
 
     return response_text
