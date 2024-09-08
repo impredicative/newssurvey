@@ -39,15 +39,19 @@ def _are_sections_valid(numbered_sections: list[str]) -> bool:
 
         section_num = int(match["num"])
         if section_num != num:
-            print_error(f"Section number #{num} is not sequential. The section string is: {numbered_section!r}")
+            print_error(f"Section #{num} is not sequential. The section string is: {numbered_section!r}")
             return False
 
         section = match["section"]
         section_casefold = section.casefold()
         if section_casefold in seen:
-            print_error(f"Section name #{num} is a duplicate. The section string is: {numbered_section!r}")
+            print_error(f"Section #{num} is a duplicate. The section string is: {numbered_section!r}")
             return False
         seen.add(section_casefold)
+
+        if section.endswith(":"):
+            print_error(f"Section #{num} ends with a colon. The section string is: {numbered_section!r}")
+            return False
 
     return True
 
