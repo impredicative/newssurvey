@@ -1,7 +1,15 @@
-In this step of the workflow, you are given the list of section names of a research report. Your task is to write the title of the report. The title is meant to be in the context of both the user query and the section names. Having said this, if there is any sensitive aspect of the user's query, consider not mentioning it in the title unless the section names also cover it.
+In this step of the workflow, you are given the list of section names of a research report. Your task is to write the title of the report. The title is meant to be in the context of both the user query and the section names.
 
+What to do:
+1. All else being equal, a shorter title that doesn't overpromise is better than a longer one that does.
+
+What not to do:
+1. If there is any sensitive aspect of the user's query, consider not mentioning it in the title unless the section names also cover it.
+
+## Format
 The title is expected in a single line. It will be the only line of your output.
 
+## Data
 The list of section names is:
 
 {sections}
