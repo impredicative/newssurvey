@@ -45,7 +45,7 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
 
     def repl(match: re.Match) -> str:
         """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers and separate hover tooltips."""
-        return "[" + ",".join(f'<a href="#citation-{citation_num}" class="citation-link">{citation_num}</a>' f'<a href="{citation_map[citation_num]["link"]}" class="citation-tooltip" target="_blank">{citation_map[citation_num]["title"]}</a>' for citation_num in match.group(1).split(",")) + "]"
+        return "<sup>[</sup>" + "<sup>,</sup>".join(f'<a href="#citation-{citation_num}" class="citation-link"><sup>{citation_num}</sup></a>' f'<a href="{citation_map[citation_num]["link"]}" class="citation-tooltip" target="_blank">{citation_map[citation_num]["title"]}</a>' for citation_num in match.group(1).split(",")) + "<sup>]</sup>"
 
     def format_section_text(text: str) -> str:
         """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
