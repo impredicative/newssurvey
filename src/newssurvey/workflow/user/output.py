@@ -35,7 +35,7 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
     return text
 
 
-def format_html_output(title: str, sections: list[dict], citations: list[dict]) -> str:
+def format_html_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> str:
     """Return the HTML string output for the given sections and citations."""
     citation_map = {str(citation["number"]): citation for citation in citations}
 
