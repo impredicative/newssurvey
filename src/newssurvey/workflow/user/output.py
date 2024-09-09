@@ -53,6 +53,55 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            font-family: 'Roboto', sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }}
+        h1, h2 {{
+            font-family: 'Merriweather', serif;
+            color: #333;
+        }}
+        h1 {{
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }}
+        h2 {{
+            font-size: 1.75em;
+            margin-top: 2em;
+        }}
+        p {{
+            font-size: 1.1em;
+        }}
+        ol {{
+            padding-left: 20px;
+        }}
+        a {{
+            color: #1a73e8;
+            text-decoration: none;
+        }}
+        a:hover {{
+            text-decoration: underline;
+        }}
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {{
+            body {{
+                margin: 20px;
+            }}
+            h1 {{
+                font-size: 2em;
+            }}
+            h2 {{
+                font-size: 1.5em;
+            }}
+            ol {{
+                padding-left: 15px;
+            }}
+        }}
+    </style>
 </head>
 <body>
 
