@@ -34,14 +34,14 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         ensure_source_is_valid(source)
         source_module = get_source_module(source)
 
-        query_type = 'arg'
+        query_type = "arg"
         if not query:
             query = get_query(source_type=source_module.SOURCE_TYPE)
-            query_type = 'prompt'
+            query_type = "prompt"
         elif (query_path := Path(query)).is_file():
             assert query_path.exists()
             query = query_path.read_text().strip()
-            query_type = 'file'
+            query_type = "file"
         ensure_query_is_valid(query)
 
         assert isinstance(max_sections, int), (max_sections, type(max_sections))
@@ -52,7 +52,7 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         output_path_suffix = output_path.suffix
         assert output_path_suffix in (".txt", ".md", ".html", ".json"), (output_path, output_path_suffix)
         output_format = output_path_suffix.lstrip(".")
-        if (query_type == 'file') and (query_path.resolve() == output_path.resolve()):
+        if (query_type == "file") and (query_path.resolve() == output_path.resolve()):
             print_error(f"Output file path {str(output_path.resolve())!r} is the same as the query file path {str(query_path.resolve())!r}.")
             exit(1)
 
