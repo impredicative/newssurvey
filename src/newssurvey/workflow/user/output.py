@@ -26,7 +26,7 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
     contents.append(f"{len(contents) + 1}. [References](#references)")
 
     def repl(match: re.Match) -> str:
-        """Replace the plain citation numbers in the citation group with linked citation numbers."""
+        """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers."""
         return "[" + ",".join(f"[{citation_num}](#citation-{citation_num})" for citation_num in match.group(1).split(",")) + "]"
 
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
@@ -41,10 +41,17 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
     contents.append('<li><a href="#references">References</a></li>')
 
     def repl(match: re.Match) -> str:
-        """Replace the plain citation numbers in the citation group with linked citation numbers."""
+        """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers."""
         return "[" + ",".join(f'<a href="#citation-{citation_num}">{citation_num}</a>' for citation_num in match.group(1).split(",")) + "]"
 
-    sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n<p>{CITATION_GROUP_PATTERN.sub(repl, section["text"])}</p>' for num, section in enumerate(sections, start=1)]
+    def format_section_text(text: str) -> str:
+        """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
+        paragraphs = text.split('\n\n')
+        wrapped_paragraphs = [f'<p>{CITATION_GROUP_PATTERN.sub(repl, paragraph.strip())}</p>' for paragraph in paragraphs]
+        return '\n'.join(wrapped_paragraphs)
+
+    sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}' for num, section in enumerate(sections, start=1)]
+
     references_html = [f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}">{citation["title"]}</a></li>' for citation in citations]
 
     html_output = f"""
