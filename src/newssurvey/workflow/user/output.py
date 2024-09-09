@@ -28,7 +28,7 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
 
     def repl(match: re.Match) -> str:
         """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers."""
-        return "[" + ",".join(f"[{citation_num}](#citation-{citation_num})" for citation_num in match.group(1).split(",")) + "]"
+        return "<sup>[" + ",".join(f"[{citation_num}](#citation-{citation_num})" for citation_num in match.group(1).split(",")) + "]</sup>"
 
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
 
