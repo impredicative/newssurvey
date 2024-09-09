@@ -26,7 +26,7 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
 
     def repl(match: re.Match) -> str:
         """Replace the plain citation numbers in the citation group with linked citation numbers."""
-        return "[" + ",".join(f'[{citation_num}](#citation-{citation_num})' for citation_num in match.group(1).split(",")) + "]"
+        return "[" + ",".join(f"[{citation_num}](#citation-{citation_num})" for citation_num in match.group(1).split(",")) + "]"
 
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
 
@@ -34,33 +34,18 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
     return text
 
 
-import re
-
 def format_html_output(title: str, sections: list[dict], citations: list[dict]) -> str:
     """Return the HTML output for the given sections and citations."""
-    
-    # Generate the contents section with HTML links
     contents = [f'<li><a href="#section-{num}">{section["title"]}</a></li>' for num, section in enumerate(sections, start=1)]
-    contents.append(f'<li><a href="#references">References</a></li>')
-    
-    # Function to replace citation group patterns with linked citation numbers
+    contents.append('<li><a href="#references">References</a></li>')
+
     def repl(match: re.Match) -> str:
         """Replace the plain citation numbers in the citation group with linked citation numbers."""
         return "[" + ",".join(f'<a href="#citation-{citation_num}">{citation_num}</a>' for citation_num in match.group(1).split(",")) + "]"
 
-    # Process sections, replacing the citations in text
-    sections_html = [
-        f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n<p>{CITATION_GROUP_PATTERN.sub(repl, section["text"])}</p>'
-        for num, section in enumerate(sections, start=1)
-    ]
-    
-    # Process the references section
-    references_html = [
-        f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}">{citation["title"]}</a></li>'
-        for citation in citations
-    ]
-    
-    # Combine all parts into the final HTML string
+    sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n<p>{CITATION_GROUP_PATTERN.sub(repl, section["text"])}</p>' for num, section in enumerate(sections, start=1)]
+    references_html = [f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}">{citation["title"]}</a></li>' for citation in citations]
+
     html_output = f"""
 <!DOCTYPE html>
 <html lang="en">
