@@ -53,7 +53,7 @@ def _is_response_valid(response: str, num_search_results: int) -> bool:
             return False
 
         if number in seen:
-            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {response!r}")
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {responses!r}")
             return False
         seen.add(number)
 
@@ -83,7 +83,7 @@ def _filter_search_results(user_query: str, source_module: ModuleType, *, result
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size="small", log=False)
+        response = get_content(prompt, model_size="small", log=(num_attempt > 1), read_cache=(num_attempt == 1))
 
         if response == "0":
             return []
