@@ -35,10 +35,10 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         ensure_source_is_valid(source)
         source_module = get_source_module(source)
 
-        query_type = "arg"
+        query_origin = "arg"
         if not query:
             query = get_query(source_type=source_module.SOURCE_TYPE)
-            query_type = "prompt"
+            query_origin = "prompt"
         elif (query_path := Path(query)).is_file():
             assert query_path.exists()
             query = query_path.read_text().strip()
