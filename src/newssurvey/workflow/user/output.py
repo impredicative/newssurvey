@@ -2,9 +2,10 @@ import datetime
 import json
 import re
 
-from newssurvey.config import CITATION_GROUP_PATTERN
+from newssurvey.config import CITATION_GROUP_PATTERN, PROMPTS
 from newssurvey.types import SectionGen2, CitationGen2
 
+_DISCLAIMER = PROMPTS['disclaimer']
 
 def _get_date_string() -> str:
     """Return the current date as a string."""
@@ -16,7 +17,7 @@ def format_text_output(title: str, sections: list[SectionGen2], citations: list[
     """Return the text string output for the given sections and citations."""
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(r"[\1]", section["text"])) for section in sections]  # Uses standard brackets for citations.
 
-    text = f"{title}\n\n" + f"{_get_date_string()}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section['title']}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}: {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + "References:\n\n" + "\n\n".join([f"{c['number']}: {c['title']}\n{c['link']}" for c in citations])
+    text = f"{title}\n\n" + f"{_get_date_string()}\n\n{_DISCLAIMER}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section['title']}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}: {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + "References:\n\n" + "\n\n".join([f"{c['number']}: {c['title']}\n{c['link']}" for c in citations])
     return text
 
 
@@ -31,7 +32,7 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
 
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
 
-    text = f"# {title}\n\n" + f"{_get_date_string()}\n\n" + "## Contents\n" + "\n".join(contents) + "\n\n" + "\n\n".join(f'## <a id="section-{num}"></a>{num}. {s["title"]}\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + '## <a id="references"></a>References\n\n' + "\n\n".join([f'<a id="citation-{c["number"]}"></a>{c["number"]}. [{c["title"]}]({c["link"]})' for c in citations])
+    text = f"# {title}\n\n" + f"{_get_date_string()}\n\n_{_DISCLAIMER}_\n\n" + "## Contents\n" + "\n".join(contents) + "\n\n" + "\n\n".join(f'## <a id="section-{num}"></a>{num}. {s["title"]}\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + '## <a id="references"></a>References\n\n' + "\n\n".join([f'<a id="citation-{c["number"]}"></a>{c["number"]}. [{c["title"]}]({c["link"]})' for c in citations])
     return text
 
 
@@ -141,6 +142,7 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
 
 <h1>{title}</h1>
 <p>{_get_date_string()}</p>
+<p><em>{_DISCLAIMER}</em></p>
 
 <h2>Contents</h2>
 <ol>
@@ -166,6 +168,7 @@ def format_json_output(title: str, sections: list[SectionGen2], citations: list[
     data = {
         "title": title,
         "date": _get_date_string(),
+        "disclaimer": _DISCLAIMER,
         "sections": [{"number": num, "title": section["title"], "text": section["text"]} for num, section in enumerate(sections, start=1)],
         "citations": [{"number": citation["number"], "title": citation["title"], "link": citation["link"]} for citation in citations],
     }
