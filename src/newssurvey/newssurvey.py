@@ -7,7 +7,7 @@ from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
-from newssurvey.workflow.user.output import format_text_output, format_markdown_output, format_html_output
+from newssurvey.workflow.user.output import format_text_output, format_markdown_output, format_html_output, format_json_output
 from newssurvey.workflow.llm.list_search_terms import list_search_terms
 from newssurvey.workflow.llm.filter_search_results import filter_search_results
 from newssurvey.workflow.llm.list_sections import list_sections
@@ -28,7 +28,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
     * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.
-    * `output_format`: Output format. It can be `txt` (for text), `md` (for GitHub Flavored markdown), or `html` (for HTML). Its default is `txt`.
+    * `output_format`: Output format. It can be `txt` (for text), `md` (for GitHub Flavored markdown), `html`, or `json`. Its default is `txt`.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
@@ -47,7 +47,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
         raise InputError(f"Invalid number of sections: {max_sections}. It must be between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}.")
     print(f"MAX SECTIONS: {max_sections}")
 
-    supported_output_formats = ("txt", "md", "html")
+    supported_output_formats = ("txt", "md", "html", "json")
     if output_format not in supported_output_formats:
         raise InputError(f"Invalid output format: {output_format}. It must be one of: {', '.join(supported_output_formats)}.")
     print(f"FORMAT: {output_format}")
@@ -114,10 +114,10 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     match output_format:
         case "txt":
             response = response_text
-        case "md" | "html":
-            formatter = {"md": format_markdown_output, "html": format_html_output}[output_format]
+        case "md" | "html" | "json":
+            formatter = {"md": format_markdown_output, "html": format_html_output, "json": format_json_output}[output_format]
             response = formatter(title=title, sections=section_texts, citations=citations)
         case _:
-            assert False, output_format  # Previously validated.
+            assert False, output_format  # Previously validated to not happen.
 
     return response

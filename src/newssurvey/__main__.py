@@ -17,7 +17,7 @@ from newssurvey.workflow.user.source import get_source, get_source_module, ensur
 @click.option("--source", "-s", default=None, help="Name of supported news source. If not given, the user is prompted for it.")
 @click.option("--query", "-q", default=None, help="Question or concern answerable by the news source. If a path to a file, the file text is read as text. If not given, the user is prompted for it.")
 @click.option("--max-sections", "-m", default=NUM_SECTIONS_DEFAULT, type=click.IntRange(NUM_SECTIONS_MIN, NUM_SECTIONS_MAX), help=f"Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.")
-@click.option("--output-path", "-o", required=True, type=Path, help="Output file path with extension txt (for text), md (for GitHub Flavored markdown), or html (for HTML). The response is written to this file except if there is an error.")
+@click.option("--output-path", "-o", required=True, type=Path, help="Output file path with extension txt (for text), md (for GitHub Flavored markdown), html, or json. The response is written to this file except if there is an error.")
 @click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
 def main(source: Optional[str], query: Optional[str], max_sections: int, output_path: Path, confirm: bool) -> None:
     """Generate and write a response to a question or concern using a supported news source.
@@ -47,7 +47,7 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         assert isinstance(output_path, Path), (output_path, type(output_path))
         assert not output_path.is_dir(), output_path
         output_path_suffix = output_path.suffix
-        assert output_path_suffix in (".txt", ".md", ".html"), (output_path, output_path_suffix)
+        assert output_path_suffix in (".txt", ".md", ".html", ".json"), (output_path, output_path_suffix)
         output_format = output_path_suffix.lstrip(".")
 
         assert isinstance(confirm, bool), (confirm, type(confirm))
