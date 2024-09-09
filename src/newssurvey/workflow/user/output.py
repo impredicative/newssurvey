@@ -38,17 +38,13 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
 def format_html_output(title: str, sections: list[dict], citations: list[dict]) -> str:
     """Return the HTML string output for the given sections and citations."""
     citation_map = {str(citation["number"]): citation for citation in citations}
-    
+
     contents = [f'<li><a href="#section-{num}">{section["title"]}</a></li>' for num, section in enumerate(sections, start=1)]
     contents.append('<li><a href="#references">References</a></li>')
 
     def repl(match: re.Match) -> str:
         """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers and separate hover tooltips."""
-        return "[" + ",".join(
-            f'<a href="#citation-{citation_num}" class="citation-link">{citation_num}</a>'
-            f'<span class="citation-tooltip" data-link="{citation_map[citation_num]["link"]}">{citation_map[citation_num]["title"]}</span>'
-            for citation_num in match.group(1).split(",")
-        ) + "]"
+        return "[" + ",".join(f'<a href="#citation-{citation_num}" class="citation-link">{citation_num}</a>' f'<a href="{citation_map[citation_num]["link"]}" class="citation-tooltip" target="_blank">{citation_map[citation_num]["title"]}</a>' for citation_num in match.group(1).split(",")) + "]"
 
     def format_section_text(text: str) -> str:
         """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
@@ -100,16 +96,13 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
             text-decoration: underline;
         }}
 
-        /* Citation hover tooltip */
         .citation-link {{
             color: #1a73e8;
             text-decoration: none;
         }}
-
         .citation-link:hover + .citation-tooltip {{
             display: inline-block;
         }}
-
         .citation-tooltip {{
             display: none;
             position: absolute;
@@ -123,7 +116,6 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
             cursor: pointer;
             color: #1a73e8;
         }}
-
         .citation-tooltip:hover {{
             display: inline-block;
         }}
@@ -144,18 +136,6 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
             }}
         }}
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {{
-            document.querySelectorAll('.citation-tooltip').forEach(tooltip => {{
-                tooltip.addEventListener('click', (e) => {{
-                    const link = tooltip.getAttribute('data-link');
-                    if (link) {{
-                        window.open(link, '_blank');
-                    }}
-                }});
-            }});
-        }});
-    </script>
 </head>
 <body>
 
