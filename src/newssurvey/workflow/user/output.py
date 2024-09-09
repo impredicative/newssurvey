@@ -32,3 +32,62 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
 
     text = f"# {title}\n\n" + f"{_get_date_string()}\n\n" + "## Contents\n" + "\n".join(contents) + "\n\n" + "\n\n".join(f'## <a id="section-{num}"></a>{num}. {s["title"]}\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + '## <a id="references"></a>References\n\n' + "\n\n".join([f'<a id="citation-{c["number"]}"></a>{c["number"]}. [{c["title"]}]({c["link"]})' for c in citations])
     return text
+
+
+import re
+
+def format_html_output(title: str, sections: list[dict], citations: list[dict]) -> str:
+    """Return the HTML output for the given sections and citations."""
+    
+    # Generate the contents section with HTML links
+    contents = [f'<li><a href="#section-{num}">{section["title"]}</a></li>' for num, section in enumerate(sections, start=1)]
+    contents.append(f'<li><a href="#references">References</a></li>')
+    
+    # Function to replace citation group patterns with linked citation numbers
+    def repl(match: re.Match) -> str:
+        """Replace the plain citation numbers in the citation group with linked citation numbers."""
+        return "[" + ",".join(f'<a href="#citation-{citation_num}">{citation_num}</a>' for citation_num in match.group(1).split(",")) + "]"
+
+    # Process sections, replacing the citations in text
+    sections_html = [
+        f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n<p>{CITATION_GROUP_PATTERN.sub(repl, section["text"])}</p>'
+        for num, section in enumerate(sections, start=1)
+    ]
+    
+    # Process the references section
+    references_html = [
+        f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}">{citation["title"]}</a></li>'
+        for citation in citations
+    ]
+    
+    # Combine all parts into the final HTML string
+    html_output = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+</head>
+<body>
+
+<h1>{title}</h1>
+<p>{_get_date_string()}</p>
+
+<h2>Contents</h2>
+<ol>
+    {'\n    '.join(contents)}
+</ol>
+
+{'\n\n'.join(sections_html)}
+
+<h2 id="references">References</h2>
+<ol>
+    {'\n    '.join(references_html)}
+</ol>
+
+</body>
+</html>
+    """
+
+    return html_output
