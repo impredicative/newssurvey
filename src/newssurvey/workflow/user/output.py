@@ -54,7 +54,7 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
 
     sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}' for num, section in enumerate(sections, start=1)]
 
-    references_html = [f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}">{citation["title"]}</a></li>' for citation in citations]
+    references_html = [f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}" target="_blank">{citation["title"]}</a></li>' for citation in citations]
 
     html_output = f"""
 <!DOCTYPE html>
