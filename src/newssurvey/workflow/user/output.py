@@ -46,9 +46,9 @@ def format_html_output(title: str, sections: list[dict], citations: list[dict]) 
 
     def format_section_text(text: str) -> str:
         """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
-        paragraphs = text.split('\n\n')
-        wrapped_paragraphs = [f'<p>{CITATION_GROUP_PATTERN.sub(repl, paragraph.strip())}</p>' for paragraph in paragraphs]
-        return '\n'.join(wrapped_paragraphs)
+        paragraphs = text.split("\n\n")
+        wrapped_paragraphs = [f"<p>{CITATION_GROUP_PATTERN.sub(repl, paragraph.strip())}</p>" for paragraph in paragraphs]
+        return "\n".join(wrapped_paragraphs)
 
     sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}' for num, section in enumerate(sections, start=1)]
 
