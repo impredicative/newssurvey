@@ -1,6 +1,6 @@
 from typing import Optional
 
-from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
+from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX, OUTPUT_FORMAT_DEFAULT
 from newssurvey.exceptions import InputError
 from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1, Response
 from newssurvey.util.input import get_confirmation
@@ -19,7 +19,7 @@ from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
 
 
-def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = "txt", confirm: bool = False) -> Response:
+def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = OUTPUT_FORMAT_DEFAULT, confirm: bool = False) -> Response:
     f"""Return a response for the given source and query.
 
     The returned response contains the attributes: format, title, response.
@@ -30,7 +30,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
     * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.
-    * `output_format`: Output format. It can be `txt` (text), `md` (markdown), `gfm.md` (GitHub Flavored markdown), `html`, or `json`. Its default is `txt`.
+    * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is {OUTPUT_FORMAT_DEFAULT}.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.

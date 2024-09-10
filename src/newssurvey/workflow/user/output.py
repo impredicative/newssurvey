@@ -6,7 +6,7 @@ from newssurvey.config import CITATION_GROUP_PATTERN, PROMPTS
 from newssurvey.types import SectionGen2, CitationGen2
 
 _DISCLAIMER = PROMPTS["disclaimer"]
-SUPPORTED_OUTPUT_FORMATS: list[str] = ["txt", "md", "gfm.md", "html", "json"]
+SUPPORTED_OUTPUT_FORMATS: list[str] = ["txt", "gfm.md", "md", "html", "json"]  # Note: 'gfm.md' must remain before 'md' to avoid matching 'md' first.
 
 
 def _get_date_string() -> str:

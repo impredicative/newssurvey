@@ -8,7 +8,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-
+CWD: Path = Path.cwd()
 PACKAGE_PATH: Path = Path(__file__).parent
 PACKAGE_NAME: str = PACKAGE_PATH.name
 
@@ -23,5 +23,6 @@ NUM_SECTIONS_DEFAULT: int = 100
 NUM_SECTIONS_MIN: int = 10  # Applies only to the `max_sections` argument. Does not apply to LLM output.
 NUM_SECTIONS_MAX: int = 100
 assert NUM_SECTIONS_MIN <= NUM_SECTIONS_DEFAULT <= NUM_SECTIONS_MAX
+OUTPUT_FORMAT_DEFAULT: str = "txt"
 PROMPTS: dict[str, str] = {p.stem: p.read_text().strip() for p in (PACKAGE_PATH / "prompts").glob("*.txt")}
 REQUEST_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:129.0) Gecko/20100101 Firefox/129.0"}
