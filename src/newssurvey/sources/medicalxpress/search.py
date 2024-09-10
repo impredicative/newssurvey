@@ -3,7 +3,7 @@ from typing import Callable
 import hext
 import requests
 
-from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG
+from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG, CACHE_SIZES_GiB
 from newssurvey.exceptions import RequestError
 from newssurvey.types import SearchResult
 from newssurvey.util.diskcache_ import get_diskcache
@@ -11,7 +11,7 @@ from newssurvey.util.sys_ import print_error
 
 from ._common import REQUEST_HEADERS, request_cooldown_lock
 
-_DISKCACHE = get_diskcache(__file__)
+_DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["small"])
 _HEXT = hext.Rule("""
     <h2 class="mb-2">
       <a href:link class="news-link" @text:title />

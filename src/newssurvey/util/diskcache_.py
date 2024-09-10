@@ -3,14 +3,14 @@ from pathlib import Path
 
 import diskcache
 
-from newssurvey.config import GiB, PACKAGE_PATH
+from newssurvey.config import CACHE_SIZES_GiB, GiB, PACKAGE_PATH
 
 
 DISKCACHE_ROOT_PATH = PACKAGE_PATH / ".diskcache"
 
 
 @cache
-def get_diskcache(file_path: str, *, size_gib: int = 1) -> diskcache.FanoutCache:
+def get_diskcache(file_path: str, *, size_gib: int = CACHE_SIZES_GiB["small"]) -> diskcache.FanoutCache:
     """Return a diskcache object for the given file path.
 
     `file_path` should typically be `__file__`.

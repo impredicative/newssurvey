@@ -5,8 +5,9 @@ import re
 from newssurvey.config import CITATION_GROUP_PATTERN, PROMPTS
 from newssurvey.types import SectionGen2, CitationGen2
 
-_DISCLAIMER = PROMPTS['disclaimer']
+_DISCLAIMER = PROMPTS["disclaimer"]
 SUPPORTED_OUTPUT_FORMATS: list[str] = ["txt", "md", "gfm.md", "html", "json"]
+
 
 def _get_date_string() -> str:
     """Return the current date as a string."""
@@ -195,7 +196,7 @@ def format_output(*, title: str, sections: list[SectionGen2], citations: list[Ci
     """Return the formatted output for the given sections and citations in the specified format."""
     if output_format not in SUPPORTED_OUTPUT_FORMATS:
         raise ValueError(f"Unsupported output format: {output_format!r}")
-    
+
     match output_format:
         case "txt":
             return format_text_output(title, sections, citations, **kwargs)

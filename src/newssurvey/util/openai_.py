@@ -6,7 +6,7 @@ from typing import Literal, Optional
 import dotenv
 import openai
 
-from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG
+from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG, CACHE_SIZES_GiB
 import newssurvey.exceptions
 from newssurvey.util.dict import dict_str
 from newssurvey.util.diskcache_ import get_diskcache
@@ -21,7 +21,7 @@ CreateEmbeddingResponse = openai.types.create_embedding_response.CreateEmbedding
 _COLOR_GRAY = "\033[0;90m"
 _COLOR_RESET = "\033[0m"
 
-_DISKCACHE = get_diskcache(__file__, size_gib=10)
+_DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["medium"])
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
         "deprecated": "gpt-4-0125-preview",  # Note: Can require more prompt tuning for successful use. gpt-4-turbo-2024-04-09 is worse.

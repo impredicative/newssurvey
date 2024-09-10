@@ -4,13 +4,13 @@ import re
 import hext
 import requests
 
-from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG
+from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG, CACHE_SIZES_GiB
 from newssurvey.util.diskcache_ import get_diskcache
 from newssurvey.util.sys_ import print_error
 
 from ._common import REQUEST_HEADERS, request_cooldown_lock
 
-_DISKCACHE = get_diskcache(__file__)
+_DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["large"])
 _HEXT = hext.Rule("""
     <html>
         <body>

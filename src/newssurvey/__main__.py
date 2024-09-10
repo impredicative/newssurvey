@@ -50,7 +50,7 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
 
         assert isinstance(output_path, Path), (output_path, type(output_path))
         assert not output_path.is_dir(), output_path
-        output_path_suffix = ''.join(output_path.suffixes)  # Note: `output_path.suffix`` is not used because it returns only the last suffix.
+        output_path_suffix = "".join(output_path.suffixes)  # Note: `output_path.suffix`` is not used because it returns only the last suffix.
         supported_output_suffixes = [f".{suffix}" for suffix in SUPPORTED_OUTPUT_FORMATS]
         if output_path_suffix not in supported_output_suffixes:
             print_error(f"Output file path suffix {output_path_suffix!r} is not supported. Supported suffixes are: {', '.join(supported_output_suffixes)}")
