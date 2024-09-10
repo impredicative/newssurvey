@@ -2,7 +2,7 @@ from typing import Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX
 from newssurvey.exceptions import InputError
-from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1
+from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1, Response
 from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
@@ -19,8 +19,10 @@ from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
 
 
-def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = "txt", confirm: bool = False) -> str:
+def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = "txt", confirm: bool = False) -> Response:
     f"""Return a response for the given source and query.
+
+    The returned response contains the attributes: format, title, response.
 
     The progress is printed to stdout.
 
@@ -111,10 +113,11 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"REPORT:\n\n{response_text}")
 
     if output_format == "txt":
-        response = response_text
+        pass
     elif output_format in SUPPORTED_OUTPUT_FORMATS:
-        response = format_output(title=title, sections=section_texts, citations=citations, output_format=output_format)
+        response_text: str = format_output(title=title, sections=section_texts, citations=citations, output_format=output_format)
     else:
         raise ValueError(f"Unsupported output format: {output_format!r}")
 
+    response: Response = Response(format=output_format, title=title, response=response_text)
     return response

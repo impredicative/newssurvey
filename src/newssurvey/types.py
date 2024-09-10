@@ -1,3 +1,4 @@
+import dataclasses
 from typing import NotRequired, Required, TypedDict
 
 
@@ -52,3 +53,10 @@ class CitationGen2(TypedDict):
 class SectionGen2(TypedDict):
     title: Required[str]
     text: Required[str]
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class Response:
+    format: str  # Included to facilitate writing the response as text or binary.
+    title: str  # Included to facilitate writing the response to file with the title in its name.
+    response: str
