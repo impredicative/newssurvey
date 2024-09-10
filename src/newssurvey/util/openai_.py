@@ -6,7 +6,7 @@ from typing import Literal, Optional
 import dotenv
 import openai
 
-from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG, CACHE_SIZES_GiB
+from newssurvey.config import CACHE_EXPIRATION_BY_TAG, CACHE_SIZES_GiB
 import newssurvey.exceptions
 from newssurvey.util.dict import dict_str
 from newssurvey.util.diskcache_ import get_diskcache
@@ -55,7 +55,7 @@ def ensure_openai_key() -> None:
         raise newssurvey.exceptions.EnvError("The environment variable OPENAI_API_KEY is unavailable. It can optionally be defined in an .env file.")
 
 
-@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG["get_completion"], tag="get_completion")
+@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_completion"], tag="get_completion")
 def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the completion for the given prompt and model
 
@@ -111,7 +111,7 @@ def get_content(prompt: str, *, model_size: TextModelSizeType, completion: Optio
     return content
 
 
-@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG["get_embedding"], tag="get_embedding")
+@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_embedding"], tag="get_embedding")
 def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the embedding response for the given text."""
     assert model in MODELS["embedding"].values(), model

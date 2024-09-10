@@ -12,7 +12,7 @@ dotenv.load_dotenv()
 PACKAGE_PATH: Path = Path(__file__).parent
 PACKAGE_NAME: str = PACKAGE_PATH.name
 
-CACHE_EXPIRATION_DEFAULTS_BY_TAG: dict[str, int] = {tag: datetime.timedelta(weeks=weeks).total_seconds() for tag, weeks in {"get_search_response": 1, "get_article_response": 52, "get_completion": 52, "get_embedding": 52}.items()}
+CACHE_EXPIRATION_BY_TAG: dict[str, int] = {tag: datetime.timedelta(weeks=weeks).total_seconds() for tag, weeks in {"get_search_response": 1, "get_article_response": 52, "get_completion": 52, "get_embedding": 52}.items()}
 CACHE_SIZES_GiB: dict[str, int] = {"small": 1, "medium": 5, "large": 10}
 CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR = "〚〛"
 CITATION_GROUP_PATTERN = re.compile(CITATION_OPEN_CHAR + r"(.*?)" + CITATION_CLOSE_CHAR)

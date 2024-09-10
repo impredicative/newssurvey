@@ -3,7 +3,7 @@ from typing import Callable
 import hext
 import requests
 
-from newssurvey.config import CACHE_EXPIRATION_DEFAULTS_BY_TAG, CACHE_SIZES_GiB
+from newssurvey.config import CACHE_EXPIRATION_BY_TAG, CACHE_SIZES_GiB
 from newssurvey.exceptions import RequestError
 from newssurvey.types import SearchResult
 from newssurvey.util.diskcache_ import get_diskcache
@@ -25,7 +25,7 @@ class UnsupportedPageError(RequestError):
     """Excessive page number request error."""
 
 
-@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_DEFAULTS_BY_TAG["get_search_response"], tag="get_search_response")
+@_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_search_response"], tag="get_search_response")
 def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: bool = False, page_num: int = 1) -> requests.Response:
     """Return a response from the MedicalXpress website for a given query, sorting preference, and page number.
 
