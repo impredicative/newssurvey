@@ -1,5 +1,5 @@
 # newssurvey
-**newssurvey** is a Python 3.12 application to write a survey report about a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics, although some additional sites are planned for inclusion. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
+**newssurvey** is a proof-of-concept Python 3.12 application to write a survey report about a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics, although some additional sites are planned for inclusion. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
 ## Links
 | Caption     | Link                                                 |
@@ -31,3 +31,29 @@ These generated sample are available in HTML format. Their corresponding GitHub 
 | medicalxpress | northeast eastern equine encephalitis | [Eastern Equine Encephalitis: Prevention, Diagnosis, and Management in the Northeast](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A53%3A50%20Eastern%20Equine%20Encephalitis%3A%20Prevention%2C%20Diagnosis%2C%20and%20Management%20in%20the%20Northeast.html) |
 | medicalxpress | vascular dementia in elderly          | [Holistic Management Strategies for Vascular Dementia in Elderly Patients](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T01%3A58%3A39%20Holistic%20Management%20Strategies%20for%20Vascular%20Dementia%20in%20Elderly%20Patients.html) |
 
+As additional news sources are supported, samples based on them are intended to be added.
+
+## Setup
+
+### Common setup
+* In the working directory, create a file named `.env`, with the intended environment variable `OPENAI_API_KEY=<your OpenAI API key>`, or set it in a different way.
+* Continue the setup via GitHub or PyPI as below.
+
+### Setup via GitHub using devcontainer
+* Continue from the common setup steps.
+* Clone or download this repo.
+* Build and provision the defined devcontainer.
+
+### Setup via GitHub manually
+* Continue from the common setup steps.
+* Clone or download this repo.
+* Ensure that [`rye`](https://rye-up.com/) is installed and available.
+* In the repo directory, run `rye sync --no-lock`.
+
+### Setup via PyPI
+* Continue from the common setup steps.
+* Create and activate a Python 3.12 devcontainer or virtual environment.
+* Install via [PyPI](https://pypi.org/project/newssurvey): `pip install -U newssurvey`.
+
+## Cache
+An extensive disk cache is stored locally to cache website and LLM outputs with a fixed expiration period. This is in the `[src]/newssurvey/.diskcache` directory. The expiration period is 1 week for website searches and 52 weeks for everything else, also subject to separate disk usage limits. To reuse the cache, rerun the same user query within this period. To bypass the cache, alter the user query, otherwise delete the appropriate cache subdirectory. Updates to the prompts will also bypass the cache.
