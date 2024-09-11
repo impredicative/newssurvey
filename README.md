@@ -115,6 +115,8 @@ Usage examples:
 (source: str, query: str, max_sections: int = 100, output_format: Optional[str] = 'txt', confirm: bool = False) -> newssurvey.types.Response
 
 >>> print(inspect.getdoc(generate_response))
+```
+```text
 Return a response for the given source and query.
 
 The returned response contains the attributes: format, title, response.
