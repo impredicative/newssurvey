@@ -99,6 +99,7 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     for brackets, pattern in _INVALID_BRACKETS_PATTERNS.items():
         if pattern.search(text):
             print_error(f"The text for the section {section!r} contains invalid brackets {brackets}.")
+            # Note: A regex substitution could in principle be used to replace the invalid brackets with valid ones, but it is not used so as to ensure that the LLM is paying attention.
             return False
 
     return True
