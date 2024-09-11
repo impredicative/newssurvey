@@ -26,7 +26,7 @@ The workflow is intended to be as simple as necessary, and without cycles betwee
 ## Samples
 These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are in the [samples](./samples/) directory.
 
-| Source        | User query (shortened)                | Output title |
+| Source        | User query (simplified)               | Output title |
 |---------------|---------------------------------------|--------------|
 | medicalxpress | nutrition for anxiety                 | [Nutrition and Supplements for Anxiety Relief in Adults: Insights from Recent Research](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A51%3A12%20Nutrition%20and%20Supplements%20for%20Anxiety%20Relief%20in%20Adults%3A%20Insights%20from%20Recent%20Research.html) |
 | medicalxpress | daytime drowsiness                    | [Managing Daytime Drowsiness: Understanding Causes and Solutions](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A20%3A37%20Managing%20Daytime%20Drowsiness%3A%20Understanding%20Causes%20and%20Solutions.html) |
