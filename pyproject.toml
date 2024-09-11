@@ -1,7 +1,7 @@
 [project]
 name = "newssurvey"
 version = "0.1.0"
-description = "News survey using a supported news site and GPT-4"
+description = "Write a survey report using a supported news site and GPT-4 LLM "
 authors = [
     { name = "Ouroboros Chrysopoeia", email = "impredicative@users.noreply.github.com" }
 ]
@@ -19,6 +19,16 @@ dependencies = [
 ]
 readme = "README.md"
 requires-python = ">= 3.12"
+keywords = ["news", "news-summarization", "GPT-4"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3.12"
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -38,6 +48,9 @@ packages = ["src/newssurvey"]
 [project.scripts]
 newssurvey = "newssurvey.__main__:main"
 
+[project.urls]
+Repository = "https://github.com/impredicative/newssurvey"
+
 [tool.rye.scripts]  # Run as "rye run <command>"
 check = { chain = ["check-lint", "check-fmt" ] }
 "check-lint" = "rye lint"
@@ -47,6 +60,12 @@ fix = { chain = ["fix-lint", "fix-fmt" ] }
 "fix-fmt" = "rye fmt"
 lockup = "rye lock --update-all"
 syncup = "rye sync --update-all"
+build = "rye build --clean --verbose"
+publish = "rye publish --verbose"
+release = { chain = ["check", "build", "publish"]}
+
+[tool.hatch.build]
+exclude = [".env", "archive/", "docs/", "samples/", "scripts/", "work/"]
 
 [tool.ruff]
 line-length = 999
