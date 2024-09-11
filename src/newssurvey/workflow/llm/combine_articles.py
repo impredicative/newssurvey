@@ -31,6 +31,10 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     if not text:
         print_error(f"The text for the section {section!r} is empty.")
         return False
+    
+    if '\n1. **' in text:
+        print_error(f"The text for the section {section!r} contains a markdown list item.")
+        return False
 
     if text.startswith(CITATION_OPEN_CHAR):
         print_error(f"The text for the section {section!r} starts with an opening bracket meant for a citation group.")
