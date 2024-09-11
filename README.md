@@ -105,6 +105,31 @@ Usage examples:
 
     $ python -m newssurvey -s medicalxpress -q "safe strategies for weight loss" -f txt -o ~ -nc
 
+### Usage as library
+
+```python
+>>> from newssurvey.newssurvey import generate_response
+>>> import inspect
+
+>>> print(inspect.signature(generate_response))
+(source: str, query: str, max_sections: int = 100, output_format: Optional[str] = 'txt', confirm: bool = False) -> newssurvey.types.Response
+
+>>> print(inspect.getdoc(generate_response))
+Return a response for the given source and query.
+
+The returned response contains the attributes: format, title, response.
+
+The progress is printed to stdout.
+
+Params:
+* `source`: Name of supported news source.
+* `query`: Question or concern answerable by the news source.
+* `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
+* `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is txt.
+* `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
+
+If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
+```
 
 ## Cache
 An extensive disk cache is stored locally to cache website and LLM outputs with a fixed expiration period. This is in the `[src]/newssurvey/.diskcache` directory. The expiration period is 1 week for website searches and 52 weeks for everything else, also subject to separate disk usage limits. To reuse the cache, rerun the same user query within this period. To bypass the cache, alter the user query, otherwise delete the appropriate cache subdirectory. Updates to the prompts will also bypass the cache.
