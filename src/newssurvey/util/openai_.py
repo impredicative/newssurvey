@@ -3,15 +3,15 @@ import os
 import time
 from typing import Literal, Optional
 
-import dotenv
 import openai
 
 from newssurvey.config import CACHE_EXPIRATION_BY_TAG, CACHE_SIZES_GiB
 import newssurvey.exceptions
 from newssurvey.util.dict import dict_str
 from newssurvey.util.diskcache_ import get_diskcache
+from newssurvey.util.dotenv_ import load_dotenv
 
-dotenv.load_dotenv()
+load_dotenv()
 
 ChatCompletion = openai.types.chat.chat_completion.ChatCompletion
 CreateEmbeddingResponse = openai.types.create_embedding_response.CreateEmbeddingResponse

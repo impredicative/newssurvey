@@ -4,9 +4,9 @@ from importlib.machinery import ModuleSpec
 from pathlib import Path
 import re
 
-import dotenv
+from newssurvey.util.dotenv_ import load_dotenv
 
-dotenv.load_dotenv()
+load_dotenv()
 
 CWD: Path = Path.cwd()
 PACKAGE_PATH: Path = Path(__file__).parent
