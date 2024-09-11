@@ -30,7 +30,7 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
     """Return the output format and path, ensuring they are valid."""
     if (output_format is not None) and (output_format not in SUPPORTED_OUTPUT_FORMATS):
         raise newssurvey.exceptions.InputError(f"Output format {output_format!r} is not supported. Supported formats are: {', '.join(SUPPORTED_OUTPUT_FORMATS)}")
-    
+
     if output_path is None:
         if title:
             output_format, output_filename = _get_default_output_format_and_filename(title=title, output_format=output_format)
@@ -41,7 +41,7 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
     else:
         assert isinstance(output_path, Path), (output_path, type(output_path))
     output_path = output_path.expanduser().resolve()
-    
+
     if output_path.is_dir():
         assert output_path.exists()
         if title:
@@ -60,7 +60,7 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
             raise newssurvey.exceptions.InputError(f"Output file path format {extracted_output_format!r} does not match the specified output format {output_format!r}.")
         output_format = extracted_output_format
         output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     pathvalidate.validate_filepath(output_path, platform="auto")
     return output_format, output_path
 
@@ -107,8 +107,8 @@ def main(source: Optional[str], query: Optional[str], max_sections: int, output_
         assert isinstance(confirm, bool), (confirm, type(confirm))
 
         response = generate_response(source=source, query=query, max_sections=max_sections, output_format=output_format, confirm=confirm)
-        assert (output_format == response.format), (output_format, response.format)
-        
+        assert output_format == response.format, (output_format, response.format)
+
         output_format, output_path = _get_output_format_and_path(output_format=output_format, output_path=output_path, title=response.title)
         if (query_origin == "file") and (query_path.resolve() == output_path.resolve()):
             raise newssurvey.exceptions.InputError(f"Output file path {str(output_path.resolve())!r} is the same as the query file path {str(query_path.resolve())!r}.")

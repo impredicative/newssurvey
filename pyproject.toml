@@ -49,7 +49,7 @@ lockup = "rye lock --update-all"
 syncup = "rye sync --update-all"
 
 [tool.ruff]
-line-length = 500
+line-length = 999
 
 [tool.ruff.lint]
 ignore = ["E731"]
