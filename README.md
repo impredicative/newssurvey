@@ -1,6 +1,8 @@
 # newssurvey
 **newssurvey** is a proof-of-concept Python 3.12 application to write a survey report about a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics, although some additional sites are planned for inclusion. Numerous calls are made to OpenAI LLMs to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
+As of 2024, the estimated OpenAI API cost per report has been observed to be 1 to 6 USD. The cost varies by the number of source articles available for the submitted user query. The cost is approximately 1 USD per 100 source articles. Strictly speaking, the cost is unbounded and must be monitored and restricted via the [OpenAI usage dashboard](https://platform.openai.com/organization/usage). The generation time per report is expected to be under an hour, also depending on the number of source articles.
+
 ## Links
 | Caption     | Link                                                 |
 |-------------|------------------------------------------------------|
