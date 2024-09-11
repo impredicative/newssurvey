@@ -57,5 +57,53 @@ As additional news sources are supported, samples based on them are intended to 
 * Create and activate a Python 3.12 devcontainer or virtual environment.
 * Install via [PyPI](https://pypi.org/project/newssurvey): `pip install -U newssurvey`.
 
+## Usage
+
+### Usage as application
+In the simplest case, run `python -m newssurvey` to interactively start the application. You will be prompted for the necessary information.
+
+For non-interactive use, the usage help is copied below:
+```
+$ python -m newssurvey -h
+Usage: python -m newssurvey [OPTIONS]
+
+  Generate and write a response to a question or concern using a supported news source.
+
+  The progress is printed to stdout.
+
+  A nonzero exitcode exists if there is an error.
+
+Options:
+  -s, --source TEXT               Name of supported news source. If not given, the user is prompted for it.
+  -q, --query TEXT                Question or concern answerable by the news source. If a path to a file, the file
+                                  text is read as text. If not given, the user is prompted for it.
+  -m, --max-sections INTEGER RANGE
+                                  Maximum number of sections to include in the response, between 10 and 100. Its
+                                  recommended value, also the default, is 100.  [10<=x<=100]
+  -f, --output-format TEXT        Output format of the response. It can be txt (for text), md (for markdown), gfm.md
+                                  (for GitHub Flavored markdown), html, or json. If not specified, but if an output
+                                  filename is specified via '--output-path', it is determined automatically from the
+                                  file extension. If not specified, and if an output filename is not specified either,
+                                  its default is txt.
+  -o, --output-path PATH          Output directory path or file path. If intended as a directory path, it must exist,
+                                  and the file name is auto-determined. If intended as a file path, its extension can
+                                  be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html,
+                                  or json. If not specified, the output file is written to the current working
+                                  directory with an auto-determined file name. The response is written to the file
+                                  except if there is an error.
+  -c, --confirm / -nc, --no-confirm
+                                  Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively
+                                  sought as each step of the workflow progresses, and this is the default. If `--no-
+                                  confirm`, the workflow progresses without any confirmation.
+  -h, --help                      Show this message and exit.
+```
+
+Usage examples:
+
+    $ python -m newssurvey -s medicalxpress -q ./my_medical_concern.txt -f html -o ~/output.html -c
+
+    $ python -m newssurvey -s medicalxpress -q "safe strategies for weight loss" -f txt -o ~ -nc
+
+
 ## Cache
 An extensive disk cache is stored locally to cache website and LLM outputs with a fixed expiration period. This is in the `[src]/newssurvey/.diskcache` directory. The expiration period is 1 week for website searches and 52 weeks for everything else, also subject to separate disk usage limits. To reuse the cache, rerun the same user query within this period. To bypass the cache, alter the user query, otherwise delete the appropriate cache subdirectory. Updates to the prompts will also bypass the cache.
