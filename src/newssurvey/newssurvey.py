@@ -20,7 +20,7 @@ from newssurvey.workflow.source.map_citations import map_citations
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = OUTPUT_FORMAT_DEFAULT, confirm: bool = False) -> Response:
-    f"""Return a response for the given source and query.
+    """Return a response for the given source and query.
 
     The returned response contains the attributes: format, title, response.
 
@@ -29,8 +29,8 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     Params:
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
-    * `max_sections`: Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.
-    * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is {OUTPUT_FORMAT_DEFAULT}.
+    * `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
+    * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is txt.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
