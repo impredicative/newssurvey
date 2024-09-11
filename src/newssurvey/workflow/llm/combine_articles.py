@@ -1,6 +1,7 @@
 import concurrent.futures
 import contextlib
 import io
+import re
 from types import ModuleType
 
 from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
@@ -17,6 +18,9 @@ _MODEL_SIZE = [
     "deprecated",  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
+
+_INVALID_BRACKETS = ["〖〗"]  # These have been observed in the output.
+_INVALID_BRACKETS_PATTERNS = {f"{invalid_open_bracket}{invalid_close_bracket}": re.compile(CITATION_GROUP_PATTERN.pattern.translate(str.maketrans(f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}", f"{invalid_open_bracket}{invalid_close_bracket}"))) for invalid_open_bracket, invalid_close_bracket in _INVALID_BRACKETS}
 
 
 def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
@@ -90,6 +94,12 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
                 return False
 
             # Note: Duplicates are not checked because they can be managed.
+
+    # Check for invalid brackets
+    for brackets, pattern in _INVALID_BRACKETS_PATTERNS.items():
+        if pattern.search(text):
+            print_error(f"The text for the section {section!r} contains invalid brackets {brackets}.")
+            return False
 
     return True
 
