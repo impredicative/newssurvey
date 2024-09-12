@@ -32,6 +32,7 @@ These generated sample are available in HTML format. Their corresponding GitHub 
 | medicalxpress | daytime drowsiness                    | [Managing Daytime Drowsiness: Understanding Causes and Solutions](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A20%3A37%20Managing%20Daytime%20Drowsiness%3A%20Understanding%20Causes%20and%20Solutions.html) |
 | medicalxpress | northeast eastern equine encephalitis | [Eastern Equine Encephalitis: Prevention, Diagnosis, and Management in the Northeast](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A53%3A50%20Eastern%20Equine%20Encephalitis%3A%20Prevention%2C%20Diagnosis%2C%20and%20Management%20in%20the%20Northeast.html) |
 | medicalxpress | vascular dementia in elderly          | [Holistic Management Strategies for Vascular Dementia in Elderly Patients](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T01%3A58%3A39%20Holistic%20Management%20Strategies%20for%20Vascular%20Dementia%20in%20Elderly%20Patients.html) |
+| medicalxpress | advances in neuroradiology          | [Advancements and Emerging Techniques in Neuroradiology](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-12T02%3A33%3A59%20Advancements%20and%20Emerging%20Techniques%20in%20Neuroradiology.html) |
 
 As additional news sources are supported, samples based on them are intended to be added.
 
