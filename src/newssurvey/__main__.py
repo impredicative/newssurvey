@@ -84,7 +84,7 @@ def main(*args, **kwargs) -> None:
         with locket.lock_file(lockfile_path, timeout=1):
             _main(*args, **kwargs)
     except locket.LockError:
-        print_error(f"Only a single instance of {PACKAGE_NAME} can be run at a time. Another instance of it may be running using the lock file {lockfile_path}.")
+        print_error(f"Only a single instance of {PACKAGE_NAME} can be run at a time. This is intended to avoid remote throttling of requests. Another instance of it may be running using the lock file {lockfile_path}.")
         exit(1)
 
 
