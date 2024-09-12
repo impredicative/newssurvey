@@ -24,15 +24,16 @@ Each step in this workflow corresponds to an action taken by the LLM.
 The workflow is intended to be as simple as necessary, and without cycles between steps.
 
 ## Samples
-These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are in the [samples](./samples/) directory.
+These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are also available in the [samples](./samples/) directory.
 
 | Source        | User query (simplified)               | Output title |
 |---------------|---------------------------------------|--------------|
 | medicalxpress | nutrition for anxiety                 | [Nutrition and Supplements for Anxiety Relief in Adults: Insights from Recent Research](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T19%3A49%3A33%20Nutrition%20and%20Supplements%20for%20Anxiety%20Relief%20in%20Adults%3A%20Insights%20from%20Recent%20Research.html) |
 | medicalxpress | daytime drowsiness                    | [Managing Daytime Drowsiness: Understanding Causes and Solutions](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A20%3A37%20Managing%20Daytime%20Drowsiness%3A%20Understanding%20Causes%20and%20Solutions.html) |
 | medicalxpress | northeast eastern equine encephalitis | [Eastern Equine Encephalitis: Prevention, Diagnosis, and Management in the Northeast](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T02%3A53%3A50%20Eastern%20Equine%20Encephalitis%3A%20Prevention%2C%20Diagnosis%2C%20and%20Management%20in%20the%20Northeast.html) |
+| medicalxpress | advances in neuroradiology            | [Advancements and Emerging Techniques in Neuroradiology](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-12T02%3A33%3A59%20Advancements%20and%20Emerging%20Techniques%20in%20Neuroradiology.html) |
 | medicalxpress | vascular dementia in elderly          | [Holistic Management Strategies for Vascular Dementia in Elderly Patients](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-11T01%3A58%3A39%20Holistic%20Management%20Strategies%20for%20Vascular%20Dementia%20in%20Elderly%20Patients.html) |
-| medicalxpress | advances in neuroradiology          | [Advancements and Emerging Techniques in Neuroradiology](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-12T02%3A33%3A59%20Advancements%20and%20Emerging%20Techniques%20in%20Neuroradiology.html) |
+| medicalxpress | sciatica and bursitis pain in elderly | [Comprehensive Approaches to Sciatica and Bursitis Pain Management in Older Adults](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-12T04%3A57%3A38%20Comprehensive%20Approaches%20to%20Sciatica%20and%20Bursitis%20Pain%20Management%20in%20Older%20Adults.html) |
 
 As additional news sources are supported, samples based on them are intended to be added.
 
