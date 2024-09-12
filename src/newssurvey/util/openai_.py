@@ -10,6 +10,7 @@ import newssurvey.exceptions
 from newssurvey.util.dict import dict_str
 from newssurvey.util.diskcache_ import get_diskcache
 from newssurvey.util.dotenv_ import load_dotenv
+from newssurvey.util.sys_ import print_warning
 
 load_dotenv()
 
@@ -71,7 +72,22 @@ def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note
     print(f"Requesting completion for prompt of length {len(prompt):,} using model {model} with keyword arguments: {dict_str(kwargs)}")
     time_start = time.monotonic()
     messages = [{"role": "user", "content": prompt}]
-    completion = client.chat.completions.create(model=model, messages=messages, **kwargs)  # Ref: https://platform.openai.com/docs/api-reference/chat/create
+
+    max_attempts = 3
+    for num_attempt in range(1, max_attempts + 1):
+        try:
+            completion = client.chat.completions.create(model=model, messages=messages, **kwargs)  # Ref: https://platform.openai.com/docs/api-reference/chat/create
+        except openai.InternalServerError as exc:
+            if num_attempt < max_attempts:
+                print_warning(f"Completion for prompt of length {len(prompt):,} using model {model} failed in attempt {num_attempt} of {max_attempts}: {exc}")
+                time.sleep(5 * num_attempt)
+                continue
+            else:
+                assert num_attempt == max_attempts
+                raise
+        else:
+            break
+
     time_used = time.monotonic() - time_start
     print(f"Received completion for prompt of length {len(prompt):,} using model {model} in {time_used:.1f}s.")
     return completion
