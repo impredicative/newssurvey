@@ -60,7 +60,11 @@ As additional news sources are supported, samples based on them are intended to 
 * Install via [PyPI](https://pypi.org/project/newssurvey): `pip install -U newssurvey`.
 
 ## Usage
-Only a single instance of the application must be run at a time, failing which throttles can aggressively be imposed by the source website and by OpenAI.
+Usage can be as a command-line application or as a Python library.
+
+### Usage considerations
+* Refining the query text over a few iterations is often essential for receiving a sufficiently tailored response.
+* Only a single instance of the application must be run at a time, failing which throttles can aggressively be imposed by the source website and by OpenAI. This is also enforced at the application-level by the use of a lock file.
 
 ### Usage as application
 In the simplest case, run `python -m newssurvey` to interactively start the application. You will be prompted for the necessary information.
