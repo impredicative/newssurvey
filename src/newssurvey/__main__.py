@@ -1,13 +1,15 @@
 import os
+import tempfile
 from pathlib import Path
 from typing import Optional
 
 import click
 import datetime
+import locket
 import pathvalidate
 
 import newssurvey.exceptions
-from newssurvey.config import CWD, NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX, OUTPUT_FORMAT_DEFAULT
+from newssurvey.config import CWD, NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX, OUTPUT_FORMAT_DEFAULT, PACKAGE_NAME
 from newssurvey.newssurvey import generate_response
 from newssurvey.util.openai_ import ensure_openai_key
 from newssurvey.util.sys_ import print_error
@@ -72,7 +74,21 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
 @click.option("--output-format", "-f", default=None, help=f"Output format of the response. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. If not specified, but if an output filename is specified via '--output-path', it is determined automatically from the file extension. If not specified, and if an output filename is not specified either, its default is {OUTPUT_FORMAT_DEFAULT}.")
 @click.option("--output-path", "-o", default=None, type=Path, help="Output directory path or file path. If intended as a directory path, it must exist, and the file name is auto-determined. If intended as a file path, its extension can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. If not specified, the output file is written to the current working directory with an auto-determined file name. The response is written to the file except if there is an error.")
 @click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
-def main(source: Optional[str], query: Optional[str], max_sections: int, output_format: str, output_path: Path, confirm: bool) -> None:
+def main(*args, **kwargs) -> None:
+    """Generate and write a response to a question or concern using a supported news source.
+
+    A single instance of this method is enforced.
+    """
+    lockfile_path = Path(tempfile.gettempdir()) / f"{PACKAGE_NAME}.lock"
+    try:
+        with locket.lock_file(lockfile_path, timeout=1):
+            _main(*args, **kwargs)
+    except locket.LockError:
+        print_error(f"Only a single instance of {PACKAGE_NAME} can be run at a time. Another instance of it may be running using the lock file {lockfile_path}.")
+        exit(1)
+
+
+def _main(source: Optional[str], query: Optional[str], max_sections: int, output_format: str, output_path: Path, confirm: bool) -> None:
     """Generate and write a response to a question or concern using a supported news source.
 
     The progress is printed to stdout.
