@@ -97,7 +97,8 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
 
     condensed_articles = []
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    max_workers = min(8, MAX_WORKERS)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_section = {executor.submit(condense_article_section, article["article"], section): (article, section) for article in articles for section in article["sections"]}
 
         article_section_results = {}
