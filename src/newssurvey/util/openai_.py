@@ -27,6 +27,7 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
         "deprecated": "gpt-4-0125-preview",  # Note: Can require more prompt tuning for successful use. gpt-4-turbo-2024-04-09 is worse.
         "large": "gpt-4o-2024-08-06",
+        "large_previous": "gpt-4o-2024-05-13",  # For token measurement purposes.
         "small": "gpt-4o-mini-2024-07-18",
     },
     "embedding": {
@@ -40,11 +41,13 @@ EmbeddingModelSizeType = Literal["large", "small"]
 MAX_INPUT_TOKENS = {
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-08-06": 128_000,
+    "gpt-4o-2024-05-13": 128_000,
     "gpt-4o-mini-2024-07-18": 128_000,
 }
 MAX_OUTPUT_TOKENS = {
     "gpt-4-0125-preview": 4096,
     "gpt-4o-2024-08-06": 16_384,
+    "gpt-4o-2024-05-13": 4096,
     "gpt-4o-mini-2024-07-18": 16_384,
 }
 MAX_WORKERS = 16
@@ -58,7 +61,7 @@ def ensure_openai_key() -> None:
 
 @_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_completion"], tag="get_completion")
 def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note: `model` is explicitly specified to allow model-specific caching.
-    """Return the completion for the given prompt and model
+    """Return the completion for the given prompt and model.
 
     `kwargs` are forwarded to the create call.
     ."""
