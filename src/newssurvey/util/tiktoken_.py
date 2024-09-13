@@ -36,7 +36,7 @@ def calc_input_token_usage(text: str, *, model: str, num_output_tokens: Optional
     if num_output_tokens is None:
         num_output_tokens = MAX_OUTPUT_TOKENS[model]
     else:
-        assert num_output_tokens <= MAX_OUTPUT_TOKENS[model], (num_output_tokens, MAX_OUTPUT_TOKENS[model])
+        assert 1 <= num_output_tokens <= MAX_OUTPUT_TOKENS[model], (num_output_tokens, MAX_OUTPUT_TOKENS[model])
 
     assert MAX_INPUT_TOKENS[model] >= num_output_tokens
 
