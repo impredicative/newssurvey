@@ -75,11 +75,6 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(section_names_str)
 
     if confirm:
-        get_confirmation("creating title")
-    title: str = create_title(user_query=query, source_module=source_module, sections=sections)
-    print(f"TITLE: {title}")
-
-    if confirm:
         get_confirmation("rating articles")
     articles_and_sections: list[AnalyzedArticleGen1] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=sections)
     print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
@@ -103,11 +98,17 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(section_names_str)
 
     if confirm:
-        get_confirmation("generate section texts")
+        get_confirmation("generating section texts")
     section_texts: list[SectionGen1] = combine_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
     # response_text = f"{title}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}. {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(section_texts, start=1))
     # print(f"REPORT:\n\n{response_text}")
     section_texts, citations = map_citations(sections=section_texts)
+
+    if confirm:
+        get_confirmation("generating title")
+    # Note: The title is created only after the sections are generated to ensure that the title is based on the actual remaining sections.
+    title: str = create_title(user_query=query, source_module=source_module, sections=[s["title"] for s in section_texts])
+    print(f"TITLE: {title}")
 
     response_text: str = format_text_output(title=title, sections=section_texts, citations=citations)
     print(f"REPORT:\n\n{response_text}")
