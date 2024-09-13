@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable
 
 import tiktoken
 
@@ -34,13 +34,6 @@ def calc_input_token_usage(text: str, *, model: str) -> dict[str, int]:
     return {"used_tokens": used_tokens, "usable_tokens": usable_tokens}
 
 
-def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dict] = None) -> bool:
-    """Return true if the input token usage is allowable for the given text and model."""
-    if usage is None:
-        usage = calc_input_token_usage(text, model=model)
-    return usage["used_tokens"] <= usage["usable_tokens"]
-
-
 def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> tuple[int, str]:
     """Return the number of items used and the text that fits the input token limit for the given items and model.
 
@@ -53,7 +46,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
     text = formatter(items)
     usage = calc_input_token_usage(text, model=model)
     num_items = len(items)
-    if is_input_token_usage_allowable(text, model=model, usage=usage):
+    if usage["used_tokens"] <= usage["usable_tokens"]:
         print(f"Using all {num_items:,} items of text for model {model} and encoding {encoding}, with {usage['used_tokens']:,}/{usage['usable_tokens']:,} tokens.")
         return num_items, text
 
@@ -68,7 +61,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
                 mid_text = formatter(items[:mid])
                 usage = calc_input_token_usage(mid_text, model=model)
                 num_items_used = mid
-                if is_input_token_usage_allowable(mid_text, model=model, usage=usage):
+                if usage["used_tokens"] <= usage["usable_tokens"]:
                     lo = mid
                 else:
                     hi = mid - 1
