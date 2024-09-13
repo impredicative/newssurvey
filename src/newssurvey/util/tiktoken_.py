@@ -47,7 +47,8 @@ def calc_input_token_usage(text: str, *, model: str, num_output_tokens: Optional
 def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> tuple[int, str]:
     """Return the number of items used and the text that fits the input token limit for the given items and model.
 
-    The items are formatted to a string using the given formatter function.
+    `formatter` must be a function that takes a list of items and returns a string.
+    `approach` must be either "binary" or "rate". It is the optimization approach used to fit the items to the input token limit.
     """
     # Tests:
     # _=fit_items_to_input_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,583/111,606 tokens.
