@@ -71,6 +71,9 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
 
     model_size = "large"
     num_titles_used, prompt = fit_items_to_input_token_limit(titles, model=MODELS["text"][model_size], formatter=prompt_formatter, approach="rate")
+    if num_titles_used < len(titles):
+        num_titles_not_used = len(titles) - num_titles_used
+        print_warning(f"Used only {num_titles_used:,}/{len(titles):,} titles for getting section names, leaving the last {num_titles_not_used:,} titles unused.")
 
     for num_attempt in range(1, max_attempts + 1):
         response = get_content(prompt, model_size=model_size, log=True, read_cache=(num_attempt == 1))
