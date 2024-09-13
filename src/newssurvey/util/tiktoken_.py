@@ -37,25 +37,30 @@ def calc_input_token_usage(text: str, *, model: str, num_output_tokens: Optional
         num_output_tokens = MAX_OUTPUT_TOKENS[model]
     else:
         assert num_output_tokens <= MAX_OUTPUT_TOKENS[model], (num_output_tokens, MAX_OUTPUT_TOKENS[model])
-    
+
     assert MAX_INPUT_TOKENS[model] >= num_output_tokens
 
     usable_tokens = max(0, MAX_INPUT_TOKENS[model] - num_output_tokens - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
     return {"used_tokens": used_tokens, "usable_tokens": usable_tokens}
 
 
-def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> tuple[int, str]:
+def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary", num_output_tokens: Optional[int] = None) -> tuple[int, str]:
     """Return the number of items used and the text that fits the input token limit for the given items and model.
 
     `formatter` must be a function that takes a list of items and returns a string.
     `approach` must be either "binary" or "rate". It is the optimization approach used to fit the items to the input token limit.
+
+    `num_output_tokens` is the allocated number of tokens for the output text.
+    If given, it must be less than or equal to the maximum output tokens for the given model.
+    If not given, it is set to the maximum output tokens for the given model.
     """
     # Tests:
     # _=fit_items_to_input_token_limit([string.printable]*10_000, model="gpt-4o-2024-08-06", approach='binary') -> Using 3,487/10,000 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,583/111,606 tokens.
     # _=fit_items_to_input_token_limit(''.join(random.Random(0).choices(string.printable, k=1_000_000)).split('\n'), model="gpt-4o-2024-08-06", approach='binary') -> Using 1,480/9,929 items of text for model gpt-4o-2024-08-06 and encoding o200k_base, with 111,410/111,606 tokens.
+    fn_calc_usage = lambda text: calc_input_token_usage(text, model=model, num_output_tokens=num_output_tokens)
     encoding = get_encoding(model).name
     text = formatter(items)
-    usage = calc_input_token_usage(text, model=model)
+    usage = fn_calc_usage(text)
     num_items = len(items)
     if usage["used_tokens"] <= usage["usable_tokens"]:
         print(f"Using all {num_items:,} items of text for model {model} and encoding {encoding}, with {usage['used_tokens']:,}/{usage['usable_tokens']:,} tokens.")
@@ -70,7 +75,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
                 iteration += 1
                 mid = (lo + hi + 1) // 2
                 mid_text = formatter(items[:mid])
-                usage = calc_input_token_usage(mid_text, model=model)
+                usage = fn_calc_usage(mid_text)
                 num_items_used = mid
                 if usage["used_tokens"] <= usage["usable_tokens"]:
                     lo = mid
@@ -90,7 +95,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
                         break
                     num_items_used = candidate_num_items_used
                 iteration += 1
-                usage = calc_input_token_usage(formatter(items[:num_items_used]), model=model)
+                usage = fn_calc_usage(formatter(items[:num_items_used]))
                 items_to_excess_tokens[num_items_used] = usage["used_tokens"] - usage["usable_tokens"]
                 rate = usage["used_tokens"] / usage["usable_tokens"]
                 print(f"Tried {num_items_used:,}/{num_items:,} items of text for model {model} in iteration {iteration:,} using {usage['used_tokens']:,}/{usage['usable_tokens']:,} tokens.")
@@ -102,6 +107,6 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
 
     encoding = get_encoding(model).name
     text_used = formatter(items[:num_items_used])
-    usage = calc_input_token_usage(text_used, model=model)
+    usage = fn_calc_usage(text_used)
     print(f"Using {num_items_used:,}/{num_items:,} items of text for model {model} and encoding {encoding}, with {usage['used_tokens']:,}/{usage['usable_tokens']:,} tokens.")
     return num_items_used, text_used
