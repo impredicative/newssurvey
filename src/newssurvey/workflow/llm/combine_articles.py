@@ -5,7 +5,7 @@ import re
 from types import ModuleType
 
 from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
-from newssurvey.exceptions import LanguageModelOutputStructureError
+from newssurvey.exceptions import LanguageModelOutputLimitError, LanguageModelOutputStructureError
 from newssurvey.types import AnalyzedArticleGen2, CitationGen1, SectionGen1
 from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
@@ -128,7 +128,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
-        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt > 1), read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size=_MODEL_SIZE, max_tokens=max_output_tokens, log=(num_attempt > 1), read_cache=(num_attempt == 1))
         # Note:
         # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return.
         # Specifying presence_penalty<0 helped produce more tokens only with presence_penalty=-2 which is risky to use.
@@ -146,6 +146,13 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
         break
 
+    num_response_tokens = count_tokens(response, model=_MODEL)
+    max_safe_output_tokens_rate = 0.8
+    max_safe_output_tokens = int(max_output_tokens * max_safe_output_tokens_rate)
+    if num_response_tokens > max_safe_output_tokens:
+        # Note: The output is intentionally not retried in this case, as `max_output_tokens` likely is insufficient. It may need to be checked and increased.
+        raise LanguageModelOutputLimitError(f"The generated section {section!r} has {num_response_tokens:,} tokens, which is more than {max_safe_output_tokens:,} tokens which is {max_safe_output_tokens_rate:.0%} of the maximum output token limit of {max_output_tokens:,} tokens. This is unexpected.")
+
     return num_articles_used, response
 
 
@@ -153,7 +160,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
     """Return a list of sections with texts generated from the given articles.
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
-    Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
+    Specifically, its subclass `LanguageModelOutputLimitError` or `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
     """
     num_articles = len(articles)
     num_sections = len(sections)
