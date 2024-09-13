@@ -24,21 +24,21 @@ def calc_input_token_usage(text: str, *, model: str) -> dict[str, int]:
     """Return the input token usage for the given text and model.
 
     The returned dictionary has the following keys:
-    * `num_tokens`: Number of tokens used by input.
+    * `used_tokens`: Number of tokens used by input.
     * `max_tokens`: Maximum number of input tokens allowed, leaving maximum room for output tokens.
     """
-    num_tokens = count_tokens(text, model=model)
+    used_tokens = count_tokens(text, model=model)
     assert MAX_INPUT_TOKENS[model] >= MAX_OUTPUT_TOKENS[model]
 
     max_tokens = max(0, MAX_INPUT_TOKENS[model] - MAX_OUTPUT_TOKENS[model] - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
-    return {"num_tokens": num_tokens, "max_tokens": max_tokens}
+    return {"used_tokens": used_tokens, "max_tokens": max_tokens}
 
 
 def is_input_token_usage_allowable(text: str, *, model: str, usage: Optional[dict] = None) -> bool:
     """Return true if the input token usage is allowable for the given text and model."""
     if usage is None:
         usage = calc_input_token_usage(text, model=model)
-    return usage["num_tokens"] <= usage["max_tokens"]
+    return usage["used_tokens"] <= usage["max_tokens"]
 
 
 def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callable[[list], str] = "\n".join, approach: str = "binary") -> tuple[int, str]:
@@ -54,7 +54,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
     usage = calc_input_token_usage(text, model=model)
     num_items = len(items)
     if is_input_token_usage_allowable(text, model=model, usage=usage):
-        print(f"Using all {num_items:,} items of text for model {model} and encoding {encoding}, with {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
+        print(f"Using all {num_items:,} items of text for model {model} and encoding {encoding}, with {usage['used_tokens']:,}/{usage['max_tokens']:,} tokens.")
         return num_items, text
 
     iteration = 0
@@ -72,7 +72,7 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
                     lo = mid
                 else:
                     hi = mid - 1
-                print(f"Tried {num_items_used:,}/{num_items:,} items of text for model {model} in iteration {iteration:,} using {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
+                print(f"Tried {num_items_used:,}/{num_items:,} items of text for model {model} in iteration {iteration:,} using {usage['used_tokens']:,}/{usage['max_tokens']:,} tokens.")
             num_items_used = lo
         case "rate":
             # Rate-based search
@@ -87,9 +87,9 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
                     num_items_used = candidate_num_items_used
                 iteration += 1
                 usage = calc_input_token_usage(formatter(items[:num_items_used]), model=model)
-                items_to_excess_tokens[num_items_used] = usage["num_tokens"] - usage["max_tokens"]
-                rate = usage["num_tokens"] / usage["max_tokens"]
-                print(f"Tried {num_items_used:,}/{num_items:,} items of text for model {model} in iteration {iteration:,} using {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
+                items_to_excess_tokens[num_items_used] = usage["used_tokens"] - usage["max_tokens"]
+                rate = usage["used_tokens"] / usage["max_tokens"]
+                print(f"Tried {num_items_used:,}/{num_items:,} items of text for model {model} in iteration {iteration:,} using {usage['used_tokens']:,}/{usage['max_tokens']:,} tokens.")
                 num_items_used = num_items_used / rate
                 num_items_used = int(num_items_used)  # Note: Always using `round` or `math.ceil` instead of `int` was observed to lead to an infinite loop.
                 num_items_used = min(num_items, num_items_used)
@@ -99,5 +99,5 @@ def fit_items_to_input_token_limit(items: list, *, model: str, formatter: Callab
     encoding = get_encoding(model).name
     text_used = formatter(items[:num_items_used])
     usage = calc_input_token_usage(text_used, model=model)
-    print(f"Using {num_items_used:,}/{num_items:,} items of text for model {model} and encoding {encoding}, with {usage['num_tokens']:,}/{usage['max_tokens']:,} tokens.")
+    print(f"Using {num_items_used:,}/{num_items:,} items of text for model {model} and encoding {encoding}, with {usage['used_tokens']:,}/{usage['max_tokens']:,} tokens.")
     return num_items_used, text_used
