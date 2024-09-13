@@ -119,11 +119,12 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
     def prompt_formatter(articles_truncated: list[str]) -> str:
         numbered_articles = "\n\n---\n\n".join([f"[ARTICLE {num}]\n\n{article}" for num, article in enumerate(articles_truncated, start=1)])
+        # Note: The number of supplied max_output_tokens is not rounded by flooring because the model is very likely already aware of the exact number assuming it's the actual limit.
         prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
-    num_articles_used, prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach="rate")
+    num_articles_used, prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach="rate", num_output_tokens=max_output_tokens)
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
