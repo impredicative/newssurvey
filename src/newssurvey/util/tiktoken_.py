@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 import tiktoken
 
@@ -20,17 +20,24 @@ def count_tokens(text: str, *, model: str) -> int:
     return len(encoded)
 
 
-def calc_input_token_usage(text: str, *, model: str) -> dict[str, int]:
+def calc_input_token_usage(text: str, *, model: str, max_output_tokens: Optional[int] = None) -> dict[str, int]:
     """Return the input token usage for the given text and model.
+
+    If `max_output_tokens` is not given, it is set to the maximum output tokens for the given model.
+    If `max_output_tokens` is given, it must be less than or equal to the maximum output tokens for the given model.
 
     The returned dictionary has the following keys:
     * `used_tokens`: Number of tokens used by input.
     * `usable_tokens`: Maximum number of usable input tokens, leaving maximum room for output tokens.
     """
     used_tokens = count_tokens(text, model=model)
-    assert MAX_INPUT_TOKENS[model] >= MAX_OUTPUT_TOKENS[model]
 
-    usable_tokens = max(0, MAX_INPUT_TOKENS[model] - MAX_OUTPUT_TOKENS[model] - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
+    if max_output_tokens is None:
+        assert max_output_tokens <= MAX_OUTPUT_TOKENS[model], (max_output_tokens, MAX_OUTPUT_TOKENS[model])
+        max_output_tokens = MAX_OUTPUT_TOKENS[model]
+    assert MAX_INPUT_TOKENS[model] >= max_output_tokens
+
+    usable_tokens = max(0, MAX_INPUT_TOKENS[model] - max_output_tokens - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
     return {"used_tokens": used_tokens, "usable_tokens": usable_tokens}
 
 
