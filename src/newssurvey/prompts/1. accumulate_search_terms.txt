@@ -1,0 +1,6 @@
+In this step of the workflow, you are given a list of search terms relevant to the user's query, one per line. Your task is to exhaustively list any previously missed search terms relevant to the user's query, also one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's query. Do not prefix the search terms with bullets, etc. In case there are no additional search terms to list, just say the word "none" instead.
+
+## Data
+This list of {num_terms} preexisting search terms is below.
+
+{terms}

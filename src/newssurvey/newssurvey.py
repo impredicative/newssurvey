@@ -8,6 +8,7 @@ from newssurvey.util.openai_ import ensure_openai_key, MODELS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
 from newssurvey.workflow.user.output import format_text_output, format_output, SUPPORTED_OUTPUT_FORMATS
+from newssurvey.workflow.llm.accumulate_search_terms import accumulate_search_terms
 from newssurvey.workflow.llm.list_search_terms import list_search_terms
 from newssurvey.workflow.llm.filter_search_results import filter_search_results
 from newssurvey.workflow.llm.list_sections import list_sections
@@ -56,6 +57,8 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"MODELS: text:large={MODELS["text"]["large"]}, text:small={MODELS["text"]["small"]}, embedding:large={MODELS["embedding"]["large"]}")
 
     search_terms: list[str] = list_search_terms(user_query=query, source_module=source_module)
+    print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
+    search_terms: list[str] = accumulate_search_terms(user_query=query, source_module=source_module, search_terms=search_terms)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
 
     if confirm:
