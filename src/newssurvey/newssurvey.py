@@ -57,7 +57,6 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"MODELS: text:large={MODELS["text"]["large"]}, text:small={MODELS["text"]["small"]}, embedding:large={MODELS["embedding"]["large"]}")
 
     search_terms: list[str] = list_search_terms(user_query=query, source_module=source_module)
-    print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
     search_terms: list[str] = accumulate_search_terms(user_query=query, source_module=source_module, search_terms=search_terms)
     print(f"SEARCH TERMS ({len(search_terms)}): " + ", ".join(search_terms))
 
