@@ -106,9 +106,8 @@ def list_sections(user_query: str, source_module: ModuleType, *, titles: list[st
     """Return an ordered list of section names.
 
     The internal functions raise `LanguageModelOutputError` if the model output has an error.
-    Specifically, its subclass `LanguageModelOutputStructureError` is raised by it if the output is structurally invalid.
-
     The subclass `LanguageModelOutputRejectionError` is raised if the output is rejected.
+    The subclass `LanguageModelOutputStructureError` is raised if the output is structurally invalid.
     """
     assert NUM_SECTIONS_MIN <= max_sections <= NUM_SECTIONS_MAX, (max_sections, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX)
 
