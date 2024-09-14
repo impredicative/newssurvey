@@ -35,7 +35,7 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
         "small": "text-embedding-3-small",  # Output vector length is 1536.
     },
 }
-TextModelSizeType = Literal["deprecated", "large", "small"]
+TextModelSizeType = Literal["large", "small"]
 EmbeddingModelSizeType = Literal["large", "small"]
 
 MAX_INPUT_TOKENS = {
