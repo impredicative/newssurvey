@@ -41,7 +41,7 @@ def _accumulate_search_terms(user_query: str, source_module: ModuleType, search_
     assert search_terms
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
-    prompt_data["task"] = PROMPTS["1. accumulate_search_terms"].format(**prompt_data, num_terms=len(search_terms), terms="\n".join(search_terms))
+    prompt_data["task"] = PROMPTS["1.2. accumulate_search_terms"].format(**prompt_data, num_terms=len(search_terms), terms="\n".join(search_terms))
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
