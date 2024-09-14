@@ -26,7 +26,9 @@ def is_query_valid(query: str) -> bool:
         return False
     if any(ln.lstrip().startswith("#") for ln in query.splitlines()):
         print_error("Query may not contain any line starting with # as it will interfere with separating sections in the prompts.")
-        # Note: Technically, only level 1 to 2 headings need to be avoided, with level 3 and lower levels being acceptable.
+        # Note:
+        # - Technically, only level 1 to 2 headings need to be avoided, with level 3 and lower levels being acceptable.
+        # - More technically, user supplied level 1 or 2 headings can if necessary be dedented to level 3 and lower headings.
         return False
     return True
 
