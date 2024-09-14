@@ -37,7 +37,7 @@ def is_search_terms_list_valid(terms: list[str]) -> bool:
 
 
 def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
-    """Return the list of search topics.
+    """Return the list of search terms for the user query.
 
     `LanguageModelOutputError` is raised if the model output has an error.
     The subclass `LanguageModelOutputRejectionError` is raised if the output is rejected.
