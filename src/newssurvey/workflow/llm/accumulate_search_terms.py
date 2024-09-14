@@ -87,6 +87,7 @@ def accumulate_search_terms(user_query: str, source_module: ModuleType, search_t
     iteration = 1
     while True:
         num_old_search_terms = len(search_terms)
+        # Note: It is useful for the order of search_terms to be preserved as is.
         new_search_terms = _accumulate_search_terms(user_query, source_module, search_terms)
         search_terms.extend(new_search_terms)
         print(f"Search terms counts: {iteration=} original={num_original_search_terms} old={num_old_search_terms} new={len(new_search_terms)}, total={len(search_terms)}")
