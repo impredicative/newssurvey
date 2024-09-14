@@ -9,7 +9,7 @@ from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_error
 
 
-def is_search_terms_list_valid(terms: list[str]) -> bool:
+def is_search_terms_list_valid(terms: list[str]) -> bool:  # Also used by accumulate_search_terms.
     """Return true if the search terms are structurally valid, otherwise false.
 
     A validation error is printed if a search term is invalid.

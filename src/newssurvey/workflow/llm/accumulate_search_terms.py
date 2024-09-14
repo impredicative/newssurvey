@@ -6,34 +6,8 @@ from newssurvey.exceptions import LanguageModelOutputStructureError
 from newssurvey.config import PROMPTS
 from newssurvey.util.openai_ import get_content
 from newssurvey.util.str import is_none_response
-from newssurvey.util.sys_ import print_error, print_warning
-
-
-def is_search_terms_list_valid(terms: list[str]) -> bool:
-    """Return true if the search terms are structurally valid, otherwise false.
-
-    A validation error is printed if a search term is invalid.
-    """
-    if not terms:
-        print_error("No search terms exist.")
-        return False
-
-    seen = set()
-    for term in terms:
-        if term != term.strip():
-            print_error(f"Search term is invalid because it has leading or trailing whitespace: {term!r}")
-            return False
-
-        if term.startswith(("- ", "* ")):
-            print_error(f"Search term is invalid because it has a leading bullet prefix: {term}")
-            return False
-
-        if term in seen:
-            print_error(f"Search term is invalid because it is a duplicate: {term}")
-            return False
-        seen.add(term)
-
-    return True
+from newssurvey.util.sys_ import print_warning
+from newssurvey.workflow.llm.list_search_terms import is_search_terms_list_valid
 
 
 def _accumulate_search_terms(user_query: str, source_module: ModuleType, search_terms: list[str], max_attempts: int = 3) -> list[str]:
