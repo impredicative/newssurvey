@@ -205,10 +205,37 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     )
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.pagesizes import letter
-    from reportlab.lib.units import inch
+
+    # Custom DocTemplate to handle bookmarks
+    class MyDocTemplate(SimpleDocTemplate):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._bookmark_id = 0
+
+        def afterFlowable(self, flowable):
+            # Check if the flowable is a Paragraph
+            if isinstance(flowable, Paragraph):
+                text = flowable.getPlainText()
+                style_name = flowable.style.name
+
+                # Map styles to bookmark levels
+                if style_name == 'Title':
+                    level = 0
+                elif style_name in ('Heading1', 'Heading2'):
+                    level = 1
+                else:
+                    return  # Not a heading style we're tracking
+
+                # Create a unique bookmark key
+                key = f"bk_{self._bookmark_id}"
+                self._bookmark_id += 1
+
+                # Add bookmark and outline entry
+                self.canv.bookmarkPage(key)
+                self.canv.addOutlineEntry(text, key, level=level, closed=False)
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(
+    doc = MyDocTemplate(
         buffer,
         pagesize=letter,
         rightMargin=72,
@@ -238,7 +265,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
 
     story = []
 
-    # Title
+    # Title (Level 0)
     story.append(Paragraph(title, styles["Title"]))
     story.append(Spacer(1, 12))
 
@@ -252,8 +279,8 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     story.append(Paragraph(_DISCLAIMER, styles["Italic"]))
     story.append(Spacer(1, 12))
 
-    # Contents
-    story.append(Paragraph("Contents", styles["Heading2"]))
+    # Contents (Level 1)
+    story.append(Paragraph('<a name="contents"/>Contents', styles["Heading1"]))
     story.append(Spacer(1, 12))
     toc_items = []
     for num, section in enumerate(sections, start=1):
@@ -283,9 +310,9 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
 
     # Add sections
     for num, section in enumerate(sections, start=1):
-        # Section heading with anchor
+        # Section heading with anchor (Level 1)
         heading_text = f'{num}. <a name="section_{num}"/>{section["title"]}'
-        heading_style = styles["Heading2"]
+        heading_style = styles["Heading1"]
         story.append(Paragraph(heading_text, heading_style))
         story.append(Spacer(1, 12))
 
@@ -298,9 +325,9 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
             story.append(Paragraph(para_text, styles["Normal"]))
             story.append(Spacer(1, 12))
 
-    # References
+    # References (Level 1)
     story.append(PageBreak())
-    references_heading = Paragraph('<a name="references"/>References', styles["Heading2"])
+    references_heading = Paragraph('<a name="references"/>References', styles["Heading1"])
     story.append(references_heading)
     story.append(Spacer(1, 12))
 
