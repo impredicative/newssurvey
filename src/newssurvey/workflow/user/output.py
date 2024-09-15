@@ -230,16 +230,24 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     def replace_citations(text):
         return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + ",".join([f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in match.group(1).split(",")]) + "</super>", text)
 
-    for num, section in enumerate(sections, start=1):
-        story += [Paragraph(f'{num}. <a name="section_{num}"/>{section["title"]}', styles["Heading1"]), Spacer(1, 12)]
-        for para_text in replace_citations(section["text"]).split("\n\n"):
-            story += [Paragraph(para_text, styles["Normal"]), Spacer(1, 12)]
+    num_sections = len(sections)
+    for section_num, section in enumerate(sections, start=1):
+        story += [Paragraph(f'{section_num}. <a name="section_{section_num}"/>{section["title"]}', styles["Heading1"]), Spacer(1, 12)]
+        paragraphs = replace_citations(section["text"]).split("\n\n")
+        num_paragraphs = len(paragraphs)
+        for para_num, para_text in enumerate(paragraphs, start=1):
+            story.append(Paragraph(para_text, styles["Normal"]))
+            if (section_num != num_sections) or (para_num != num_paragraphs):
+                story.append(Spacer(1, 12))
 
     story += [PageBreak(), Paragraph('<a name="references"/>References', styles["Heading1"]), Spacer(1, 12)]
 
-    for citation in citations:
+    num_citations = len(citations)
+    for citation_num, citation in enumerate(citations, start=1):
         citation_text = f'<a name="citation_{citation["number"]}"/><b>{citation["number"]}.</b> <a href="{citation["link"]}">{citation["title"]}</a><br/><a href="{citation["link"]}">{citation["link"]}</a>'
-        story += [Paragraph(citation_text, styles["Normal"]), Spacer(1, 12)]
+        story.append(Paragraph(citation_text, styles["Normal"]))
+        if citation_num != num_citations:
+            story.append(Spacer(1, 12))
 
     doc.build(story)
     pdf_value = buffer.getvalue()
