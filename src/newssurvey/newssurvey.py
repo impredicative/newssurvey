@@ -12,6 +12,7 @@ from newssurvey.workflow.llm.accumulate_search_terms import accumulate_search_te
 from newssurvey.workflow.llm.list_search_terms import list_search_terms
 from newssurvey.workflow.llm.filter_search_results import filter_search_results
 from newssurvey.workflow.llm.list_sections import list_sections
+from newssurvey.workflow.llm.refine_sections import refine_sections
 from newssurvey.workflow.llm.create_title import create_title
 from newssurvey.workflow.llm.rate_articles import rate_articles
 from newssurvey.workflow.llm.condense_articles import condense_articles
@@ -72,6 +73,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if confirm:
         get_confirmation("listing sections")
     sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r["title"] for r in articles], max_sections=max_sections)
+    sections: list[str] = refine_sections(user_query=query, source_module=source_module, sections=sections, titles=[r["title"] for r in articles], max_sections=max_sections)
     num_sections = len(sections)
     section_names_str = f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)])
     print(section_names_str)

@@ -1,0 +1,35 @@
+In this step of the workflow, you are given:
+1. An ordered single-level list of section names. These are for a research report which is to be written in a later step.
+2. An exhaustive list of article titles. The research report is to be written using the article texts in the later step.
+
+Your task is to refine the given list of section names for the research report in the context of the user's query. Up to {max_sections} section names are permitted. The research report will comprise the refined named sections. As before, an ordered single-level list is expected. You may keep, add, remove, and/or alter section names. Avoid nitpicking, however, or we will never converge at a final list. In suggesting updated section names, continue to limit them to the ones that the articles can strongly substantiate, while also ensuring that the section names maintain a strong relevance and high specificity to the user's query. Also continue to use a sensible ordering. For your convenience, the article titles are sorted using a semantic cosine embedding distance from the user's query in ascending order by distance.
+
+The sections must conceptually all be complementary to each other, not overlapping or duplicative.
+
+## Format
+### Input format
+You will be given one section name per line in the numbered format "{{num}}. {{section}}", where:
+* {{num}} is just an ordered incremented enumeration of the section names.
+* {{section}} is the section name.
+
+Likewise, you will be given one article title per line in the numbered format "{{num}}. {{title}}", where:
+* {{num}} is just an ordered incremented enumeration of the article titles.
+* {{title}} is the article title.
+
+### Output format
+Each line of your output will have the numbered format "{{num}}. {{section}}", where:
+* {{num}} is your ordered incremented enumeration of the section names. It is intended to help you keep a running count of how many sections you have listed.
+* {{section}} is the section name.
+
+Remember to limit your list of section names to a maximum of {max_sections}, although there isn't any minimum quota to meet. The user's well-being may depend on the comprehensiveness and well-roundedness of your coverage. Recall that each section is intended to uniquely contribute to the report.
+
+Lastly, there is no room to provide a "diff" update. Even if only one section name needed to be updated, the entire list must still be returned.
+
+## Data
+The list of {num_sections} preexisting section names of the report is:
+
+{sections}
+
+The list of {num_titles} article titles is below:
+
+{titles}

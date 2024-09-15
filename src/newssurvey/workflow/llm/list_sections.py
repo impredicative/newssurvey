@@ -12,10 +12,10 @@ from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_error, print_warning
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
-SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
+SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")  # Also used by refine_sections.
 
 
-def are_sections_valid(numbered_sections: list[str]) -> bool:
+def are_sections_valid(numbered_sections: list[str], max_sections: int) -> bool:  # Also used by refine_sections.
     """Return true if the section names are valid, otherwise false.
 
     A validation error is printed if a section name is invalid.
@@ -24,6 +24,10 @@ def are_sections_valid(numbered_sections: list[str]) -> bool:
     """
     if not numbered_sections:
         print_error("No sections found.")
+        return False
+
+    if len(numbered_sections) > max_sections:
+        print_error(f"Number of sections ({len(numbered_sections)}) exceeds the maximum number of permissible sections ({max_sections}).")
         return False
 
     seen = set()
@@ -65,7 +69,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
     def prompt_formatter(titles_truncated: list[str]) -> str:
         numbered_titles = [f"{i}. {s}" for i, s in enumerate(titles_truncated, start=1)]
         numbered_titles_str = "\n".join(numbered_titles)
-        prompt_data["task"] = PROMPTS["3. list_sections"].format(num_titles=len(titles_truncated), titles=numbered_titles_str, max_sections=max_sections)
+        prompt_data["task"] = PROMPTS["3.1. list_sections"].format(num_titles=len(titles_truncated), titles=numbered_titles_str, max_sections=max_sections)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
@@ -86,7 +90,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = are_sections_valid(numbered_response_sections)
+            response_is_valid = are_sections_valid(numbered_response_sections, max_sections)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
