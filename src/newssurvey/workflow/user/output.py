@@ -195,144 +195,56 @@ def format_json_output(title: str, sections: list[SectionGen2], citations: list[
 def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> bytes:
     """Return the PDF bytes output for the given sections and citations."""
     from io import BytesIO
-    from reportlab.platypus import (
-        SimpleDocTemplate,
-        Paragraph,
-        Spacer,
-        PageBreak,
-        ListFlowable,
-        ListItem,
-    )
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, ListFlowable, ListItem
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.pagesizes import letter
 
-    # Custom DocTemplate to handle bookmarks
     class MyDocTemplate(SimpleDocTemplate):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self._bookmark_id = 0
 
         def afterFlowable(self, flowable):
-            # Check if the flowable is a Paragraph
             if isinstance(flowable, Paragraph):
                 text = flowable.getPlainText()
                 style_name = flowable.style.name
-
-                # Map styles to bookmark levels
-                if style_name == "Title":
-                    level = 0
-                elif style_name in ("Heading1", "Heading2"):
-                    level = 1
-                else:
-                    return  # Not a heading style we're tracking
-
-                # Create a unique bookmark key
-                key = f"bk_{self._bookmark_id}"
-                self._bookmark_id += 1
-
-                # Add bookmark and outline entry
-                self.canv.bookmarkPage(key)
-                self.canv.addOutlineEntry(text, key, level=level, closed=False)
+                level = 0 if style_name == "Title" else 1 if style_name in ("Heading1", "Heading2") else None
+                if level is not None:
+                    key = f"bk_{self._bookmark_id}"
+                    self._bookmark_id += 1
+                    self.canv.bookmarkPage(key)
+                    self.canv.addOutlineEntry(text, key, level=level, closed=False)
 
     buffer = BytesIO()
-    doc = MyDocTemplate(
-        buffer,
-        pagesize=letter,
-        rightMargin=72,
-        leftMargin=72,
-        topMargin=72,
-        bottomMargin=72,
-    )
+    doc = MyDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
     styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="TOC", parent=styles["Normal"], fontSize=12, leading=14, leftIndent=20))
+    styles.add(ParagraphStyle(name="Center", parent=styles["Normal"], alignment=1))
 
-    # Custom Styles
-    styles.add(
-        ParagraphStyle(
-            name="TOC",
-            parent=styles["Normal"],
-            fontSize=12,
-            leading=14,
-            leftIndent=20,
-        )
-    )
-    styles.add(
-        ParagraphStyle(
-            name="Center",
-            parent=styles["Normal"],
-            alignment=1,  # Center alignment
-        )
-    )
+    story = [Paragraph(title, styles["Title"]), Spacer(1, 12), Paragraph(_get_date_string(), styles["Center"]), Spacer(1, 12), Paragraph(_DISCLAIMER, styles["Italic"]), Spacer(1, 12), Paragraph('<a name="contents"/>Contents', styles["Heading1"]), Spacer(1, 12)]
 
-    story = []
-
-    # Title (Level 0)
-    story.append(Paragraph(title, styles["Title"]))
-    story.append(Spacer(1, 12))
-
-    # Date (Center-Aligned)
-    date_str = _get_date_string()
-    date_para = Paragraph(date_str, styles["Center"])
-    story.append(date_para)
-    story.append(Spacer(1, 12))
-
-    # Disclaimer
-    story.append(Paragraph(_DISCLAIMER, styles["Italic"]))
-    story.append(Spacer(1, 12))
-
-    # Contents (Level 1)
-    story.append(Paragraph('<a name="contents"/>Contents', styles["Heading1"]))
-    story.append(Spacer(1, 12))
-    toc_items = []
-    for num, section in enumerate(sections, start=1):
-        section_title = section["title"]
-        p = Paragraph(f'<a href="#section_{num}">{section_title}</a>', styles["TOC"])
-        toc_items.append(ListItem(p))
-    # Add References to contents
-    p = Paragraph('<a href="#references">References</a>', styles["TOC"])
-    toc_items.append(ListItem(p))
-
+    toc_items = [ListItem(Paragraph(f'<a href="#section_{num}">{section["title"]}</a>', styles["TOC"])) for num, section in enumerate(sections, start=1)]
+    toc_items.append(ListItem(Paragraph('<a href="#references">References</a>', styles["TOC"])))
     story.append(ListFlowable(toc_items, bulletType="1"))
     story.append(PageBreak())
 
-    # Citation pattern
     def replace_citations(text):
-        def repl(match):
-            citation_numbers = match.group(1).split(",")
-            citation_links = [f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in citation_numbers]
-            return "<super>" + ",".join(citation_links) + "</super>"
+        return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + ",".join([f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in match.group(1).split(",")]) + "</super>", text)
 
-        return CITATION_GROUP_PATTERN.sub(repl, text)
-
-    # Add sections
     for num, section in enumerate(sections, start=1):
-        # Section heading with anchor (Level 1)
-        heading_text = f'{num}. <a name="section_{num}"/>{section["title"]}'
-        heading_style = styles["Heading1"]
-        story.append(Paragraph(heading_text, heading_style))
+        story.append(Paragraph(f'{num}. <a name="section_{num}"/>{section["title"]}', styles["Heading1"]))
         story.append(Spacer(1, 12))
-
-        # Processed text
-        processed_text = replace_citations(section["text"])
-
-        # Split processed_text into paragraphs
-        paragraphs = processed_text.split("\n\n")
-        for para_text in paragraphs:
+        for para_text in replace_citations(section["text"]).split("\n\n"):
             story.append(Paragraph(para_text, styles["Normal"]))
             story.append(Spacer(1, 12))
 
-    # References (Level 1)
-    story.append(PageBreak())
-    references_heading = Paragraph('<a name="references"/>References', styles["Heading1"])
-    story.append(references_heading)
-    story.append(Spacer(1, 12))
+    story += [PageBreak(), Paragraph('<a name="references"/>References', styles["Heading1"]), Spacer(1, 12)]
 
-    # Add citations with anchors and clickable URLs
     for citation in citations:
-        citation_text = f'<a name="citation_{citation["number"]}"/>' f'<b>{citation["number"]}.</b> ' f'<a href="{citation["link"]}">{citation["title"]}</a><br/>' f'<a href="{citation["link"]}">{citation["link"]}</a>'
+        citation_text = f'<a name="citation_{citation["number"]}"/><b>{citation["number"]}.</b> <a href="{citation["link"]}">{citation["title"]}</a><br/><a href="{citation["link"]}">{citation["link"]}</a>'
         story.append(Paragraph(citation_text, styles["Normal"]))
         story.append(Spacer(1, 12))
 
-    # Build the PDF
     doc.build(story)
     pdf_value = buffer.getvalue()
     buffer.close()
