@@ -225,25 +225,21 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
 
     toc_items = [ListItem(Paragraph(f'<a href="#section_{num}">{section["title"]}</a>', styles["TOC"])) for num, section in enumerate(sections, start=1)]
     toc_items.append(ListItem(Paragraph('<a href="#references">References</a>', styles["TOC"])))
-    story.append(ListFlowable(toc_items, bulletType="1"))
-    story.append(PageBreak())
+    story += [ListFlowable(toc_items, bulletType="1"), PageBreak()]
 
     def replace_citations(text):
         return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + ",".join([f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in match.group(1).split(",")]) + "</super>", text)
 
     for num, section in enumerate(sections, start=1):
-        story.append(Paragraph(f'{num}. <a name="section_{num}"/>{section["title"]}', styles["Heading1"]))
-        story.append(Spacer(1, 12))
+        story += [Paragraph(f'{num}. <a name="section_{num}"/>{section["title"]}', styles["Heading1"]), Spacer(1, 12)]
         for para_text in replace_citations(section["text"]).split("\n\n"):
-            story.append(Paragraph(para_text, styles["Normal"]))
-            story.append(Spacer(1, 12))
+            story += [Paragraph(para_text, styles["Normal"]), Spacer(1, 12)]
 
     story += [PageBreak(), Paragraph('<a name="references"/>References', styles["Heading1"]), Spacer(1, 12)]
 
     for citation in citations:
         citation_text = f'<a name="citation_{citation["number"]}"/><b>{citation["number"]}.</b> <a href="{citation["link"]}">{citation["title"]}</a><br/><a href="{citation["link"]}">{citation["link"]}</a>'
-        story.append(Paragraph(citation_text, styles["Normal"]))
-        story.append(Spacer(1, 12))
+        story += [Paragraph(citation_text, styles["Normal"]), Spacer(1, 12)]
 
     doc.build(story)
     pdf_value = buffer.getvalue()
