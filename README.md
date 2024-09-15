@@ -140,6 +140,8 @@ If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
 ## Cache
 An extensive disk cache is stored locally to cache website and LLM outputs with a fixed expiration period. This is in the `[src]/newssurvey/.diskcache` directory. The expiration period is 1 week for website searches and 52 weeks for everything else, also subject to separate disk usage limits. To reuse the cache, rerun the same user query within this period. To bypass the cache, alter the user query, otherwise delete the appropriate cache subdirectory. Updates to the LLM prompts will also bypass the cache.
 
+The LLM is prompted to always output in a basic text format. Following this, the text is structured into the user-requested output format without using the LLM. Rewriting the output into a new format is therefore possible offline until the earliest cache expiration, typically for 1 week.
+
 ## Disclaimer
 
 <sub>This software is provided as a proof-of-concept application and is distributed under the LGPL license. It is offered without any guarantees or warranties, either expressed or implied, including but not limited to the implied warranties of merchantability, fitness for a particular purpose, or non-infringement.</sub>
