@@ -18,6 +18,10 @@ class LanguageModelOutputError(ModelOutputError):
     """Language model output error."""
 
 
+class LanguageModelOutputConvergenceError(LanguageModelOutputError):
+    """Language model output convergence error."""
+
+
 class LanguageModelOutputLimitError(LanguageModelOutputError):
     """Language model output limit error."""
 
