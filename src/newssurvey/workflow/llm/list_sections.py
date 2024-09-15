@@ -12,10 +12,10 @@ from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_error, print_warning
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
-_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
+SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 
 
-def _are_sections_valid(numbered_sections: list[str]) -> bool:
+def are_sections_valid(numbered_sections: list[str]) -> bool:
     """Return true if the section names are valid, otherwise false.
 
     A validation error is printed if a section name is invalid.
@@ -32,7 +32,7 @@ def _are_sections_valid(numbered_sections: list[str]) -> bool:
             print_error(f"Section {num} is not a string.")
             return False
 
-        match = _SECTION_PATTERN.fullmatch(numbered_section)
+        match = SECTION_PATTERN.fullmatch(numbered_section)
         if not match:
             print_error(f"Section line #{num} does not match expected pattern. The section string is: {numbered_section!r}")
             return False
@@ -86,7 +86,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = _are_sections_valid(numbered_response_sections)
+            response_is_valid = are_sections_valid(numbered_response_sections)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
@@ -97,7 +97,7 @@ def _list_sections(user_query: str, source_module: ModuleType, *, titles: list[s
 
         break
 
-    numbered_response_matches = [_SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
+    numbered_response_matches = [SECTION_PATTERN.fullmatch(line) for line in numbered_response_sections]
     sections = [match["section"] for match in numbered_response_matches]
     return sections
 
