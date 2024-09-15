@@ -212,7 +212,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
                 if level is not None:
                     key = f"bk_{self._bookmark_id}"
                     self._bookmark_id += 1
-                    self.canv.bookmarkPage(key)
+                    self.canv.bookmarkPage(key, fit="XYZ", left=0, zoom=None)
                     self.canv.addOutlineEntry(text, key, level=level, closed=False)
 
     buffer = BytesIO()
