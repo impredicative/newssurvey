@@ -196,17 +196,14 @@ def format_output(*, title: str, sections: list[SectionGen2], citations: list[Ci
     """Return the formatted output for the given sections and citations in the specified format."""
     if output_format not in SUPPORTED_OUTPUT_FORMATS:
         raise ValueError(f"Unsupported output format: {output_format!r}")
-
-    match output_format:
-        case "txt":
-            return format_text_output(title, sections, citations, **kwargs)
-        case "md":
-            return format_markdown_output(title, sections, citations, **kwargs)
-        case "gfm.md":
-            return format_gfm_output(title, sections, citations, **kwargs)
-        case "html":
-            return format_html_output(title, sections, citations, **kwargs)
-        case "json":
-            return format_json_output(title, sections, citations, **kwargs)
-        case _:
-            raise ValueError(f"Unsupported output format: {output_format!r}")
+    
+    formatters = {
+            "txt": format_text_output,
+            "md": format_markdown_output,
+            "gfm.md": format_gfm_output,
+            "html": format_html_output,
+            "json": format_json_output,
+        }
+    formatter = formatters[output_format]
+    output = formatter(title=title, sections=sections, citations=citations, **kwargs)
+    return output
