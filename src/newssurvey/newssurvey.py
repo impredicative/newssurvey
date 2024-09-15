@@ -118,7 +118,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     print(f"REPORT:\n\n{response_text}")
 
     if output_format == "txt":
-        pass
+        response_data = response_text
     elif output_format in SUPPORTED_OUTPUT_FORMATS:
         response_data: str | bytes = format_output(title=title, sections=section_texts, citations=citations, output_format=output_format)
     else:
