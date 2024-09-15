@@ -67,7 +67,7 @@ publish = "rye publish --verbose"
 release = { chain = ["check", "build", "publish"]}
 
 [tool.hatch.build]
-exclude = [".env", "archive/", "docs/", "samples/", "scripts/", "work/"]
+exclude = [".env", "analysis/", "archive/", "docs/", "samples/", "scripts/", "work/"]
 
 [tool.ruff]
 line-length = 999
