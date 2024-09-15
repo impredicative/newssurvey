@@ -128,7 +128,7 @@ def _main(source: Optional[str], query: Optional[str], max_sections: int, output
         output_format, output_path = _get_output_format_and_path(output_format=output_format, output_path=output_path, title=response.title)
         if (query_origin == "file") and (query_path.resolve() == output_path.resolve()):
             raise newssurvey.exceptions.InputError(f"Output file path {str(output_path.resolve())!r} is the same as the query file path {str(query_path.resolve())!r}.")
-        
+
         response_data = response.response
         if isinstance(response_data, str):
             output_path.write_text(response_data)
