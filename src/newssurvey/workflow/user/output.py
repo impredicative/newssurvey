@@ -219,9 +219,9 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
                 style_name = flowable.style.name
 
                 # Map styles to bookmark levels
-                if style_name == 'Title':
+                if style_name == "Title":
                     level = 0
-                elif style_name in ('Heading1', 'Heading2'):
+                elif style_name in ("Heading1", "Heading2"):
                     level = 1
                 else:
                     return  # Not a heading style we're tracking
@@ -285,9 +285,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     toc_items = []
     for num, section in enumerate(sections, start=1):
         section_title = section["title"]
-        p = Paragraph(
-            f'<a href="#section_{num}">{section_title}</a>', styles["TOC"]
-        )
+        p = Paragraph(f'<a href="#section_{num}">{section_title}</a>', styles["TOC"])
         toc_items.append(ListItem(p))
     # Add References to contents
     p = Paragraph('<a href="#references">References</a>', styles["TOC"])
@@ -300,11 +298,8 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     def replace_citations(text):
         def repl(match):
             citation_numbers = match.group(1).split(",")
-            citation_links = [
-                f'<a href="#citation_{num.strip()}">{num.strip()}</a>'
-                for num in citation_numbers
-            ]
-            return '<super>' + ','.join(citation_links) + '</super>'
+            citation_links = [f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in citation_numbers]
+            return "<super>" + ",".join(citation_links) + "</super>"
 
         return CITATION_GROUP_PATTERN.sub(repl, text)
 
@@ -333,12 +328,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
 
     # Add citations with anchors and clickable URLs
     for citation in citations:
-        citation_text = (
-            f'<a name="citation_{citation["number"]}"/>'
-            f'<b>{citation["number"]}.</b> '
-            f'<a href="{citation["link"]}">{citation["title"]}</a><br/>'
-            f'<a href="{citation["link"]}">{citation["link"]}</a>'
-        )
+        citation_text = f'<a name="citation_{citation["number"]}"/>' f'<b>{citation["number"]}.</b> ' f'<a href="{citation["link"]}">{citation["title"]}</a><br/>' f'<a href="{citation["link"]}">{citation["link"]}</a>'
         story.append(Paragraph(citation_text, styles["Normal"]))
         story.append(Spacer(1, 12))
 
@@ -353,15 +343,15 @@ def format_output(*, title: str, sections: list[SectionGen2], citations: list[Ci
     """Return the formatted output for the given sections and citations in the specified format."""
     if output_format not in SUPPORTED_OUTPUT_FORMATS:
         raise ValueError(f"Unsupported output format: {output_format!r}")
-    
+
     formatters = {
-            "txt": format_text_output,
-            "md": format_markdown_output,
-            "gfm.md": format_gfm_output,
-            "html": format_html_output,
-            "pdf": format_pdf_output,
-            "json": format_json_output,
-        }
+        "txt": format_text_output,
+        "md": format_markdown_output,
+        "gfm.md": format_gfm_output,
+        "html": format_html_output,
+        "pdf": format_pdf_output,
+        "json": format_json_output,
+    }
     formatter = formatters[output_format]
     output = formatter(title=title, sections=sections, citations=citations, **kwargs)
     return output
