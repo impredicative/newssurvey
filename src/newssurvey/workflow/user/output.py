@@ -195,7 +195,7 @@ def format_json_output(title: str, sections: list[SectionGen2], citations: list[
 def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> bytes:
     """Return the PDF bytes output for the given sections and citations."""
     from io import BytesIO
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, ListFlowable, ListItem
+    from reportlab.platypus import Flowable, SimpleDocTemplate, Paragraph, Spacer, PageBreak, ListFlowable, ListItem
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.pagesizes import letter
 
@@ -204,7 +204,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
             super().__init__(*args, **kwargs)
             self._bookmark_id = 0
 
-        def afterFlowable(self, flowable):
+        def afterFlowable(self, flowable: Flowable) -> None:
             if isinstance(flowable, Paragraph):
                 text = flowable.getPlainText()
                 style_name = flowable.style.name
