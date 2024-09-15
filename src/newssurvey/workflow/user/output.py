@@ -198,6 +198,8 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     from reportlab.platypus import Flowable, SimpleDocTemplate, Paragraph, Spacer, PageBreak, ListFlowable, ListItem
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import inch
+    from reportlab.pdfgen.canvas import Canvas
 
     class MyDocTemplate(SimpleDocTemplate):
         def __init__(self, *args, **kwargs):
@@ -205,6 +207,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
             self._bookmark_id = 0
 
         def afterFlowable(self, flowable: Flowable) -> None:
+            """Add bookmark and outline entries for the flowable if a Paragraph with a style of "Title", "Heading1", or "Heading2"."""
             if isinstance(flowable, Paragraph):
                 text = flowable.getPlainText()
                 style_name = flowable.style.name
@@ -214,6 +217,15 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
                     self._bookmark_id += 1
                     self.canv.bookmarkPage(key, fit="XYZ", left=0, zoom=None)
                     self.canv.addOutlineEntry(text, key, level=level, closed=False)
+
+        def onPage(self, canvas: Canvas, doc: SimpleDocTemplate) -> None:
+            """Add the page number to the footer of each page."""
+            page_num = doc.page
+            text = f"{page_num}"
+            canvas.saveState()
+            canvas.setFont("Helvetica", 9)
+            canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, text)  # Page number at bottom center
+            canvas.restoreState()
 
     buffer = BytesIO()
     doc = MyDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
@@ -249,7 +261,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
         if citation_num != num_citations:
             story.append(Spacer(1, 12))
 
-    doc.build(story)
+    doc.build(story, onFirstPage=doc.onPage, onLaterPages=doc.onPage)
     pdf_value = buffer.getvalue()
     buffer.close()
     return pdf_value
