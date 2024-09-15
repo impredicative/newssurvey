@@ -115,11 +115,10 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
     numbered_sections_str = "\n".join(numbered_sections)
     section_number = sections.index(section) + 1
     numbered_section = f"{section_number}. {section}"
-    max_output_tokens = MAX_OUTPUT_TOKENS[_MODEL]
+    max_output_tokens = min(8192, MAX_OUTPUT_TOKENS[_MODEL])  # Max observed: <800 output tokens.
 
     def prompt_formatter(articles_truncated: list[str]) -> str:
         numbered_articles = "\n\n---\n\n".join([f"[ARTICLE {num}]\n\n{article}" for num, article in enumerate(articles_truncated, start=1)])
-        # Note: The number of supplied max_output_tokens is not rounded by flooring because the model is very likely already aware of the exact number assuming it's the actual limit.
         prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
@@ -150,7 +149,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
     max_safe_output_tokens_rate = 0.8
     max_safe_output_tokens = int(max_output_tokens * max_safe_output_tokens_rate)
     if num_response_tokens > max_safe_output_tokens:
-        # Note: The output is intentionally not retried in this case, as `max_output_tokens` likely is insufficient. It may need to be checked and increased.
+        # Note: The output is intentionally not retried in this case, as `max_output_tokens` likely is insufficient. If this is reached, it may need to be checked and increased.
         raise LanguageModelOutputLimitError(f"The generated section {section!r} has {num_response_tokens:,} tokens, which is more than {max_safe_output_tokens:,} tokens which is {max_safe_output_tokens_rate:.0%} of the maximum output token limit of {max_output_tokens:,} tokens. This is unexpected.")
 
     return num_articles_used, response
