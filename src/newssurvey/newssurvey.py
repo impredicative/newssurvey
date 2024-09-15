@@ -32,7 +32,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
     * `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
-    * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is txt.
+    * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. Its default is txt.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
     If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.
@@ -120,9 +120,9 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     if output_format == "txt":
         pass
     elif output_format in SUPPORTED_OUTPUT_FORMATS:
-        response_text: str = format_output(title=title, sections=section_texts, citations=citations, output_format=output_format)
+        response_data: str | bytes = format_output(title=title, sections=section_texts, citations=citations, output_format=output_format)
     else:
         raise ValueError(f"Unsupported output format: {output_format!r}")
 
-    response: Response = Response(format=output_format, title=title, response=response_text)
+    response: Response = Response(format=output_format, title=title, response=response_data)
     return response

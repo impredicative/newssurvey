@@ -14,6 +14,7 @@ dependencies = [
     "openai>=1.45.0",  # https://github.com/openai/openai-python/releases
     "pathvalidate>=3.2.1",  # https://github.com/thombashi/pathvalidate/releases
     "python-dotenv>=1.0.1",
+    "reportlab",
     "requests>=2.32.3",
     "scipy>=1.14.1",  # https://github.com/scipy/scipy/releases https://docs.scipy.org/doc/scipy/release.html
     "tiktoken>=0.7.0",  # https://github.com/openai/tiktoken/blob/main/CHANGELOG.md

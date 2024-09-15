@@ -71,13 +71,12 @@ In the simplest case, run `python -m newssurvey` to interactively start the appl
 For non-interactive use, the usage help is copied below:
 ```
 $ python -m newssurvey -h
+Using diskcache path: /workspaces/newssurvey/src/newssurvey/.diskcache/util/openai_
 Usage: python -m newssurvey [OPTIONS]
 
   Generate and write a response to a question or concern using a supported news source.
 
-  The progress is printed to stdout.
-
-  A nonzero exitcode exists if there is an error.
+  A single instance of this method is enforced.
 
 Options:
   -s, --source TEXT               Name of supported news source. If not given, the user is prompted for it.
@@ -87,14 +86,14 @@ Options:
                                   Maximum number of sections to include in the response, between 10 and 100. Its
                                   recommended value, also the default, is 100.  [10<=x<=100]
   -f, --output-format TEXT        Output format of the response. It can be txt (for text), md (for markdown), gfm.md
-                                  (for GitHub Flavored markdown), html, or json. If not specified, but if an output
-                                  filename is specified via '--output-path', it is determined automatically from the
-                                  file extension. If not specified, and if an output filename is not specified either,
-                                  its default is txt.
+                                  (for GitHub Flavored markdown), html, pdf, or json. If not specified, but if an
+                                  output filename is specified via '--output-path', it is determined automatically
+                                  from the file extension. If not specified, and if an output filename is not
+                                  specified either, its default is txt.
   -o, --output-path PATH          Output directory path or file path. If intended as a directory path, it must exist,
                                   and the file name is auto-determined. If intended as a file path, its extension can
                                   be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html,
-                                  or json. If not specified, the output file is written to the current working
+                                  pdf, or json. If not specified, the output file is written to the current working
                                   directory with an auto-determined file name. The response is written to the file
                                   except if there is an error.
   -c, --confirm / -nc, --no-confirm
@@ -132,7 +131,7 @@ Params:
 * `source`: Name of supported news source.
 * `query`: Question or concern answerable by the news source.
 * `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
-* `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. Its default is txt.
+* `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. Its default is txt.
 * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
 If failed, a subclass of the `newssurvey.exceptions.Error` exception is raised.

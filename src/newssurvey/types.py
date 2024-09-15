@@ -57,6 +57,6 @@ class SectionGen2(TypedDict):
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class Response:
-    format: str  # Included to facilitate writing the response as text or binary.
+    format: str
     title: str  # Included to facilitate writing the response to file with the title in its name.
-    response: str
+    response: str | bytes

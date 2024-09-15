@@ -6,7 +6,7 @@ from newssurvey.config import CITATION_GROUP_PATTERN, PROMPTS
 from newssurvey.types import SectionGen2, CitationGen2
 
 _DISCLAIMER = PROMPTS["disclaimer"]
-SUPPORTED_OUTPUT_FORMATS: list[str] = ["txt", "gfm.md", "md", "html", "json"]  # Note: 'gfm.md' must remain before 'md' to avoid matching 'md' first.
+SUPPORTED_OUTPUT_FORMATS: list[str] = ["txt", "gfm.md", "md", "html", "pdf", "json"]  # Note: 'gfm.md' must remain before 'md' to avoid matching 'md' first.
 
 
 def _get_date_string() -> str:
@@ -192,6 +192,136 @@ def format_json_output(title: str, sections: list[SectionGen2], citations: list[
     return json.dumps(data, indent=4)
 
 
+def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> bytes:
+    """Return the PDF bytes output for the given sections and citations."""
+    from io import BytesIO
+    from reportlab.platypus import (
+        SimpleDocTemplate,
+        Paragraph,
+        Spacer,
+        PageBreak,
+        ListFlowable,
+        ListItem,
+    )
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import inch
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72,
+    )
+    styles = getSampleStyleSheet()
+
+    # Custom Styles
+    styles.add(
+        ParagraphStyle(
+            name="TOC",
+            parent=styles["Normal"],
+            fontSize=12,
+            leading=14,
+            leftIndent=20,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="Center",
+            parent=styles["Normal"],
+            alignment=1,  # Center alignment
+        )
+    )
+
+    story = []
+
+    # Title
+    story.append(Paragraph(title, styles["Title"]))
+    story.append(Spacer(1, 12))
+
+    # Date (Center-Aligned)
+    date_str = _get_date_string()
+    date_para = Paragraph(date_str, styles["Center"])
+    story.append(date_para)
+    story.append(Spacer(1, 12))
+
+    # Disclaimer
+    story.append(Paragraph(_DISCLAIMER, styles["Italic"]))
+    story.append(Spacer(1, 12))
+
+    # Contents
+    story.append(Paragraph("Contents", styles["Heading2"]))
+    story.append(Spacer(1, 12))
+    toc_items = []
+    for num, section in enumerate(sections, start=1):
+        section_title = section["title"]
+        p = Paragraph(
+            f'<a href="#section_{num}">{section_title}</a>', styles["TOC"]
+        )
+        toc_items.append(ListItem(p))
+    # Add References to contents
+    p = Paragraph('<a href="#references">References</a>', styles["TOC"])
+    toc_items.append(ListItem(p))
+
+    story.append(ListFlowable(toc_items, bulletType="1"))
+    story.append(PageBreak())
+
+    # Citation pattern
+    def replace_citations(text):
+        def repl(match):
+            citation_numbers = match.group(1).split(",")
+            citation_links = [
+                f'<a href="#citation_{num.strip()}">{num.strip()}</a>'
+                for num in citation_numbers
+            ]
+            return '<super>' + ','.join(citation_links) + '</super>'
+
+        return CITATION_GROUP_PATTERN.sub(repl, text)
+
+    # Add sections
+    for num, section in enumerate(sections, start=1):
+        # Section heading with anchor
+        heading_text = f'{num}. <a name="section_{num}"/>{section["title"]}'
+        heading_style = styles["Heading2"]
+        story.append(Paragraph(heading_text, heading_style))
+        story.append(Spacer(1, 12))
+
+        # Processed text
+        processed_text = replace_citations(section["text"])
+
+        # Split processed_text into paragraphs
+        paragraphs = processed_text.split("\n\n")
+        for para_text in paragraphs:
+            story.append(Paragraph(para_text, styles["Normal"]))
+            story.append(Spacer(1, 12))
+
+    # References
+    story.append(PageBreak())
+    references_heading = Paragraph('<a name="references"/>References', styles["Heading2"])
+    story.append(references_heading)
+    story.append(Spacer(1, 12))
+
+    # Add citations with anchors and clickable URLs
+    for citation in citations:
+        citation_text = (
+            f'<a name="citation_{citation["number"]}"/>'
+            f'<b>{citation["number"]}.</b> '
+            f'<a href="{citation["link"]}">{citation["title"]}</a><br/>'
+            f'<a href="{citation["link"]}">{citation["link"]}</a>'
+        )
+        story.append(Paragraph(citation_text, styles["Normal"]))
+        story.append(Spacer(1, 12))
+
+    # Build the PDF
+    doc.build(story)
+    pdf_value = buffer.getvalue()
+    buffer.close()
+    return pdf_value
+
+
 def format_output(*, title: str, sections: list[SectionGen2], citations: list[CitationGen2], output_format: str, **kwargs) -> str:
     """Return the formatted output for the given sections and citations in the specified format."""
     if output_format not in SUPPORTED_OUTPUT_FORMATS:
@@ -202,6 +332,7 @@ def format_output(*, title: str, sections: list[SectionGen2], citations: list[Ci
             "md": format_markdown_output,
             "gfm.md": format_gfm_output,
             "html": format_html_output,
+            "pdf": format_pdf_output,
             "json": format_json_output,
         }
     formatter = formatters[output_format]

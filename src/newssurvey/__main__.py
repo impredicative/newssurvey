@@ -71,8 +71,8 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
 @click.option("--source", "-s", default=None, help="Name of supported news source. If not given, the user is prompted for it.")
 @click.option("--query", "-q", default=None, help="Question or concern answerable by the news source. If a path to a file, the file text is read as text. If not given, the user is prompted for it.")
 @click.option("--max-sections", "-m", default=NUM_SECTIONS_DEFAULT, type=click.IntRange(NUM_SECTIONS_MIN, NUM_SECTIONS_MAX), help=f"Maximum number of sections to include in the response, between {NUM_SECTIONS_MIN} and {NUM_SECTIONS_MAX}. Its recommended value, also the default, is {NUM_SECTIONS_DEFAULT}.")
-@click.option("--output-format", "-f", default=None, help=f"Output format of the response. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. If not specified, but if an output filename is specified via '--output-path', it is determined automatically from the file extension. If not specified, and if an output filename is not specified either, its default is {OUTPUT_FORMAT_DEFAULT}.")
-@click.option("--output-path", "-o", default=None, type=Path, help="Output directory path or file path. If intended as a directory path, it must exist, and the file name is auto-determined. If intended as a file path, its extension can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, or json. If not specified, the output file is written to the current working directory with an auto-determined file name. The response is written to the file except if there is an error.")
+@click.option("--output-format", "-f", default=None, help=f"Output format of the response. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. If not specified, but if an output filename is specified via '--output-path', it is determined automatically from the file extension. If not specified, and if an output filename is not specified either, its default is {OUTPUT_FORMAT_DEFAULT}.")
+@click.option("--output-path", "-o", default=None, type=Path, help="Output directory path or file path. If intended as a directory path, it must exist, and the file name is auto-determined. If intended as a file path, its extension can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. If not specified, the output file is written to the current working directory with an auto-determined file name. The response is written to the file except if there is an error.")
 @click.option("--confirm/--no-confirm", "-c/-nc", default=True, help="Confirm as the workflow progresses. If `--confirm`, a confirmation is interactively sought as each step of the workflow progresses, and this is the default. If `--no-confirm`, the workflow progresses without any confirmation.")
 def main(*args, **kwargs) -> None:
     """Generate and write a response to a question or concern using a supported news source.
@@ -128,7 +128,14 @@ def _main(source: Optional[str], query: Optional[str], max_sections: int, output
         output_format, output_path = _get_output_format_and_path(output_format=output_format, output_path=output_path, title=response.title)
         if (query_origin == "file") and (query_path.resolve() == output_path.resolve()):
             raise newssurvey.exceptions.InputError(f"Output file path {str(output_path.resolve())!r} is the same as the query file path {str(query_path.resolve())!r}.")
-        output_path.write_text(response.response)
+        
+        response_data = response.response
+        if isinstance(response_data, str):
+            output_path.write_text(response_data)
+        elif isinstance(response_data, bytes):
+            output_path.write_bytes(response_data)
+        else:
+            assert False, type(response_data)
         print(f"Wrote response titled {response.title!r} in format {response.format} to {str(output_path.resolve())!r}.")
     except newssurvey.exceptions.Error as exc:
         print_error(str(exc))
