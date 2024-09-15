@@ -24,7 +24,8 @@ Each step in this workflow corresponds to an action taken by the LLM.
 The workflow is intended to be as simple as necessary, and without cycles between steps.
 
 ## Samples
-These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are also available in the [samples](./samples/) directory.
+These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are also available in the [samples](https://github.com/impredicative/newssurvey/tree/master/samples) directory of the repository.<!-- Note: An absolute link is used because a relative link doesn't work in PyPI. -->
+
 
 | Source        | User query (simplified)               | Output title |
 |---------------|---------------------------------------|--------------|
