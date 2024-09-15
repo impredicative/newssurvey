@@ -4,5 +4,10 @@ def prefix_lines(string: str, /, *, prefix: str = "> ") -> str:
 
 
 def is_none_response(text: str) -> bool:
-    """Return true if the given text is a none response, otherwise false."""
+    """Return true if the given text is a "none" response, otherwise false."""
     return text.lower() in ("none", "none.")
+
+
+def is_ok_response(text: str) -> bool:
+    """Return true if the given text is an "OK" response, otherwise false."""
+    return text.upper() in ("OK", "OK.")
