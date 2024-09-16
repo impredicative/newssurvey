@@ -11,6 +11,7 @@ from newssurvey.util.sys_ import print_error
 from ._common import REQUEST_HEADERS, request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["large"])
+_EXPECTED_ARTICLE_URL_PREFIX = "https://medicalxpress.com/news/"
 _HEXT = hext.Rule("""
     <html>
         <body>
@@ -59,6 +60,7 @@ _CONTENT_SUFFIX_REMOVELIST = (" Read the original article.",)
 
 @_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_article_response"], tag="get_article_response")
 def _get_article_response(url: str) -> requests.Response:
+    assert url.startswith(_EXPECTED_ARTICLE_URL_PREFIX), url
     with request_cooldown_lock:
         print(f"Reading {url}.")
         response = requests.get(url, headers=REQUEST_HEADERS)
