@@ -3,7 +3,6 @@ from newssurvey.util.threading_ import CooldownLock
 
 _REQUEST_COOLDOWN = 3  # Applicable to default Mozilla Firefox user agent.
 REQUEST_HEADERS = REQUEST_HEADERS.copy()
-# SOURCE_SITE_URL = "medicalxpress.com"
 SOURCE_SITE_NAME = "MedicalXpress"
 SOURCE_TYPE = "medical"
 
