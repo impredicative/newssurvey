@@ -19,7 +19,7 @@ _MODEL_SIZE = [
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
 
-_INVALID_BRACKETS = ["〖〗"]  # These have been observed in the output.
+_INVALID_BRACKETS = ["〖〗", "〈〉"]  # These have been observed in the output.
 _INVALID_BRACKETS_PATTERNS = {f"{invalid_open_bracket}{invalid_close_bracket}": re.compile(CITATION_GROUP_PATTERN.pattern.translate(str.maketrans(f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}", f"{invalid_open_bracket}{invalid_close_bracket}"))) for invalid_open_bracket, invalid_close_bracket in _INVALID_BRACKETS}
 
 
