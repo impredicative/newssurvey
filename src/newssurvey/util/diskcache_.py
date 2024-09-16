@@ -21,4 +21,4 @@ def get_diskcache(file_path: str, *, size_gib: int = CACHE_SIZES_GiB["small"]) -
     path = path.with_suffix("")  # Ex: sources/medicalxpress/article
     path = DISKCACHE_ROOT_PATH / path  # Ex: /workspaces/newssurvey/src/newssurvey/.diskcache/sources/medicalxpress/article
     print(f"Using diskcache path: {path}")
-    return diskcache.FanoutCache(directory=str(path), timeout=10, size_limit=size_gib * GiB)
+    return diskcache.FanoutCache(directory=str(path), shards=16, timeout=10, size_limit=size_gib * GiB)
