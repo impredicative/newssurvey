@@ -203,6 +203,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
 
     class MyDocTemplate(SimpleDocTemplate):
         def __init__(self, *args, **kwargs):
+            # kwargs['compress'] = True  # Made no difference to output size.
             super().__init__(*args, **kwargs)
             self._bookmark_id = 0
 
