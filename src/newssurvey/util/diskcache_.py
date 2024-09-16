@@ -5,7 +5,7 @@ import diskcache
 
 from newssurvey.config import CACHE_SIZES_GiB, GiB, PACKAGE_PATH
 
-
+_SHARDS = 16  # Note: A heuristic for this value is to use the number of OpenAI workers. Changing this value can invalidate the cache.
 DISKCACHE_ROOT_PATH = PACKAGE_PATH / ".diskcache"
 
 
@@ -21,4 +21,4 @@ def get_diskcache(file_path: str, *, size_gib: int = CACHE_SIZES_GiB["small"]) -
     path = path.with_suffix("")  # Ex: sources/medicalxpress/article
     path = DISKCACHE_ROOT_PATH / path  # Ex: /workspaces/newssurvey/src/newssurvey/.diskcache/sources/medicalxpress/article
     print(f"Using diskcache path: {path}")
-    return diskcache.FanoutCache(directory=str(path), shards=16, timeout=10, size_limit=size_gib * GiB)
+    return diskcache.FanoutCache(directory=str(path), shards=_SHARDS, timeout=10, size_limit=size_gib * GiB)
