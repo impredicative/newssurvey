@@ -1,7 +1,16 @@
 # newssurvey
-**newssurvey** is a proof-of-concept Python 3.12 application to write a survey report about a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only the [MedicalXpress](https://medicalxpress.com/) news site is supported for medical topics, although some additional sites are planned for inclusion. Numerous calls are made to OpenAI LLMs, namely gpt-4o-mini and gpt-4o, to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
+**newssurvey** is a proof-of-concept Python 3.12 application to write a survey report about a question or concern using a single supported news site. The news site is used to conduct searches and read articles. Currently only two sites are supported. Numerous calls are made to OpenAI LLMs, namely gpt-4o-mini and gpt-4o, to formulate the response. A funded [OpenAI API key](https://platform.openai.com/api-keys) is required.
 
-As of 2024, the estimated OpenAI API cost per report has been observed to be 1 to 6 USD. The cost varies by the number of source articles available for the submitted user query. The cost is approximately 1 USD per 100 source articles. Strictly speaking, the cost is unbounded and must be monitored and restricted via the [OpenAI usage dashboard](https://platform.openai.com/organization/usage). The generation time per report is expected to be under an hour, also depending on the number of source articles.
+## Sources
+
+The supported sources are:
+
+| Name                                            | Type    | Observed LLM cost range per report in USD |
+|-------------------------------------------------|---------|-------------------------------------------|
+| [medicalxpress](https://medicalxpress.com/)     | medical | <6  |
+| [physorg](https://phys.org/)                    | science | <19 |
+
+The LLM cost per report varies by the number of source articles and output sections for the submitted user query. The cost is approximately 1 USD per 100 source articles per 10 output sections. Strictly speaking, the cost is unbounded and must be monitored and restricted via the [OpenAI usage dashboard](https://platform.openai.com/organization/usage). The generation time per report is expected to be under an hour, also depending on the number of source articles.
 
 ## Links
 | Caption     | Link                                                 |
@@ -31,9 +40,8 @@ These generated sample are available in HTML format. Their corresponding GitHub 
 |---------------|---------------------------------------|--------------|
 | medicalxpress | nutrition for anxiety                 | [Nutritional Strategies and Supplements for Managing Anxiety in Adults](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-15T03%3A59%3A45%20Nutritional%20Strategies%20and%20Supplements%20for%20Managing%20Anxiety%20in%20Adults.html) |
 | medicalxpress | daytime drowsiness                    | [Understanding and Addressing Daytime Drowsiness: Causes, Strategies, and Solutions](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-15T05%3A27%3A48%20Understanding%20and%20Addressing%20Daytime%20Drowsiness%3A%20Causes%2C%20Strategies%2C%20and%20Solutions.html) |
-| medicalxpress | northeast eastern equine encephalitis | [Eastern Equine Encephalitis: Prevention, Diagnosis, and Management in the Northeast](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-15T05%3A33%3A50%20Eastern%20Equine%20Encephalitis%3A%20Prevention%2C%20Diagnosis%2C%20and%20Management%20in%20the%20Northeast.html) |
-| medicalxpress | advances in neuroradiology            | [Advances in Neuroradiology: Innovations, Imaging, and Interventions](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-15T05%3A59%3A05%20Advances%20in%20Neuroradiology%3A%20Innovations%2C%20Imaging%2C%20and%20Interventions.html) |
 | medicalxpress | acid reflux treatments            | [Comprehensive Approaches to Managing GERD: From Lifestyle Changes to Emerging Treatments](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-15T06%3A04%3A01%20Comprehensive%20Approaches%20to%20Managing%20GERD%3A%20From%20Lifestyle%20Changes%20to%20Emerging%20Treatments.html) |
+| physorg       | dark matter theories            | [Comprehensive Exploration of Dark Matter Theories and Alternatives](https://html-preview.github.io/?url=https://github.com/impredicative/newssurvey/blob/master/samples/2024-09-17T07%3A38%3A30%20Comprehensive%20Exploration%20of%20Dark%20Matter%20Theories%20and%20Alternatives.html) |
 
 As additional news sources are supported, samples based on them are intended to be added.
 
@@ -106,9 +114,11 @@ Options:
 
 Usage examples:
 
-    $ python -m newssurvey -s medicalxpress -q ./my_medical_concern.txt -f html -o ~/output.html -c
-
     $ python -m newssurvey -s medicalxpress -q "safe strategies for weight loss" -f txt -o ~ -nc
+
+    $ python -m newssurvey -s medicalxpress -q ./my_detailed_medical_concern.txt -f html -o ~/output.html -c
+
+    $ python -m newssurvey -s physorg -q ./my_science_query.txt -f pdf -o ./work/
 
 ### Usage as library
 
