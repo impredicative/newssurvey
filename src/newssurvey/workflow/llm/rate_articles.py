@@ -9,13 +9,14 @@ from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newssurvey.types import SearchArticle, AnalyzedArticleGen1, AnalyzedSectionGen1
 from newssurvey.util.openai_ import get_content, MAX_WORKERS
+from newssurvey.util.scipy_ import sort_by_distance
 from newssurvey.util.sys_ import print_error, print_warning
 
 _INPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?)")
 _OUTPUT_SECTION_PATTERN = re.compile(r"(?P<num>\d+)\. (?P<section>.+?) → (?P<rating>\d{1,3})")
 
 
-def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sections: list[str]) -> bool:
+def _are_sections_valid(sections: list[str], numbered_input_sections: list[str], numbered_output_sections: list[str]) -> bool:
     """Return true if the output sections have a valid rating of the input sections, otherwise false.
 
     A validation error is printed if a rating is invalid.
@@ -67,8 +68,12 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
             return False
         output_section = output_match.group("section")
         if input_section != output_section:
-            print_error(f"The #{num} input section name ({input_section!r}) and output section name ({output_section!r}) are unequal. The output section string is: {numbered_output_section!r}")
-            return False
+            closest_input_section = sort_by_distance(output_section, sections, model_size="large", distance="cosine")[0]
+            if closest_input_section == input_section:
+                print_warning(f"The #{num} input section name ({input_section!r}) and output section name ({output_section!r}) are unequal, although the output section name is closest to the input section name.")
+            else:
+                print_error(f"The #{num} input section name ({input_section!r}) and output section name ({output_section!r}) are unequal. The closest input section name is: {closest_input_section!r}")
+                return False
 
         rating = int(output_match.group("rating"))
         if not (0 <= rating <= 100):
@@ -78,7 +83,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     return True
 
 
-def _rate_article(user_query: str, source_module: ModuleType, article: SearchArticle, sections: list[str], *, max_attempts: int = 5) -> list[dict[str, int]]:
+def _rate_article(user_query: str, source_module: ModuleType, article: SearchArticle, sections: list[str], *, max_attempts: int = 3) -> list[dict[str, int]]:
     assert user_query
     assert sections
 
@@ -98,7 +103,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = _are_sections_valid(numbered_input_sections, numbered_output_sections)
+            response_is_valid = _are_sections_valid(sections, numbered_input_sections, numbered_output_sections)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
@@ -110,7 +115,9 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
         break
 
     output_matches = [_OUTPUT_SECTION_PATTERN.fullmatch(line) for line in numbered_output_sections]
-    rated_sections = [AnalyzedSectionGen1(section=match.group("section"), rating=int(match.group("rating"))) for match in output_matches]
+    assert (len(output_matches) == len(sections)), (len(output_matches), len(sections))
+    rated_sections = [AnalyzedSectionGen1(section=section, rating=int(match.group("rating"))) for section, match in zip(sections, output_matches)]
+    # Note: match.group("section") is not used for section because it can sometimes be different from the input section name. For example, despite many attempts, the input section name 'Particle Candidates: MACHOs, WIMPs, SIMPs, and More' was rated as 'Particle Candidates: MACHOs, WIMPs, and More' by the model.
 
     assert len(rated_sections) == len(sections)
     assert [s["section"] for s in rated_sections] == sections
