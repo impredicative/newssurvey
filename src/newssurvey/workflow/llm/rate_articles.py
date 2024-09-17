@@ -78,7 +78,7 @@ def _are_sections_valid(numbered_input_sections: list[str], numbered_output_sect
     return True
 
 
-def _rate_article(user_query: str, source_module: ModuleType, article: SearchArticle, sections: list[str], *, max_attempts: int = 3) -> list[dict[str, int]]:
+def _rate_article(user_query: str, source_module: ModuleType, article: SearchArticle, sections: list[str], *, max_attempts: int = 5) -> list[dict[str, int]]:
     assert user_query
     assert sections
 
@@ -92,7 +92,8 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size="small", log=(num_attempt > 1), read_cache=(num_attempt == 1))
+        model_size = "small" if (num_attempt <= 3) else "large"
+        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=(num_attempt == 1))
         numbered_output_sections = [line.strip() for line in response.splitlines()]
         numbered_output_sections = [line for line in numbered_output_sections if line]
 
