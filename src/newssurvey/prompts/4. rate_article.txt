@@ -15,7 +15,7 @@ You will be given one section name per line in the numbered format "{{num}}. {{s
 
 Each line of your output should be in the numbered format "{{num}}. {{section}} → {{rating}}", where:
 * {{num}} is an ordered incremented enumeration. It is copied verbatim from the input.
-* {{section}} is the section name, also copied verbatim from the input. Never alter or reorder any section name. It is used downstream as a part of the ID key for joining the rating to the section. To reiterate, the section name should not be altered even to correct any spelling or grammar changes, or the join will fail, and the entire response will be spurned!
+* {{section}} is the section name, also copied verbatim from the input. Never alter or reorder any section name even if it is incorrect or unclear. It is used downstream as a part of the ID key for joining the rating to the section. To reiterate, the section name should not be altered even to make any spelling or grammar or technical change, or the join will fail, and the entire response will be spurned!
 * {{rating}} is a granular integer rating between and including 0 to 100. Higher values indicate a higher relevance of the article for writing the respective named section in the context of the user's query. Accordingly, a value of 0 implies that the article will not be used to write the section. In fact, it is perfectly fine for irrelevant sections to receive a rating of 0.
 
 In effect, the input portion of each line is to remain wholly unaltered; you will copy it as-is for it to serve as an anchor to its respective rating.
