@@ -97,7 +97,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
-        response = get_content(prompt, model_size="small", log=(num_attempt > 1), read_cache=(num_attempt == 1)) # Note: A dynamic model_size cannot be used because it breaks the cache.
+        response = get_content(prompt, model_size="small", log=(num_attempt > 1), read_cache=(num_attempt == 1))  # Note: A dynamic model_size cannot be used because it breaks the cache.
         numbered_output_sections = [line.strip() for line in response.splitlines()]
         numbered_output_sections = [line for line in numbered_output_sections if line]
 
@@ -115,7 +115,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
         break
 
     output_matches = [_OUTPUT_SECTION_PATTERN.fullmatch(line) for line in numbered_output_sections]
-    assert (len(output_matches) == len(sections)), (len(output_matches), len(sections))
+    assert len(output_matches) == len(sections), (len(output_matches), len(sections))
     rated_sections = [AnalyzedSectionGen1(section=section, rating=int(match.group("rating"))) for section, match in zip(sections, output_matches)]
     # Note: match.group("section") is not used for section because it can sometimes be different from the input section name. For example, despite many attempts, the input section name 'Particle Candidates: MACHOs, WIMPs, SIMPs, and More' was rated as 'Particle Candidates: MACHOs, WIMPs, and More' by the model.
 

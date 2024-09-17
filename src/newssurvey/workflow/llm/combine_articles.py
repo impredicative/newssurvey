@@ -24,6 +24,7 @@ _INVALID_BRACKETS_PATTERNS = {f"{invalid_open_bracket}{invalid_close_bracket}": 
 _INVALID_DIGITS = "①②③④⑤⑥⑦⑧⑨"  # These have been observed in the output.
 _MARKDOWN_LIST_SNIPPETS = ["\n1. **", "\n- **"]  # These have been observed in the output.
 
+
 def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     """Return true if the output text is valid, otherwise false.
 

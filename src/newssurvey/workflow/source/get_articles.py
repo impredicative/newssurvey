@@ -18,7 +18,7 @@ def get_articles(source_module: ModuleType, search_results: list[SearchResult]) 
         count = next(counter)
         print(f'Received text of article {count}/{num_articles} having title: {article["title"]}')
         return article
-    
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         articles = list(executor.map(_get_article, search_results))
     return articles
