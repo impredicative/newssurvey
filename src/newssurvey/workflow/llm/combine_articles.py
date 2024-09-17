@@ -23,6 +23,7 @@ _INVALID_BRACKETS = ["〖〗", "〈〉"]  # These have been observed in the outp
 _INVALID_BRACKETS_PATTERNS = {f"{invalid_open_bracket}{invalid_close_bracket}": re.compile(CITATION_GROUP_PATTERN.pattern.translate(str.maketrans(f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}", f"{invalid_open_bracket}{invalid_close_bracket}"))) for invalid_open_bracket, invalid_close_bracket in _INVALID_BRACKETS}
 _INVALID_DIGITS = "①②③④⑤⑥⑦⑧⑨"  # These have been observed in the output.
 
+
 def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     """Return true if the output text is valid, otherwise false.
 
@@ -101,7 +102,7 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
             print_error(f"The text for the section {section!r} contains invalid brackets {brackets}.")
             # Note: A regex substitution could in principle be used to replace the invalid brackets with valid ones, but it is not used so as to ensure that the LLM is paying attention.
             return False
-    
+
     # Check for invalid digits
     for digit in _INVALID_DIGITS:
         if digit in text:
