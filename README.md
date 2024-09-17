@@ -7,8 +7,8 @@ The supported sources are:
 
 | Name                                            | Type    | Observed LLM cost range per report in USD |
 |-------------------------------------------------|---------|-------------------------------------------|
-| [medicalxpress](https://medicalxpress.com/)     | medical | <6  |
-| [physorg](https://phys.org/)                    | science | <19 |
+| [medicalxpress](https://medicalxpress.com/)     | medical | 1 to 6  |
+| [physorg](https://phys.org/)                    | science | 1 to 19 |
 
 The LLM cost per report varies by the number of source articles and output sections for the submitted user query. The cost is approximately 1 USD per 100 source articles per 10 output sections. Strictly speaking, the cost is unbounded and must be monitored and restricted via the [OpenAI usage dashboard](https://platform.openai.com/organization/usage). The generation time per report is expected to be under an hour, also depending on the number of source articles.
 
