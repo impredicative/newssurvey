@@ -25,6 +25,10 @@ def _is_title_valid(title: str) -> bool:
     if len(num_lines) != 1:
         print_error(f"The title has {num_lines} lines but a single line was expected: {title!r}")
         return False
+    
+    if title.startswith('"') and title.endswith('"'):
+        print_error(f'The title is wrapped in double quotes: {title!r}')
+        return False
 
     return True
 

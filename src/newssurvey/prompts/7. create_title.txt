@@ -5,6 +5,7 @@ What to do:
 
 What not to do:
 1. If there is any sensitive aspect of the user's query, consider not mentioning it in the title unless the section names also cover it.
+2. Do not wrap the title in double quotes. It is to remain unwrapped.
 
 ## Format
 The title is expected in a single line. It will be the only line of your output.
