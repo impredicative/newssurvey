@@ -1,4 +1,4 @@
-# "Theories of Dark Matter: Standard, Alternatives, and Emerging Perspectives"
+# Comprehensive Exploration of Dark Matter Theories and Alternatives
 
 September 17, 2024
 
