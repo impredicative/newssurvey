@@ -86,7 +86,6 @@ In the simplest case, run `python -m newssurvey` to interactively start the appl
 For non-interactive use, the usage help is copied below:
 ```
 $ python -m newssurvey -h
-Using diskcache path: /workspaces/newssurvey/src/newssurvey/.diskcache/util/openai_
 Usage: python -m newssurvey [OPTIONS]
 
   Generate and write a response to a question or concern using a supported news source.
@@ -98,8 +97,8 @@ Options:
   -q, --query TEXT                Question or concern answerable by the news source. If a path to a file, the file
                                   text is read as text. If not given, the user is prompted for it.
   -m, --max-sections INTEGER RANGE
-                                  Maximum number of sections to include in the response, between 10 and 100. Its
-                                  recommended value, also the default, is 100.  [10<=x<=100]
+                                  Maximum number of sections to include in the response, between 5 and 100. Its
+                                  recommended value, also the default, is 100.  [5<=x<=100]
   -f, --output-format TEXT        Output format of the response. It can be txt (for text), md (for markdown), gfm.md
                                   (for GitHub Flavored markdown), html, pdf, or json. If not specified, but if an
                                   output filename is specified via '--output-path', it is determined automatically
@@ -124,7 +123,7 @@ Usage examples:
 
     $ python -m newssurvey -s medicalxpress -q ./my_detailed_medical_concern.txt -f html -o ~/output.html -c
 
-    $ python -m newssurvey -s physorg -q ./my_science_query.txt -f pdf -o ./work/
+    $ python -m newssurvey -s physorg -q ./my_science_query.txt -f pdf -o ./work/ -m 10
 
 ### Usage as library
 
@@ -147,7 +146,7 @@ The progress is printed to stdout.
 Params:
 * `source`: Name of supported news source.
 * `query`: Question or concern answerable by the news source.
-* `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
+* `max_sections`: Maximum number of sections to include in the response, between 5 and 100. Its recommended value, also the default, is 100.
 * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. Its default is txt.
 * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 

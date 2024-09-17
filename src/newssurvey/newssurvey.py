@@ -31,7 +31,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     Params:
     * `source`: Name of supported news source.
     * `query`: Question or concern answerable by the news source.
-    * `max_sections`: Maximum number of sections to include in the response, between 10 and 100. Its recommended value, also the default, is 100.
+    * `max_sections`: Maximum number of sections to include in the response, between 5 and 100. Its recommended value, also the default, is 100.
     * `output_format`: Output format. It can be txt (for text), md (for markdown), gfm.md (for GitHub Flavored markdown), html, pdf, or json. Its default is txt.
     * `confirm`: Confirm as the workflow progresses. If true, a confirmation is interactively sought as each step of the workflow progresses. Its default is false.
 
