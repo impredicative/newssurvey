@@ -49,7 +49,7 @@ _MID_CONTENT_BLACKLIST = {
 _MID_CONTENT_STARTSWITH_BLACKLIST = (
     "This article has been reviewed ",
     "©",
-    "Copyright ©",
+    "Copyright ",
 )
 _POST_CONTENT_BLACKLIST = {
     "Explore further",
