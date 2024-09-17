@@ -97,8 +97,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
 
     condensed_articles = []
 
-    max_workers = min(8, MAX_WORKERS)  # Note: Using a value ≥10 caused diskcache to hang indefinitely with 8 shards.
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_section = {executor.submit(condense_article_section, article["article"], section): (article, section) for article in articles for section in article["sections"]}
 
         article_section_results = {}
