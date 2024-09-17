@@ -92,8 +92,7 @@ def _rate_article(user_query: str, source_module: ModuleType, article: SearchArt
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):
-        model_size = "small" if (num_attempt <= 3) else "large"
-        response = get_content(prompt, model_size=model_size, log=(num_attempt > 1), read_cache=(num_attempt == 1))
+        response = get_content(prompt, model_size="small", log=(num_attempt > 1), read_cache=(num_attempt == 1)) # Note: A dynamic model_size cannot be used because it breaks the cache.
         numbered_output_sections = [line.strip() for line in response.splitlines()]
         numbered_output_sections = [line for line in numbered_output_sections if line]
 
