@@ -55,33 +55,61 @@ def format_gfm_output(title: str, sections: list[SectionGen2], citations: list[C
 
 def format_html_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> str:
     """Return the HTML string output for the given sections and citations."""
+    import html
+
+    # Create a mapping from citation number to citation info
     citation_map = {str(citation["number"]): citation for citation in citations}
 
-    contents = [f'<li><a href="#section-{num}">{section["title"]}</a></li>' for num, section in enumerate(sections, start=1)]
+    # Generate the table of contents
+    contents = [f'<li><a href="#section-{num}">{html.escape(section["title"])}</a></li>' for num, section in enumerate(sections, start=1)]
     contents.append('<li><a href="#references">References</a></li>')
 
+    # Define the replacement function for citations
     def repl(match: re.Match) -> str:
-        """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers and separate hover tooltips."""
-        return "<sup>[</sup>" + "<sup>,</sup>".join(f'<a href="#citation-{citation_num}" class="citation-link"><sup>{citation_num}</sup></a>' f'<a href="{citation_map[citation_num]["link"]}" class="citation-tooltip" target="_blank">{citation_map[citation_num]["title"]}</a>' for citation_num in match.group(1).split(",")) + "<sup>]</sup>"
+        """Replace citation numbers with linked numbers that have tooltips using Tippy.js."""
+        citation_numbers = match.group(1).split(",")
+        linked_numbers = []
+        for citation_num in citation_numbers:
+            citation_num = citation_num.strip()
+            citation = citation_map[citation_num]
+            tooltip_link = html.escape(citation["link"], quote=True)
+            tooltip_title = html.escape(citation["title"])
+            tooltip_content = f'<a href="{tooltip_link}" target="_blank">{tooltip_title}</a>'
+            # Escape the tooltip content for inclusion in single quotes
+            escaped_tooltip_content = tooltip_content.replace("'", "&#39;")
+            linked_number = (f'<a href="#citation-{citation_num}" class="citation-link" '
+                             f'data-tippy-content=\'{escaped_tooltip_content}\'><sup>{citation_num}</sup></a>')
+            linked_numbers.append(linked_number)
+        return f'<sup>[</sup>{"<sup>,</sup>".join(linked_numbers)}<sup>]</sup>'
 
     def format_section_text(text: str) -> str:
         """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
         paragraphs = text.split("\n\n")
-        wrapped_paragraphs = [f"<p>{CITATION_GROUP_PATTERN.sub(repl, paragraph.strip())}</p>" for paragraph in paragraphs]
+        wrapped_paragraphs = [f"<p>{CITATION_GROUP_PATTERN.sub(repl, html.escape(paragraph.strip()))}</p>" for paragraph in paragraphs]
         return "\n".join(wrapped_paragraphs)
 
-    sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}' for num, section in enumerate(sections, start=1)]
+    # Generate the HTML for the sections
+    sections_html = [
+        f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}'
+        for num, section in enumerate(sections, start=1)
+    ]
 
-    references_html = [f'<li id="citation-{citation["number"]}"><a href="{citation["link"]}" target="_blank">{citation["title"]}</a></li>' for citation in citations]
+    # Generate the HTML for the references
+    references_html = [
+        f'<li id="citation-{citation["number"]}"><a href="{html.escape(citation["link"], quote=True)}" target="_blank">{html.escape(citation["title"])}</a></li>'
+        for citation in citations
+    ]
 
-    html_output = f"""
-<!DOCTYPE html>
+    # Generate the final HTML output
+    html_output = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
+    <title>{html.escape(title)}</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Include Tippy.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
     <style>
         body {{
             font-family: 'Roboto', sans-serif;
@@ -114,30 +142,6 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
             text-decoration: underline;
         }}
 
-        .citation-link {{
-            color: #1a73e8;
-            text-decoration: none;
-        }}
-        .citation-link:hover + .citation-tooltip {{
-            display: inline-block;
-        }}
-        .citation-tooltip {{
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            border: 1px solid #ccc;
-            padding: 5px;
-            font-size: 0.9em;
-            white-space: nowrap;
-            z-index: 10;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            color: #1a73e8;
-        }}
-        .citation-tooltip:hover {{
-            display: inline-block;
-        }}
-
         /* Mobile responsiveness */
         @media (max-width: 600px) {{
             body {{
@@ -153,13 +157,36 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
                 padding-left: 15px;
             }}
         }}
+
+        /* Custom Tippy.js tooltip theme */
+        .tippy-box[data-theme~='custom'] {{
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9em;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }}
+        .tippy-box[data-theme~='custom'] .tippy-content {{
+            padding: 10px;
+        }}
+        .tippy-box[data-theme~='custom'] .tippy-arrow {{
+            color: #ffffff; /* Arrow color matches background */
+        }}
+        .tippy-box[data-theme~='custom'] .tippy-content a {{
+            color: #1a73e8; /* Link color */
+            text-decoration: none;
+        }}
+        .tippy-box[data-theme~='custom'] .tippy-content a:hover {{
+            text-decoration: underline;
+        }}
     </style>
 </head>
 <body>
 
-<h1>{title}</h1>
+<h1>{html.escape(title)}</h1>
 <p>{_get_date_string()}</p>
-<p><em>{_DISCLAIMER}</em></p>
+<p><em>{html.escape(_DISCLAIMER)}</em></p>
 
 <h2>Contents</h2>
 <ol>
@@ -172,6 +199,19 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
 <ol>
     {'\n    '.join(references_html)}
 </ol>
+
+<!-- Include Popper.js and Tippy.js -->
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+<script>
+  tippy('.citation-link', {{
+    placement: 'top',
+    allowHTML: true,
+    interactive: true,
+    theme: 'custom',
+    maxWidth: 300,
+  }});
+</script>
 
 </body>
 </html>
