@@ -1,1 +1,11 @@
-In this step of the workflow, your task is to exhaustively list all search terms relevant to the user's query, one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's query. Do not prefix the search terms with bullets, etc. In case the user's query must be rejected for any reason, or if there are no search terms to list, just say "none" instead.
+In this step of the workflow, your task is to exhaustively list all search terms relevant to the user's query, one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's query. Do not prefix the search terms with bullets, etc.
+
+In case the user's query must be rejected for any reason, just say "none" instead. This will cause the workflow software to abort the workflow. Do not explain the reason for the rejection, as the workflow software will misinterpret it as a search term. Some reasons for rejecting the query are:
+
+1. The user may have accidentally copy-pasted invalid input.
+2. The user accidentally provided a file path.
+3. The user's query is not {source_type} related in any way.
+4. The user's query is all over the place.
+5. There are no search terms to list.
+
+Be accommodative whenever possible.
