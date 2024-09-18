@@ -121,6 +121,8 @@ def _filter_search_results_for_search_term(user_query: str, source_module: Modul
             page_results = source_module.get_search_results(query=search_term, page_num=page_num, **kwargs)
             if not page_results:
                 break
+            for result_num, result in enumerate(page_results, start=1):
+                print(f'\t#{result_num}. {result["title"]}')
             num_total_results += len(page_results)
             filtered_page_results = _filter_search_results(user_query=user_query, source_module=source_module, results=page_results)
             print(f"Limited {len(page_results)} original results to {len(filtered_page_results)} filtered results for page {page_num} of search term {search_term!r} with arguments: {dict_str(kwargs)}")
