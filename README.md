@@ -128,7 +128,7 @@ Usage examples:
 ### Usage as library
 
 ```python
->>> from newssurvey.newssurvey import generate_response
+>>> from newssurvey import generate_response
 >>> import inspect
 
 >>> print(inspect.signature(generate_response))
