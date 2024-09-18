@@ -77,9 +77,12 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
             print_error(f"The text for the section {section!r} has unbalanced citation brackets.")
             return False
 
-    # Note: Having no citations is allowed for now.
-
     citation_groups = CITATION_GROUP_PATTERN.findall(text)
+
+    if (num_articles > 0) and (not citation_groups):
+        print_error(f"The text for the section {section!r} does not contain any citation groups despite there being {num_articles} articles.")
+        return False
+
     for num_citation_group, citation_group_str in enumerate(citation_groups, start=1):
         if not citation_group_str:
             print_error(f"The citation group #{num_citation_group} for the section {section!r} is empty.")
