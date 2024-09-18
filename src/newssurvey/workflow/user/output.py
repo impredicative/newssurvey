@@ -77,8 +77,7 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
             tooltip_content = f'<a href="{tooltip_link}" target="_blank">{tooltip_title}</a>'
             # Escape the tooltip content for inclusion in single quotes
             escaped_tooltip_content = tooltip_content.replace("'", "&#39;")
-            linked_number = (f'<a href="#citation-{citation_num}" class="citation-link" '
-                             f'data-tippy-content=\'{escaped_tooltip_content}\'><sup>{citation_num}</sup></a>')
+            linked_number = f'<a href="#citation-{citation_num}" class="citation-link" ' f"data-tippy-content='{escaped_tooltip_content}'><sup>{citation_num}</sup></a>"
             linked_numbers.append(linked_number)
         return f'<sup>[</sup>{"<sup>,</sup>".join(linked_numbers)}<sup>]</sup>'
 
@@ -89,16 +88,10 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
         return "\n".join(wrapped_paragraphs)
 
     # Generate the HTML for the sections
-    sections_html = [
-        f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}'
-        for num, section in enumerate(sections, start=1)
-    ]
+    sections_html = [f'<h2 id="section-{num}">{num}. {section["title"]}</h2>\n{format_section_text(section["text"])}' for num, section in enumerate(sections, start=1)]
 
     # Generate the HTML for the references
-    references_html = [
-        f'<li id="citation-{citation["number"]}"><a href="{html.escape(citation["link"], quote=True)}" target="_blank">{html.escape(citation["title"])}</a></li>'
-        for citation in citations
-    ]
+    references_html = [f'<li id="citation-{citation["number"]}"><a href="{html.escape(citation["link"], quote=True)}" target="_blank">{html.escape(citation["title"])}</a></li>' for citation in citations]
 
     # Generate the final HTML output
     html_output = f"""<!DOCTYPE html>
