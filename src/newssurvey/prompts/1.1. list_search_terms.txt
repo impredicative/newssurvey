@@ -1,11 +1,15 @@
 In this step of the workflow, your task is to exhaustively list all search terms relevant to the user's query, one per line. The user's well-being may depend on your thoroughness. To avoid wasteful or overbroad searches, ensure that the search terms preserve a connection to the user's query. Do not prefix the search terms with bullets, etc.
 
-In case the user's query must be rejected for any reason, just say "none" instead. This will cause the workflow software to abort the workflow. Do not explain the reason for the rejection, as the workflow software will misinterpret it as a search term. Some reasons for rejecting the query are:
+In case the user's query must be rejected for any reason, respond with "QueryError: {{reason}}" instead, where {{reason}} is a brief reason for the rejection. This will cause the workflow software to abort the workflow. The workflow software will extract the reason from your response, and provide it to the user. You are free to use your own words to politely explain the reason briefly. Some reasons I can think of for rejecting the query are:
 
-1. The user may have accidentally copy-pasted invalid input.
-2. The user accidentally provided a file path.
-3. The user's query is not {source_type} related in any way.
-4. The user's query is all over the place.
-5. There are no search terms to list.
+1. Invalid inputs:
+    1.1: The user may have accidentally copy-pasted invalid input.
+    1.2. The user accidentally provided a file path.
+2. Disallowed inputs:
+    2.1. The user's query is not {source_type} related in any way.
+    2.2. The user's query is all over the place.
+    2.3. There exists PII (personally Identifiable Information) in the user's query, although names are allowed.
+3. No outputs:
+    3.1: There are no search terms to list.
 
-Be accommodative whenever possible.
+These issues are not generally expected, with most user queries being quite valid. In general, be accommodative whenever possible.
