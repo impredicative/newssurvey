@@ -79,6 +79,7 @@ Usage can be as a command-line application or as a Python library.
 ### Usage considerations
 * Refining the query text over a few iterations is often essential for receiving a sufficiently tailored response.
 * Only a single instance of the application must be run at a time, failing which throttles can aggressively be imposed by the source website and by OpenAI. This is also enforced at the application-level by the use of a lock file.
+* Do not browse the source website from the same IP address when a search is running, as this will result in throttling errors.
 
 ### Usage as application
 In the simplest case, run `python -m newssurvey` to interactively start the application. You will be prompted for the necessary information.
