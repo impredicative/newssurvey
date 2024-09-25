@@ -1,1 +1,1 @@
-HTML samples are kept in this folder because the parent /docs folder is configured for GitHub Pages deployment.
+HTML samples are kept in this folder because the parent folder (/docs) is configured for GitHub Pages deployment.
