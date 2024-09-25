@@ -1,0 +1,1 @@
+HTML samples are kept in this folder because the parent /docs folder is configured for GitHub Pages deployment.

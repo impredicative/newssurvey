@@ -37,7 +37,7 @@ The workflow is intended to be as simple as necessary, and without cycles betwee
 Due to the LLM's context window limitation of 128K, only up to about 400 condensed articles can be used for writing a section. Efforts are made, of course, to use the most highly rated section-specific relevant articles that fit in this window.
 
 ## Samples
-These generated sample are available in HTML format. Their corresponding GitHub Flavored markdown versions are also available in the [samples](https://github.com/impredicative/newssurvey/tree/master/samples) directory of the repository.<!-- Note: An absolute link is used because a relative link doesn't work in PyPI. -->
+These generated sample are available in HTML format.
 
 
 | Source        | User query (simplified)               | Output title |
