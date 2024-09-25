@@ -42,7 +42,7 @@ These generated sample are available in HTML format.
 
 | Source        | User query (simplified)               | Output title |
 |---------------|---------------------------------------|--------------|
-| medicalxpress | nutrition for anxiety                 | [Nutritional Strategies and Supplements for Managing Anxiety in Adults](https://impredicative.github.io/newssurvey/samples/2024-09-15T03%3A59%3A45%20Nutritional%20Strategies%20and%20Supplements%20for%20Managing%20Anxiety%20in%20Adults.html) |
+| medicalxpress | nutrition for anxiety                 | [Nutritional Interventions and Supplements for Managing Anxiety in Adults](https://impredicative.github.io/newssurvey/samples/2024-09-25T21%3A53%3A00%20Nutritional%20Interventions%20and%20Supplements%20for%20Managing%20Anxiety%20in%20Adults.html) |
 | medicalxpress | daytime drowsiness                    | [Understanding and Addressing Daytime Drowsiness: Causes, Strategies, and Solutions](https://impredicative.github.io/newssurvey/samples/2024-09-15T05%3A27%3A48%20Understanding%20and%20Addressing%20Daytime%20Drowsiness%3A%20Causes%2C%20Strategies%2C%20and%20Solutions.html) |
 | medicalxpress | acid reflux treatments            | [Comprehensive Approaches to Managing GERD: From Lifestyle Changes to Emerging Treatments](https://impredicative.github.io/newssurvey/samples/2024-09-15T06%3A04%3A01%20Comprehensive%20Approaches%20to%20Managing%20GERD%3A%20From%20Lifestyle%20Changes%20to%20Emerging%20Treatments.html) |
 | physorg       | dark matter theories            | [Comprehensive Exploration of Dark Matter Theories and Alternatives](https://impredicative.github.io/newssurvey/samples/2024-09-17T15%3A36%3A56%20Comprehensive%20Exploration%20of%20Dark%20Matter%20Theories%20and%20Alternatives.html) |
