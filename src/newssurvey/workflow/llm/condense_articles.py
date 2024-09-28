@@ -9,7 +9,7 @@ from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newssurvey.types import SearchArticle, AnalyzedArticleGen1, AnalyzedArticleGen2, AnalyzedSectionGen1, AnalyzedSectionGen2
 from newssurvey.util.diskcache_ import MAX_DISKCACHE_WORKERS
-from newssurvey.util.openai_ import get_content, MAX_WORKERS
+from newssurvey.util.openai_ import get_content, MAX_OPENAI_WORKERS
 from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_warning, print_error
 
@@ -98,7 +98,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
 
     condensed_articles = []
 
-    max_workers = min(MAX_DISKCACHE_WORKERS, MAX_WORKERS)
+    max_workers = min(MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_section = {executor.submit(condense_article_section, article["article"], section): (article, section) for article in articles for section in article["sections"]}
 

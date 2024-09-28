@@ -7,7 +7,7 @@ from types import ModuleType
 from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
 from newssurvey.exceptions import LanguageModelOutputLimitError, LanguageModelOutputStructureError
 from newssurvey.types import AnalyzedArticleGen2, CitationGen1, SectionGen1
-from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_WORKERS
+from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_OPENAI_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
@@ -207,7 +207,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         return section_data
 
     # Use concurrent section processing
-    max_workers = min(8, MAX_WORKERS)
+    max_workers = min(8, MAX_OPENAI_WORKERS)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)]
         section_texts = [future.result() for future in futures]

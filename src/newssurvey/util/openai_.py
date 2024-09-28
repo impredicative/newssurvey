@@ -50,7 +50,7 @@ MAX_OUTPUT_TOKENS = {
     "gpt-4o-2024-05-13": 4096,
     "gpt-4o-mini-2024-07-18": 16_384,
 }
-MAX_WORKERS = 16
+MAX_OPENAI_WORKERS = 16
 
 
 def ensure_openai_key() -> None:
@@ -162,5 +162,5 @@ def get_vectors_concurrently(texts: list[str], *, model_size: str, log: bool = F
     """Return the embedding vectors for the given texts."""
     assert model_size in MODELS["embedding"], model_size
     fn_get_vector = lambda text: (text, get_vector(text, model_size=model_size, log=log))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_OPENAI_WORKERS) as executor:
         return dict(executor.map(fn_get_vector, texts))
