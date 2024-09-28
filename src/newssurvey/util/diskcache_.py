@@ -7,6 +7,7 @@ from newssurvey.config import CACHE_SIZES_GiB, GiB, PACKAGE_PATH
 
 _SHARDS = 16  # Note: A heuristic for this value is to use the number of OpenAI workers. Changing this value can invalidate the cache.
 DISKCACHE_ROOT_PATH = PACKAGE_PATH / ".diskcache"
+MAX_DISKCACHE_WORKERS = 12  # Note: For a large job, using 16 workers routinely causes diskcache to hang despite there being more shards or less shards.
 
 
 @cache

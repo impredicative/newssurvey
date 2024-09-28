@@ -8,6 +8,7 @@ from types import ModuleType
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newssurvey.types import SearchArticle, AnalyzedArticleGen1, AnalyzedSectionGen1
+from newssurvey.util.diskcache_ import MAX_DISKCACHE_WORKERS
 from newssurvey.util.openai_ import get_content, MAX_WORKERS
 from newssurvey.util.scipy_ import sort_by_distance
 from newssurvey.util.sys_ import print_error, print_warning
@@ -146,7 +147,8 @@ def rate_articles(user_query: str, source_module: ModuleType, *, articles: list[
         rated_sections = [s for s in rated_sections if s["rating"] > 0]
         return AnalyzedArticleGen1(article=article, sections=rated_sections)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    max_workers = min(MAX_DISKCACHE_WORKERS, MAX_WORKERS)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(rate_article, article): article for article in articles}
         for future_num, future in enumerate(concurrent.futures.as_completed(futures), start=1):
             analyzed_article = future.result()
