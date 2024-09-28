@@ -47,6 +47,7 @@ These generated sample are available in HTML format.
 | medicalxpress | acid reflux treatments            | [Comprehensive Management and Treatment Approaches for Gastroesophageal Reflux Disease (GERD): Integrating Pharmacological, Non-Pharmacological, and Lifestyle Interventions](https://impredicative.github.io/newssurvey/samples/2024-09-25T23%3A22%3A20%20Comprehensive%20Management%20and%20Treatment%20Approaches%20for%20Gastroesophageal%20Reflux%20Disease%20(GERD)%3A%20Integrating%20Pharmacological%2C%20Non-Pharmacological%2C%20and%20Lifestyle%20Interventions.html) |
 | physorg       | dark matter theories            | [Comprehensive Exploration of Dark Matter Theories and Alternatives](https://impredicative.github.io/newssurvey/samples/2024-09-17T15%3A36%3A56%20Comprehensive%20Exploration%20of%20Dark%20Matter%20Theories%20and%20Alternatives.html) |
 | physorg       | multiverse theories            | [Exploring Multiverse Theories: Concepts, Evidence, and Implications](https://impredicative.github.io/newssurvey/samples/2024-09-28T17%3A05%3A37%20Exploring%20Multiverse%20Theories%3A%20Concepts%2C%20Evidence%2C%20and%20Implications.html) |
+| physorg       | synthetic biology software            | [Software Tools and Technological Advances in Synthetic Biology](https://impredicative.github.io/newssurvey/samples/2024-09-28T21%3A26%3A11%20Software%20Tools%20and%20Technological%20Advances%20in%20Synthetic%20Biology.html) |
 
 
 As additional news sources are supported, samples based on them are intended to be added.
