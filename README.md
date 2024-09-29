@@ -77,8 +77,9 @@ As additional news sources are supported, samples based on them are intended to 
 ## Usage
 Usage can be as a command-line application or as a Python library.
 
-### Usage considerations
+### Usage tips
 * Refining the query text over a few iterations is often essential for receiving a sufficiently tailored response.
+* A two-person podcast style audio file can be freely created from the text output file using [Google NotebookLM](https://notebooklm.google.com/).
 * Only a single instance of the application must be run at a time, failing which throttles can aggressively be imposed by the source website and by OpenAI. This is also enforced at the application-level by the use of a lock file.
 * Do not browse the source website from the same IP address when a search is running, as this will result in throttling errors.
 
