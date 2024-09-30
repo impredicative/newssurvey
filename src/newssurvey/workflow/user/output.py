@@ -17,8 +17,12 @@ def _get_date_string() -> str:
 
 def format_text_output(title: str, sections: list[SectionGen2], citations: list[CitationGen2]) -> str:
     """Return the text string output for the given sections and citations."""
-    sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(r"[\1]", section["text"])) for section in sections]  # Uses standard brackets for citations.
 
+    def repl(match: re.Match) -> str:
+        """Return the match text with the citation numbers in the citation group formatted into the searchable pattern [1][2][3]."""
+        return "".join(f"[{citation_num}]" for citation_num in match.group(1).split(","))
+
+    sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
     text = f"{title}\n\n" + f"{_get_date_string()}\n\n{_DISCLAIMER}\n\n" + "Sections:\n" + "\n".join([f"{num}: {section['title']}" for num, section in enumerate(sections, start=1)]) + "\n\n" + "\n\n".join(f'Section {num}: {s["title"]}:\n\n{s["text"]}' for num, s in enumerate(sections, start=1)) + "\n\n" + "References:\n\n" + "\n\n".join([f"{c['number']}: {c['title']}\n{c['link']}" for c in citations])
     return text
 
@@ -29,8 +33,8 @@ def format_markdown_output(title: str, sections: list[SectionGen2], citations: l
     contents.append(f"{len(contents) + 1}. [References](#references)")
 
     def repl(match: re.Match) -> str:
-        """Return the match text with the plain citation numbers in the citation group replaced with linked citation numbers."""
-        return "<sup>[" + ",".join(f"[{citation_num}](#citation-{citation_num})" for citation_num in match.group(1).split(",")) + "]</sup>"
+        """Return the match text with the plain citation numbers in the citation group formatted and replaced with searchable linked citation numbers."""
+        return "<sup>" + "".join(f"[[{citation_num}](#citation-{citation_num})]" for citation_num in match.group(1).split(",")) + "</sup>"
 
     sections = [SectionGen2(title=section["title"], text=CITATION_GROUP_PATTERN.sub(repl, section["text"])) for section in sections]
 
@@ -66,7 +70,7 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
 
     # Define the replacement function for citations
     def repl(match: re.Match) -> str:
-        """Replace citation numbers with linked numbers that have tooltips using Tippy.js."""
+        """Replace citation numbers with searchable linked numbers that have tooltips using Tippy.js."""
         citation_numbers = match.group(1).split(",")
         linked_numbers = []
         for citation_num in citation_numbers:
@@ -77,9 +81,9 @@ def format_html_output(title: str, sections: list[SectionGen2], citations: list[
             tooltip_content = f'<a href="{tooltip_link}" target="_blank">{tooltip_title}</a>'
             # Escape the tooltip content for inclusion in single quotes
             escaped_tooltip_content = tooltip_content.replace("'", "&#39;")
-            linked_number = f'<a href="#citation-{citation_num}" class="citation-link" ' f"data-tippy-content='{escaped_tooltip_content}'><sup>{citation_num}</sup></a>"
+            linked_number = f'<sup>[</sup><a href="#citation-{citation_num}" class="citation-link" ' f"data-tippy-content='{escaped_tooltip_content}'><sup>{citation_num}</sup></a><sup>]</sup>"
             linked_numbers.append(linked_number)
-        return f'<sup>[</sup>{"<sup>,</sup>".join(linked_numbers)}<sup>]</sup>'
+        return "".join(linked_numbers)
 
     def format_section_text(text: str) -> str:
         """Return the section text wrapped in HTML paragraph tags and replace citation numbers with linked citation numbers."""
@@ -274,7 +278,7 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     story += [ListFlowable(toc_items, bulletType="1"), PageBreak()]
 
     def replace_citations(text):
-        return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + ",".join([f'<a href="#citation_{num.strip()}">{num.strip()}</a>' for num in match.group(1).split(",")]) + "</super>", text)
+        return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + "".join([f'[<a href="#citation_{num.strip()}">{num.strip()}</a>]' for num in match.group(1).split(",")]) + "</super>", text)
 
     num_sections = len(sections)
     for section_num, section in enumerate(sections, start=1):
