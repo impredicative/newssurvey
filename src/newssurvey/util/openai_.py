@@ -93,7 +93,7 @@ def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note
 
     time_used = time.monotonic() - time_start
 
-    if (num_cached_prompt_tokens := completion.usage.prompt_tokens_details.cached_tokens) > 0:
+    if completion.usage and completion.usage.prompt_tokens_details and ((num_cached_prompt_tokens := completion.usage.prompt_tokens_details.cached_tokens) > 0):
         num_prompt_tokens = completion.usage.prompt_tokens
         pct_cached_prompt_tokens = num_cached_prompt_tokens / num_prompt_tokens
         cached_tokens_msg = f" {num_cached_prompt_tokens} ({pct_cached_prompt_tokens:.0%}) of {num_prompt_tokens} prompt tokens were cached."
