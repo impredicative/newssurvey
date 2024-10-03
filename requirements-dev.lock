@@ -36,7 +36,7 @@ h11==0.14.0
     # via httpcore
 hext==1.0.9
     # via newssurvey
-httpcore==1.0.5
+httpcore==1.0.6
     # via httpx
 httpx==0.27.2
     # via openai
@@ -51,7 +51,7 @@ locket==1.0.0
 numpy==2.1.1
     # via newssurvey
     # via scipy
-openai==1.48.0
+openai==1.51.0
     # via newssurvey
 pathvalidate==3.2.1
     # via newssurvey
@@ -65,7 +65,7 @@ python-dotenv==1.0.1
     # via newssurvey
 regex==2024.9.11
     # via tiktoken
-reportlab==4.2.2
+reportlab==4.2.5
     # via newssurvey
 requests==2.32.3
     # via newssurvey
