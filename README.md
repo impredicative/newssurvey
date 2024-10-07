@@ -83,7 +83,11 @@ Usage can be as a command-line application or as a Python library.
 * Do not browse the source website from the same IP address when a search is running, as this will result in throttling errors.
 
 ### Usage as application
-In the simplest case, run `python -m newssurvey` to interactively start the application. You will be prompted for the necessary information.
+In the simplest case, run any one of these commands to interactively start the application. You will be prompted for the necessary information.
+
+    $ python -m newssurvey
+    $ rye run python -m newssurvey
+    $ rye run newssurvey
 
 For non-interactive use, the usage help is copied below:
 ```
