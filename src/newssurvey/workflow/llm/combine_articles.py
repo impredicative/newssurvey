@@ -177,7 +177,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
     num_sections = len(sections)
     section_texts = []
 
-    # Ensure updated ratings to articles based on their sections
+    # Ensure updated ratings of articles based on their sections
     for article in articles:
         article["article"]["rating"] = sum(article_section["rating"] for article_section in article["sections"])
 
