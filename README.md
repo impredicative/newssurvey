@@ -96,7 +96,7 @@ Usage: python -m newssurvey [OPTIONS]
 
   Generate and write a response to a question or concern using a supported news source.
 
-  A single instance of this method is enforced.
+  The progress is printed to stdout. A nonzero exitcode exists if there is an error. A single instance is enforced.
 
 Options:
   -s, --source TEXT               Name of supported news source. If not given, the user is prompted for it.

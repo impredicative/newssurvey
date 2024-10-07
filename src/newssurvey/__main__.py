@@ -77,7 +77,7 @@ def _get_output_format_and_path(*, output_format: Optional[str], output_path: Pa
 def main(*args, **kwargs) -> None:
     """Generate and write a response to a question or concern using a supported news source.
 
-    A single instance of this method is enforced.
+    The progress is printed to stdout. A nonzero exitcode exists if there is an error. A single instance is enforced.
     """
     lockfile_path = Path(tempfile.gettempdir()) / f"{PACKAGE_NAME}.lock"
     try:
@@ -89,12 +89,6 @@ def main(*args, **kwargs) -> None:
 
 
 def _main(source: Optional[str], query: Optional[str], max_sections: int, output_format: str, output_path: Path, confirm: bool) -> None:
-    """Generate and write a response to a question or concern using a supported news source.
-
-    The progress is printed to stdout.
-
-    A nonzero exitcode exists if there is an error.
-    """
     try:
         ensure_openai_key()
 
