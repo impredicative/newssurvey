@@ -27,8 +27,9 @@ Each step in this workflow corresponds to an action taken by the LLM.
 3. **List section names**: The list of article titles is presented to the LLM, ordered by distance to the user query. The LLM provides a coherent single-level list of sections names. The list is then refined until convergence.
 4. **Rate articles for sections**: For each article, the LLM numerically rates on a scale of 0 to 100 how well the article can contribute to each section.
 5. **Condense article by section**: For each article and section pairing, limited to ones with nonzero ratings, the LLM condenses the article text.
-6. **Get text by section**: For each section, its condensed articles are concatenated together, ordered by their corresponding ratings, up to the maximum input context length of the LLM. The LLM formulates the text for each section. The section-specific citation numbers are replaced by globally consistent numbers.
-7. **Get response title**: The LLM provides the response title using the list of section names.
+6. **Filter articles by section**: For each section, its available condensed articles are filtered for subsequent usage. This filtering is different from the prior rating step because it is done for a section at a time versus for an article at a time. If there are more articles than can fit in the input context length, pagination is used, but with the articles selected thus far being always prefixed to the page, thereby retaining their context, and also providing a further opportunity to to the LLM to filter them.
+7. **Get text by section**: For each section, its condensed articles are concatenated together, ordered by their corresponding ratings, up to the maximum input context length of the LLM. The LLM formulates the text for each section. The section-specific citation numbers are replaced by globally consistent numbers.
+8. **Get response title**: The LLM provides the response title using the list of section names.
 
 The workflow is intended to be as simple as necessary, and without cycles between steps.
 
