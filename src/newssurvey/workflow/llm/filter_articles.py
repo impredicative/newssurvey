@@ -51,16 +51,16 @@ def _is_response_valid(response: str, num_articles: int) -> bool:
         return False
 
     seen = set()
-    for count, response in enumerate(responses, start=1):
-        assert response.isdigit()  # This is already checked by the regex.
-        number = int(response)
+    for count, value in enumerate(responses, start=1):
+        assert value.isdigit()  # This is already checked by the regex.
+        number = int(value)
 
         if number > num_articles:
             print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of articles ({num_articles}): {response!r}")
             return False
 
         if number in seen:
-            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {responses!r}")
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {response!r}")
             return False
         seen.add(number)
 
@@ -124,6 +124,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
                 raise LanguageModelOutputStructureError(error)
             else:
                 print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting a section: {error}")
+                input("Press Enter to continue...")  # TODO: Remove line.
                 continue
 
         break
