@@ -6,11 +6,12 @@ from types import ModuleType
 
 from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
 from newssurvey.exceptions import LanguageModelOutputLimitError, LanguageModelOutputStructureError
-from newssurvey.types import AnalyzedArticleGen2, CitationGen1, SectionGen1
+from newssurvey.types import AnalyzedArticleGen2, ArticleSectionPairGen2, CitationGen1, SectionGen1
 from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_OPENAI_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
+from newssurvey.workflow.llm.filter_articles import get_article_texts, join_article_texts
 
 _MODEL_SIZE = [
     "small",  # Do not use. Does not generate citations well.
@@ -117,10 +118,11 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     return True
 
 
-def _combine_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[str], max_attempts: int = 3) -> tuple[int, str]:
+def _combine_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, str]:
     assert user_query
     assert section
 
+    article_texts = get_article_texts(articles)
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     num_sections = len(sections)
     numbered_sections = [f"{num}. {s}" for num, s in enumerate(sections, start=1)]
@@ -129,13 +131,13 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
     numbered_section = f"{section_number}. {section}"
     max_output_tokens = min(8192, MAX_OUTPUT_TOKENS[_MODEL])  # Max observed: <800 output tokens.
 
-    def prompt_formatter(articles_truncated: list[str]) -> str:
-        numbered_articles = "\n\n---\n\n".join([f"[ARTICLE {num}]\n\n{article}" for num, article in enumerate(articles_truncated, start=1)])
-        prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
+    def prompt_formatter(article_texts_truncated: list[str]) -> str:
+        numbered_articles = join_article_texts(article_texts_truncated)
+        prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(article_texts_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
-    num_articles_used, prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach="rate", num_output_tokens=max_output_tokens)
+    num_articles_used, prompt = fit_items_to_input_token_limit(article_texts, model=_MODEL, formatter=prompt_formatter, approach="rate", num_output_tokens=max_output_tokens)
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
@@ -182,7 +184,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         article["article"]["rating"] = sum(article_section["rating"] for article_section in article["sections"])
 
     def process_section(section_num: int, section: str) -> SectionGen1:
-        section_articles = []
+        section_articles: list[ArticleSectionPairGen2] = []
         for article in articles:
             for article_section in article["sections"]:
                 if article_section["section"] == section:
@@ -193,8 +195,7 @@ def combine_articles(user_query: str, source_module: ModuleType, *, articles: li
         assert section_articles, section
         num_section_articles = len(section_articles)
         section_articles.sort(key=lambda a: (a["section"]["rating"], a["article"]["rating"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
-        section_articles_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in section_articles]
-        num_section_articles_used, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_articles_texts)
+        num_section_articles_used, section_text = _combine_articles(user_query, source_module, sections=sections, section=section, articles=section_articles)
 
         # Token counting and logging
         num_section_text_tokens = count_tokens(section_text, model=_MODEL)

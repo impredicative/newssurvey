@@ -119,39 +119,50 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     return True
 
 
+def get_article_texts(article_section_pairs: list[ArticleSectionPairGen2], /) -> list[str]:  # Note: Also used in combine_articles.
+    """Return the texts for the given article-section pairs."""
+    return [f'[ARTICLE {num}]\n\n{a["article"]["title"]}\n\n{a["section"]["text"]}' for num, a in enumerate(article_section_pairs, start=1)]
+
+
+def join_article_texts(article_texts: list[str], /) -> str:  # Note: Also used in combine_articles.
+    """Return the joined article texts."""
+    return "\n\n---\n\n".join(article_texts)
+
+
 def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, str]:
     """Return the number of articles used and the articles that were removed."""
     assert user_query
     assert section
     assert articles
 
-    article_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in articles]
+    article_texts = get_article_texts(articles)
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     num_sections = len(sections)
     numbered_sections = [f"{num}. {s}" for num, s in enumerate(sections, start=1)]
     numbered_sections_str = "\n".join(numbered_sections)
     section_number = sections.index(section) + 1
     numbered_section = f"{section_number}. {section}"
-    max_output_tokens = min(8192, MAX_OUTPUT_TOKENS[_MODEL])  # Max observed: <800 output tokens.
 
-    def prompt_formatter(articles_truncated: list[str]) -> str:
-        numbered_articles = "\n\n---\n\n".join([f"[ARTICLE {num}]\n\n{article}" for num, article in enumerate(articles_truncated, start=1)])
-        prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(articles_truncated), articles=numbered_articles)
+    def prompt_formatter(article_texts_truncated: list[str]) -> str:
+        numbered_articles = join_article_texts(article_texts_truncated)
+        prompt_data["task"] = PROMPTS["6. filter_articles"].format(num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(article_texts_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
-    num_articles_used, prompt = fit_items_to_input_token_limit(articles, model=_MODEL, formatter=prompt_formatter, approach="rate", num_output_tokens=max_output_tokens)
+    num_articles_used, prompt = fit_items_to_input_token_limit(article_texts, model=_MODEL, formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
-        print(f"Generating section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
-        response = get_content(prompt, model_size=_MODEL_SIZE, max_tokens=max_output_tokens, log=(num_attempt > 1), read_cache=(num_attempt == 1))
-        # Note:
-        # Specifying frequency_penalty<0 produced garbage output or otherwise takes forever to return.
-        # Specifying presence_penalty<0 helped produce more tokens only with presence_penalty=-2 which is risky to use.
+        print(f"Filtering section {section!r} from {num_articles_used} used articles out of {len(articles)} supplied articles using the {_MODEL_SIZE} model {_MODEL} in attempt {num_attempt}.")
+        print(prompt)  # TODO: Remove line.
+        input("Press Enter to continue...")  # TODO: Remove line.
+        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt >= 1), read_cache=(num_attempt == 1))
+
+        if response == "REMOVE: none":
+            return num_articles_used, []
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = _is_output_valid(response, section=section, num_articles=num_articles_used)
+            response_is_valid = _is_output_valid(response, num_articles=num_articles_used)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
@@ -162,14 +173,10 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
         break
 
-    num_response_tokens = count_tokens(response, model=_MODEL)
-    max_safe_output_tokens_rate = 0.8
-    max_safe_output_tokens = int(max_output_tokens * max_safe_output_tokens_rate)
-    if num_response_tokens > max_safe_output_tokens:
-        # Note: The output is intentionally not retried in this case, as `max_output_tokens` likely is insufficient. If this is reached, it may need to be checked and increased.
-        raise LanguageModelOutputLimitError(f"The generated section {section!r} has {num_response_tokens:,} tokens, which is more than {max_safe_output_tokens:,} tokens which is {max_safe_output_tokens_rate:.0%} of the maximum output token limit of {max_output_tokens:,} tokens. This is unexpected.")
+    removed_article_numbers = [int(s) for s in response.split(" ")]
+    removed_articles = [articles[num - 1] for num in removed_article_numbers]
 
-    return num_articles_used, response
+    return num_articles_used, removed_articles
 
 
 def filter_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[AnalyzedArticleGen2]:
@@ -190,7 +197,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
 
     def process_section(section_num: int, section: str) -> list[ArticleSectionPairGen2]:
         """Return articles to keep for the given section."""
-        article_section_pairs = []
+        article_section_pairs: list[ArticleSectionPairGen2] = []
         for article in articles:
             for article_section in article["sections"]:
                 if article_section["section"] == section:
