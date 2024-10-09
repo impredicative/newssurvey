@@ -33,6 +33,11 @@ class AnalyzedArticleGen2(TypedDict):
     sections: Required[list[AnalyzedSectionGen2]]
 
 
+class ArticleSectionPairGen2(TypedDict):
+    article: Required[SearchArticle]
+    section: Required[AnalyzedSectionGen2]
+
+
 class CitationGen1(TypedDict):
     title: Required[str]
     link: Required[str]

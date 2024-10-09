@@ -8,7 +8,7 @@ from typing import Required, TypedDict
 
 from newssurvey.config import PROMPTS, CITATION_OPEN_CHAR, CITATION_CLOSE_CHAR, CITATION_GROUP_PATTERN
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
-from newssurvey.types import AnalyzedArticleGen2, AnalyzedSectionGen2, CitationGen1, SearchArticle, SectionGen1
+from newssurvey.types import AnalyzedArticleGen2, AnalyzedSectionGen2, ArticleSectionPairGen2, CitationGen1, SearchArticle, SectionGen1
 from newssurvey.util.openai_ import get_content, MODELS, MAX_OUTPUT_TOKENS, MAX_OPENAI_WORKERS
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
@@ -119,12 +119,13 @@ def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
     return True
 
 
-def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[str], max_attempts: int = 3) -> tuple[int, str]:
+def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, str]:
+    """Return the number of articles used and the articles that were removed."""
     assert user_query
     assert section
+    assert articles
 
-    # section_articles_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in section_articles]  # TODO: Reuse.
-
+    article_texts = [f'{a["article"]["title"]}\n\n{a["section"]["text"]}' for a in articles]
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     num_sections = len(sections)
     numbered_sections = [f"{num}. {s}" for num, s in enumerate(sections, start=1)]
@@ -187,49 +188,47 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
     article_link_to_rating_map: dict[str, int] = {article["article"]["link"]: sum(article_section["rating"] for article_section in article["sections"]) for article in articles}
     # Note: Technically this summed rating could be updated after each iteration of each section, but this would break reproducible caching for concurrent processing, and so it is not updated hereafter.
 
-    class SectionArticle(TypedDict):
-        article: Required[SearchArticle]
-        section: Required[AnalyzedSectionGen2]
-
-    def process_section(section_num: int, section: str) -> list[SectionArticle]:
-        section_articles = []
+    def process_section(section_num: int, section: str) -> list[ArticleSectionPairGen2]:
+        """Return articles to keep for the given section."""
+        article_section_pairs = []
         for article in articles:
             for article_section in article["sections"]:
                 if article_section["section"] == section:
                     assert article_section["rating"] > 0
-                    section_article = {"article": article["article"], "section": article_section}
-                    section_articles.append(section_article)
+                    article_section_pair = {"article": article["article"], "section": article_section}
+                    article_section_pairs.append(article_section_pair)
                     break
-        assert section_articles, section
-        section_articles.sort(key=lambda a: (a["section"]["rating"], article_link_to_rating_map["link"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
+        assert article_section_pairs, section
+        article_section_pairs.sort(key=lambda a: (a["section"]["rating"], article_link_to_rating_map["link"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
         
         iteration = 0
         while True:
             iteration += 1
-            num_section_articles = len(section_articles)
-            num_section_articles_used, removed_section_articles = _filter_articles(user_query, source_module, sections=sections, section=section, articles=section_articles)
-            num_section_articles_unused = num_section_articles - num_section_articles_used
-            num_section_articles_removed = len(removed_section_articles)
-            for removed_section_article in removed_section_articles:
-                section_articles.remove(removed_section_article)
-            filtered_articles_str = "\n".join([f"{num}. {a['article']['title']}" for num, a in enumerate(removed_section_articles, start=1)])
+            num_article_section_pairs = len(article_section_pairs)
+            num_article_section_pairs_used, removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
+            assert num_article_section_pairs_used <= num_article_section_pairs
+            num_article_section_pairs_unused = num_article_section_pairs - num_article_section_pairs_used
+            num_article_section_pairs_removed = len(removed_article_section_pairs)
+            for removed_article_section_pair in removed_article_section_pairs:
+                article_section_pairs.remove(removed_article_section_pair)
+            filtered_articles_str = "\n".join([f"{iteration}.{num}: {a['article']['title']}" for num, a in enumerate(removed_article_section_pairs, start=1)])
             filtered_articles_suffix_str = f':\n{tab_indent(filtered_articles_str)}' if filtered_articles_str else "."
-            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_section_articles_removed} filtered articles out of {num_section_articles_used} used articles out of {num_section_articles} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
+            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} filtered articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
 
-            if num_section_articles_unused == 0:
+            if num_article_section_pairs_unused == 0:
                 break
-            if (num_section_articles_removed == 0) and (num_section_articles_unused > 0):
-                print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_section_articles_unused} unused articles out of {num_section_articles} supplied articles out of {num_articles} total articles.")
+            if (num_article_section_pairs_removed == 0) and (num_article_section_pairs_unused > 0):
+                print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
                 input("Press Enter to continue...")  # TODO: Remove line.
                 break
         
-        assert section_articles, section
-        return section_articles
+        assert article_section_pairs, section
+        return article_section_pairs
 
     max_workers = min(1, MAX_OPENAI_WORKERS)  # TODO: Replace 1 with 8.
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
-        sections_to_articles: dict[str, list[SectionArticle]] = {section: sections_to_futures[section].result() for section in sections}
+        sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
     sections_to_links: dict[str, set[str]] = {section: {a["article"]["link"] for a in sections_to_articles[section]} for section in sections}
 
     for article in articles:
