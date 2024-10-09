@@ -87,7 +87,7 @@ def join_article_texts(article_texts: list[str], /) -> str:  # Note: Also used i
     return "\n\n---\n\n".join(article_texts)
 
 
-def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, str]:
+def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, dict[int, str]]:
     """Return the number of articles used and the articles that were removed."""
     assert user_query
     assert section
@@ -114,7 +114,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
         response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt > 1), read_cache=(num_attempt == 1))
 
         if is_none_response(response.removeprefix(_RESPONSE_PREFIX)):
-            return num_articles_used, []
+            return num_articles_used, {}
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
@@ -132,7 +132,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
     removed_article_numbers = [int(s) for s in response.removeprefix(_RESPONSE_PREFIX).split(" ")]
     removed_article_numbers.sort()
-    removed_articles = [articles[num - 1] for num in removed_article_numbers]
+    removed_articles = {num: articles[num - 1] for num in removed_article_numbers}
     return num_articles_used, removed_articles
 
 
@@ -173,13 +173,14 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                 print(f"Skipping filtering section {section_num}/{num_sections} {section!r} in iteration {iteration} because it has {num_article_section_pairs} articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
                 break
 
-            num_article_section_pairs_used, removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
+            num_article_section_pairs_used, numbered_removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
+            removed_article_section_pairs = list(numbered_removed_article_section_pairs.values())
             assert num_article_section_pairs_used <= num_article_section_pairs
             num_article_section_pairs_unused = num_article_section_pairs - num_article_section_pairs_used
             num_article_section_pairs_removed = len(removed_article_section_pairs)
             for removed_article_section_pair in removed_article_section_pairs:
                 article_section_pairs.remove(removed_article_section_pair)
-            filtered_articles_str = "\n".join([f"s{section_num}.i{iteration}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, a in enumerate(removed_article_section_pairs, start=1)])
+            filtered_articles_str = "\n".join([f"s{section_num}.i{iteration}.a{a_num}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, (a_num, a) in enumerate(numbered_removed_article_section_pairs.items(), start=1)])
             filtered_articles_suffix_str = f":\n{tab_indent(filtered_articles_str)}" if filtered_articles_str else "."
             print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
             input("Press Enter to continue...")  # TODO: Remove line.
