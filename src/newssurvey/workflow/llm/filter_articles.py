@@ -8,12 +8,16 @@ from types import ModuleType
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newssurvey.types import AnalyzedArticleGen2, ArticleSectionPairGen2
-from newssurvey.util.openai_ import get_content, MAX_OPENAI_WORKERS
+from newssurvey.util.openai_ import get_content, MAX_OPENAI_WORKERS, MODELS
+from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
-_RESPONSE_PATTERN = re.compile(r"REMOVE: \d+(?: \d+)*")
+_MODEL_SIZE = "large"
+_MODEL = MODELS["text"][_MODEL_SIZE]
+_RESPONSE_PREFIX = "REMOVE: "
+_RESPONSE_PATTERN = re.compile(rf"{_RESPONSE_PREFIX}\d+(?: \d+)*")
 
 
 def _is_response_valid(response: str, num_articles: int) -> bool:
@@ -40,7 +44,7 @@ def _is_response_valid(response: str, num_articles: int) -> bool:
         print_error(f"Response is invalid because it does not match the expected pattern: {response!r}")
         return False
 
-    responses = response.removeprefix("REMOVE: ").split(" ")
+    responses = response.removeprefix(_RESPONSE_PREFIX).split(" ")
     num_responses = len(responses)
     if num_responses > num_articles:
         print_error(f"Response is invalid because it has more entries ({num_responses}) than expected for the articles ({num_articles}): {response!r}")
@@ -102,15 +106,13 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
-    num_articles_used, prompt = fit_items_to_input_token_limit(article_texts, formatter=prompt_formatter, approach="rate")
+    num_articles_used, prompt = fit_items_to_input_token_limit(article_texts, model=_MODEL, formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Filtering section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt}.")
-        print(prompt)  # TODO: Remove line.
-        input("Press Enter to continue...")  # TODO: Remove line.
-        response = get_content(prompt, log=(num_attempt >= 1), read_cache=(num_attempt == 1))  # TODO: Fix log value.
+        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt >= 1), read_cache=(num_attempt == 1))  # TODO: Fix log value.
 
-        if response == "REMOVE: none":
+        if is_none_response(response.removeprefix(_RESPONSE_PREFIX)):
             return num_articles_used, []
 
         error = io.StringIO()
@@ -126,7 +128,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
         break
 
-    removed_article_numbers = [int(s) for s in response.split(" ")]
+    removed_article_numbers = [int(s) for s in response.removeprefix(_RESPONSE_PREFIX).split(" ")]
     removed_article_numbers.sort()
     removed_articles = [articles[num - 1] for num in removed_article_numbers]
     return num_articles_used, removed_articles
@@ -159,7 +161,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                     article_section_pairs.append(article_section_pair)
                     break
         assert article_section_pairs, section
-        article_section_pairs.sort(key=lambda a: (a["section"]["rating"], article_link_to_rating_map["link"], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
+        article_section_pairs.sort(key=lambda a: (a["section"]["rating"], article_link_to_rating_map[a["article"]["link"]], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
 
         iteration = 0
         while True:
@@ -171,9 +173,10 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
             num_article_section_pairs_removed = len(removed_article_section_pairs)
             for removed_article_section_pair in removed_article_section_pairs:
                 article_section_pairs.remove(removed_article_section_pair)
-            filtered_articles_str = "\n".join([f"{iteration}.{num}: {a['article']['title']}" for num, a in enumerate(removed_article_section_pairs, start=1)])
+            filtered_articles_str = "\n".join([f"{iteration}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, a in enumerate(removed_article_section_pairs, start=1)])
             filtered_articles_suffix_str = f":\n{tab_indent(filtered_articles_str)}" if filtered_articles_str else "."
             print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} filtered articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
+            input("Press Enter to continue...")  # TODO: Remove line.
 
             if num_article_section_pairs_unused == 0:
                 break
