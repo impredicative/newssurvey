@@ -80,7 +80,8 @@ def get_completion(prompt: str, model: str, **kwargs) -> ChatCompletion:  # Note
     for num_attempt in range(1, max_attempts + 1):
         try:
             completion = client.chat.completions.create(model=model, messages=messages, **kwargs)  # Ref: https://platform.openai.com/docs/api-reference/chat/create
-        except (openai.InternalServerError, openai.PermissionDeniedError) as exc:
+        except (openai.InternalServerError, openai.PermissionDeniedError, openai.NotFoundError) as exc:
+            # Note: If encountering exceptions, check OpenAI status at https://status.openai.com/
             if num_attempt < max_attempts:
                 print_warning(f"Completion for prompt of length {len(prompt):,} using model {model} failed in attempt {num_attempt} of {max_attempts}: {exc}")
                 time.sleep(5 * num_attempt)
