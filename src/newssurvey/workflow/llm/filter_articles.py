@@ -14,6 +14,7 @@ from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
+_MIN_FILTERING_THRESHOLD = 2
 _MODEL_SIZE = "large"
 _MODEL = MODELS["text"][_MODEL_SIZE]
 _RESPONSE_PREFIX = "REMOVE: "
@@ -123,7 +124,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
             if num_attempt == max_attempts:
                 raise LanguageModelOutputStructureError(error)
             else:
-                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while getting a section: {error}")
+                print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while filtering section {section}: {error}")
                 input("Press Enter to continue...")  # TODO: Remove line.
                 continue
 
@@ -168,6 +169,11 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
         while True:
             iteration += 1
             num_article_section_pairs = len(article_section_pairs)
+            if num_article_section_pairs < _MIN_FILTERING_THRESHOLD:
+                print(f"Skipping filtering section {section_num}/{num_sections} {section!r} in iteration {iteration} because it has {num_article_section_pairs} articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
+                input("Press Enter to continue...")  # TODO: Remove line.
+                break
+
             num_article_section_pairs_used, removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
             assert num_article_section_pairs_used <= num_article_section_pairs
             num_article_section_pairs_unused = num_article_section_pairs - num_article_section_pairs_used
