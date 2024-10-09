@@ -45,7 +45,7 @@ def create_title(user_query: str, source_module: ModuleType, *, sections: list[s
     numbered_sections_str = "\n".join(numbered_sections)
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
-    prompt_data["task"] = PROMPTS["7. create_title"].format(sections=numbered_sections_str)
+    prompt_data["task"] = PROMPTS["8. create_title"].format(sections=numbered_sections_str)
     prompt = PROMPTS["0. common"].format(**prompt_data)
 
     for num_attempt in range(1, max_attempts + 1):

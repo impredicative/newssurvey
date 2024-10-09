@@ -133,7 +133,7 @@ def _combine_articles(user_query: str, source_module: ModuleType, *, sections: l
 
     def prompt_formatter(article_texts_truncated: list[str]) -> str:
         numbered_articles = join_article_texts(article_texts_truncated)
-        prompt_data["task"] = PROMPTS["6. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(article_texts_truncated), articles=numbered_articles)
+        prompt_data["task"] = PROMPTS["7. combine_articles"].format(max_output_tokens=max_output_tokens, num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(article_texts_truncated), articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
