@@ -14,107 +14,58 @@ from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import count_tokens, fit_items_to_input_token_limit
 
-_MODEL_SIZE = [
-    "small",  # Do not use. Does not generate citations well.
-    "large",  # Good.
-    "deprecated",  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
-][1]
-_MODEL = MODELS["text"][_MODEL_SIZE]
-
-_INVALID_BRACKETS = ["〖〗", "〈〉"]  # These have been observed in the output.
-_INVALID_BRACKETS_PATTERNS = {f"{invalid_open_bracket}{invalid_close_bracket}": re.compile(CITATION_GROUP_PATTERN.pattern.translate(str.maketrans(f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}", f"{invalid_open_bracket}{invalid_close_bracket}"))) for invalid_open_bracket, invalid_close_bracket in _INVALID_BRACKETS}
-_INVALID_DIGITS = "①②③④⑤⑥⑦⑧⑨"  # These have been observed in the output.
-_MARKDOWN_LIST_SNIPPETS = ["\n1. **", "\n- **"]  # These have been observed in the output.
+_RESPONSE_PATTERN = re.compile(r"REMOVE: \d+(?: \d+)*")
 
 
-def _is_output_valid(text: str, *, section: str, num_articles: int) -> bool:
-    """Return true if the output text is valid, otherwise false.
+def _is_response_valid(response: str, num_articles: int) -> bool:
+    """Return true if the response is valid, otherwise false.
 
-    A validation error is printed if the output text is invalid.
+    :param response: Valid example: 'REMOVE: 3 5 8'
+
+    A validation error is printed if a search term is invalid.
     """
-    if text != text.strip():
-        print_error(f"The text for the section {section!r} has leading or trailing whitespace.")
+    if not response:
+        print_error("No response exists.")
         return False
 
-    if not text:
-        print_error(f"The text for the section {section!r} is empty.")
+    if response != response.strip():
+        print_error(f"Response is invalid because it has leading or trailing whitespace: {response!r}")
         return False
 
-    for snippet in _MARKDOWN_LIST_SNIPPETS:
-        if snippet in text:
-            print_error(f"The text for the section {section!r} contains a markdown list snippet {snippet!r}.")
+    num_response_lines = len(response.splitlines())
+    if num_response_lines > 1:
+        print_error(f"Response is invalid because it has multiple lines: {response!r}")
+        return False
+
+    if _RESPONSE_PATTERN.fullmatch(response) is None:
+        print_error(f"Response is invalid because it does not match the expected pattern: {response!r}")
+        return False
+
+    response = response.removeprefix("REMOVE: ")
+    responses = response.split(" ")
+    num_responses = len(responses)
+    if num_responses > num_articles:
+        print_error(f"Response is invalid because it has more entries ({num_responses}) than expected for the articles ({num_articles}): {response!r}")
+        return False
+
+    seen = set()
+    for count, response in enumerate(responses, start=1):
+        assert response.isdigit()  # This is already checked by the regex.
+        number = int(response)
+
+        if number > num_articles:
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of articles ({num_articles}): {response!r}")
             return False
 
-    if text.startswith(CITATION_OPEN_CHAR):
-        print_error(f"The text for the section {section!r} starts with an opening bracket meant for a citation group.")
-        return False
-
-    if text.endswith(CITATION_CLOSE_CHAR):
-        print_error(f"The text for the section {section!r} ends with a closing bracket meant for a citation group.")
-        return False
-
-    if f"{CITATION_OPEN_CHAR}{CITATION_CLOSE_CHAR}" in text:
-        print_error(f"The text for the section {section!r} contains an empty citation group.")
-        return False
-
-    if f"{CITATION_CLOSE_CHAR}{CITATION_OPEN_CHAR}" in text:
-        print_error(f"The text for the section {section!r} could contain two adjacent citation groups.")
-        return False
-
-    num_opens, num_closes = text.count(CITATION_OPEN_CHAR), text.count(CITATION_CLOSE_CHAR)
-    if num_opens != num_closes:
-        print_error(f"The text for the section {section!r} has {num_opens} opening brackets but {num_closes} closing brackets meant for citation groups.")
-        return False
-
-    # Ensure citation brackets are balanced.
-    # Passing example: "〚1,2,3〛"
-    # Failing example: "〚1,2,〚3〛〛"
-    balance = 0
-    for char in text:
-        if char == CITATION_OPEN_CHAR:
-            balance += 1
-        elif char == CITATION_CLOSE_CHAR:
-            balance -= 1
-        if balance not in (0, 1):
-            print_error(f"The text for the section {section!r} has unbalanced citation brackets.")
+        if number in seen:
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {responses!r}")
             return False
+        seen.add(number)
 
-    citation_groups = CITATION_GROUP_PATTERN.findall(text)
-
-    if (num_articles > 0) and (not citation_groups):
-        print_error(f"The text for the section {section!r} does not contain any citation groups despite there being {num_articles} articles.")
-        return False
-
-    for num_citation_group, citation_group_str in enumerate(citation_groups, start=1):
-        if not citation_group_str:
-            print_error(f"The citation group #{num_citation_group} for the section {section!r} is empty.")
-            return False
-
-        citation_group = [g.strip() for g in citation_group_str.split(",")]
-        for citation_str in citation_group:
-            if not citation_str.isdigit():
-                print_error(f"The citation {citation_str!r} in citation group #{num_citation_group} ({citation_group_str!r}) for the section {section!r} is not a number.")
-                return False
-
-            citation = int(citation_str)
-            if not 1 <= citation <= num_articles:
-                print_error(f"The citation {citation} in citation group #{num_citation_group} ({citation_group_str!r}) for the section {section!r} is not within the expected range of 1 to {num_articles}.")
-                return False
-
-            # Note: Duplicates are not checked because they can be managed.
-
-    # Check for invalid brackets
-    for brackets, pattern in _INVALID_BRACKETS_PATTERNS.items():
-        if pattern.search(text):
-            print_error(f"The text for the section {section!r} contains invalid brackets {brackets}.")
-            # Note: A regex substitution could in principle be used to replace the invalid brackets with valid ones, but it is not used so as to ensure that the LLM is paying attention.
-            return False
-
-    # Check for invalid digits
-    for digit in _INVALID_DIGITS:
-        if digit in text:
-            print_error(f"The text for the section {section!r} contains an invalid digit {digit}.")
-            return False
+        # Note: This is not strictly necessary.
+        # if number < max(seen):
+        #     print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
+        #     return False
 
     return True
 
@@ -162,7 +113,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
-            response_is_valid = _is_output_valid(response, num_articles=num_articles_used)
+            response_is_valid = _is_response_valid(response, num_articles=num_articles_used)
         if not response_is_valid:
             error = error.getvalue().rstrip().removeprefix("Error: ")
             if num_attempt == max_attempts:
@@ -174,8 +125,8 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
         break
 
     removed_article_numbers = [int(s) for s in response.split(" ")]
+    removed_article_numbers.sort()
     removed_articles = [articles[num - 1] for num in removed_article_numbers]
-
     return num_articles_used, removed_articles
 
 
