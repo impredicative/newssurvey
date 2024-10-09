@@ -111,7 +111,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
     for num_attempt in range(1, max_attempts + 1):
         print(f"Filtering section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt}.")
-        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt >= 1), read_cache=(num_attempt == 1))  # TODO: Fix log value.
+        response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt > 1), read_cache=(num_attempt == 1))
 
         if is_none_response(response.removeprefix(_RESPONSE_PREFIX)):
             return num_articles_used, []
@@ -171,7 +171,6 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
             num_article_section_pairs = len(article_section_pairs)
             if num_article_section_pairs < _MIN_FILTERING_THRESHOLD:
                 print(f"Skipping filtering section {section_num}/{num_sections} {section!r} in iteration {iteration} because it has {num_article_section_pairs} articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
-                input("Press Enter to continue...")  # TODO: Remove line.
                 break
 
             num_article_section_pairs_used, removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
