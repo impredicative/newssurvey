@@ -180,7 +180,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
             num_article_section_pairs_removed = len(removed_article_section_pairs)
             for removed_article_section_pair in removed_article_section_pairs:
                 article_section_pairs.remove(removed_article_section_pair)
-            filtered_articles_str = "\n".join([f"{iteration}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, a in enumerate(removed_article_section_pairs, start=1)])
+            filtered_articles_str = "\n".join([f"s{section_num}.i{iteration}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, a in enumerate(removed_article_section_pairs, start=1)])
             filtered_articles_suffix_str = f":\n{tab_indent(filtered_articles_str)}" if filtered_articles_str else "."
             print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} filtered articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
             input("Press Enter to continue...")  # TODO: Remove line.
