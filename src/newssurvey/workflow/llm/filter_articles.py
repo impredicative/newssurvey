@@ -64,7 +64,7 @@ def _is_response_valid(response: str, num_articles: int) -> bool:
         # if number < max(seen):
         #     print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
         #     return False
-    
+
     if seen == set(range(1, num_articles + 1)):
         print_error(f"Response is invalid because it removes all {num_articles} articles: {response!r}")
         return False
