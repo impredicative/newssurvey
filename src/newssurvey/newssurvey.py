@@ -2,21 +2,22 @@ from typing import Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX, OUTPUT_FORMAT_DEFAULT
 from newssurvey.exceptions import InputError
-from newssurvey.types import AnalyzedArticleGen1, SearchResult, SearchArticle, SectionGen1, Response
+from newssurvey.types import AnalyzedArticleGen1, AnalyzedArticleGen2, Response, SearchResult, SearchArticle, SectionGen1
 from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
+from newssurvey.workflow.user.output import format_text_output, format_output, SUPPORTED_OUTPUT_FORMATS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
-from newssurvey.workflow.user.output import format_text_output, format_output, SUPPORTED_OUTPUT_FORMATS
 from newssurvey.workflow.llm.accumulate_search_terms import accumulate_search_terms
-from newssurvey.workflow.llm.list_search_terms import list_search_terms
-from newssurvey.workflow.llm.filter_search_results import filter_search_results
-from newssurvey.workflow.llm.list_sections import list_sections
-from newssurvey.workflow.llm.refine_sections import refine_sections
 from newssurvey.workflow.llm.create_title import create_title
-from newssurvey.workflow.llm.rate_articles import rate_articles
 from newssurvey.workflow.llm.condense_articles import condense_articles
 from newssurvey.workflow.llm.combine_articles import combine_articles
+from newssurvey.workflow.llm.filter_articles import filter_articles
+from newssurvey.workflow.llm.filter_search_results import filter_search_results
+from newssurvey.workflow.llm.list_search_terms import list_search_terms
+from newssurvey.workflow.llm.list_sections import list_sections
+from newssurvey.workflow.llm.rate_articles import rate_articles
+from newssurvey.workflow.llm.refine_sections import refine_sections
 from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
 
@@ -86,7 +87,7 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
 
     if confirm:
         get_confirmation("condensing articles")
-    articles_and_sections: list[AnalyzedArticleGen1] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    articles_and_sections: list[AnalyzedArticleGen2] = condense_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
     print("RATED SECTIONS BY ARTICLE:\n" + "\n".join(f'#{a_num}: {a["article"]["title"]} ({len(a["sections"])}/{num_sections} sections) (r={sum(s['rating'] for s in a['sections'])})\n\t{"\n\t".join(f'{s_num}. {s["section"]} (r={s["rating"]})' for s_num, s in enumerate(a["sections"], start=1))}' for a_num, a in enumerate(articles_and_sections, start=1)))
     print(f"ARTICLES BY SECTION ({num_sections}):")
     for section_num, section in enumerate(sections, start=1):
@@ -99,6 +100,12 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
     print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    print(section_names_str)
+
+    if confirm:
+        get_confirmation("filtering articles")
+    articles_and_sections: list[AnalyzedArticleGen2] = filter_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
+    print(f"FILTERED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
     print(section_names_str)
 
     if confirm:
