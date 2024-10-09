@@ -49,7 +49,7 @@ def _is_response_valid(response: str, num_search_results: int) -> bool:
         number = int(response)
 
         if number > num_search_results:
-            print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of search results: {response!r}")
+            print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of search results ({num_search_results}): {response!r}")
             return False
 
         if number in seen:
