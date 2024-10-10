@@ -17,7 +17,7 @@ from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
 _MIN_FILTERING_THRESHOLD = 2
 _MODEL_SIZE = [
-    "small",  #
+    "small",  # Bad because it routinely returns invalid numbers which are higher than the number of articles. Example: Response #11 has a value of 337 which is invalid because it is greater than the number of articles (323): 'REMOVE: 4 28 68 177 206 245 256 276 305 311 337 368 404 419 428 445 463 477 487 580 589 601 611 617 665 688 698 708 719 792 802 809 819 830 847 872 875 887 895 906 911 917 924 929 948 959 963 979 997'
     "large",  # Good but very expensive due to multiple iterations per section when there are many articles.
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
@@ -201,7 +201,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
         assert article_section_pairs, section
         return article_section_pairs
 
-    max_workers = min(8, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)
+    max_workers = min(6, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # Limited to 6 because 8 resulted in an error of exceeding token usage.
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
