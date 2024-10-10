@@ -8,6 +8,7 @@ from types import ModuleType
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
 from newssurvey.types import AnalyzedArticleGen2, ArticleSectionPairGen2
+from newssurvey.util.diskcache_ import MAX_DISKCACHE_WORKERS
 from newssurvey.util.openai_ import get_content, MAX_OPENAI_WORKERS, MODELS
 from newssurvey.util.str import is_none_response
 from newssurvey.util.sys_ import print_warning, print_error
@@ -127,7 +128,6 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
                 raise LanguageModelOutputStructureError(error)
             else:
                 print_warning(f"Fault in attempt {num_attempt} of {max_attempts} while filtering section {section}: {error}")
-                input("Press Enter to continue...")  # TODO: Remove line.
                 continue
 
         break
@@ -198,7 +198,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
         assert article_section_pairs, section
         return article_section_pairs
 
-    max_workers = min(8, MAX_OPENAI_WORKERS)
+    max_workers = min(8, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
