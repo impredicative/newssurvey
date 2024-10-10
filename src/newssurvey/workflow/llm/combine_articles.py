@@ -17,7 +17,6 @@ from newssurvey.workflow.llm.filter_articles import get_article_texts, join_arti
 _MODEL_SIZE = [
     "small",  # Do not use. Does not generate citations well.
     "large",  # Good.
-    "deprecated",  # Do not use. Does not follow instructions equally well as 4o. Does not generate citations.
 ][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
 
