@@ -16,7 +16,10 @@ from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
 _MIN_FILTERING_THRESHOLD = 2
-_MODEL_SIZE = "large"
+_MODEL_SIZE = [
+    "small",  #
+    "large",  # Good but very expensive due to multiple iterations per section when there are many articles.
+][1]
 _MODEL = MODELS["text"][_MODEL_SIZE]
 _RESPONSE_PREFIX = "REMOVE: "
 _RESPONSE_PATTERN = re.compile(rf"{_RESPONSE_PREFIX}\d+(?: \d+)*")
