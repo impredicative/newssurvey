@@ -193,13 +193,12 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                 break
             if (num_article_section_pairs_removed == 0) and (num_article_section_pairs_unused > 0):
                 print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
-                input("Press Enter to continue...")  # TODO: Remove line.
                 break
 
         assert article_section_pairs, section
         return article_section_pairs
 
-    max_workers = min(1, MAX_OPENAI_WORKERS)  # TODO: Replace 1 with 8.
+    max_workers = min(8, MAX_OPENAI_WORKERS)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
