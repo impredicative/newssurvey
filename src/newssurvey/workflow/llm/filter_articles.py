@@ -60,9 +60,11 @@ def _is_response_valid(response: str, num_articles: int) -> bool:
             print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of articles ({num_articles}): {response!r}")
             return False
 
-        if number in seen:
-            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {response!r}")
-            return False
+        # # Note: This is not strictly necessary.
+        # if number in seen:
+        #     print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {response!r}")
+        #     return False
+
         seen.add(number)
 
         # Note: This is not strictly necessary.
@@ -131,6 +133,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
         break
 
     removed_article_numbers = [int(s) for s in response.removeprefix(_RESPONSE_PREFIX).split(" ")]
+    removed_article_numbers = list(dict.fromkeys(removed_article_numbers))  # Remove duplicates as have been observed.
     removed_article_numbers.sort()
     removed_articles = {num: articles[num - 1] for num in removed_article_numbers}
     return num_articles_used, removed_articles
@@ -180,10 +183,11 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
             num_article_section_pairs_removed = len(removed_article_section_pairs)
             for removed_article_section_pair in removed_article_section_pairs:
                 article_section_pairs.remove(removed_article_section_pair)
-            filtered_articles_str = "\n".join([f"s{section_num}.i{iteration}.a{a_num}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, (a_num, a) in enumerate(numbered_removed_article_section_pairs.items(), start=1)])
-            filtered_articles_suffix_str = f":\n{tab_indent(filtered_articles_str)}" if filtered_articles_str else "."
-            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{filtered_articles_suffix_str}")
-            input("Press Enter to continue...")  # TODO: Remove line.
+            removed_articles_str = "\n".join([f"s{section_num}.i{iteration}.a{a_num}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, (a_num, a) in enumerate(numbered_removed_article_section_pairs.items(), start=1)])
+            removed_articles_suffix_str = f":\n{tab_indent(removed_articles_str)}" if removed_articles_str else "."
+            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{removed_articles_suffix_str}")
+            kept_articles_head_str = "\n".join([f"s{section_num}.i{iteration}.{num}: {a['article']['title']} (r={a['section']['rating']})" for num, a in enumerate(article_section_pairs[:num_article_section_pairs_used][:20], start=1)])
+            print(f"Top kept articles:\n{tab_indent(kept_articles_head_str)}")
 
             if num_article_section_pairs_unused == 0:
                 break
