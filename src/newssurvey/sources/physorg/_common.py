@@ -1,7 +1,7 @@
 from newssurvey.config import REQUEST_HEADERS
 from newssurvey.util.threading_ import CooldownLock
 
-_REQUEST_COOLDOWN = 4  # Applicable to default Mozilla Firefox user agent. Values ≤2 led to HTTP 429 errors.
+_REQUEST_COOLDOWN = 5  # Applicable to default Mozilla Firefox user agent. Values ≤2 led to HTTP 429 errors.
 REQUEST_HEADERS = REQUEST_HEADERS.copy()
 SOURCE_SITE_NAME = "PhysOrg"
 SOURCE_TYPE = "science"
