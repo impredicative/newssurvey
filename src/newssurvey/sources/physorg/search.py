@@ -9,7 +9,7 @@ from newssurvey.types import SearchResult
 from newssurvey.util.diskcache_ import get_diskcache
 from newssurvey.util.sys_ import print_error
 
-from ._common import REQUEST_HEADERS, request_cooldown_lock
+from ._common import UNBLOCK_MESSAGE, REQUEST_HEADERS, request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["small"])
 _HEXT = hext.Rule("""
@@ -53,7 +53,7 @@ def _get_search_response(query: str, *, sort_by: str = "relevancy", headlines: b
     try:
         response.raise_for_status()
     except requests.RequestException:
-        print_error(f"Failed to receive {description} due to status code {response.status_code}.")
+        print_error(f"Failed to receive {description} due to status code {response.status_code}. {UNBLOCK_MESSAGE}")
         raise
     print(f"Received {description} with status code {response.status_code}.")
     return response

@@ -8,7 +8,7 @@ from newssurvey.config import CACHE_EXPIRATION_BY_TAG, CACHE_SIZES_GiB
 from newssurvey.util.diskcache_ import get_diskcache
 from newssurvey.util.sys_ import print_error
 
-from ._common import REQUEST_HEADERS, request_cooldown_lock
+from ._common import UNBLOCK_MESSAGE, REQUEST_HEADERS, request_cooldown_lock
 
 _DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["large"])
 _EXPECTED_ARTICLE_URL_PREFIX = "https://phys.org/news/"
@@ -68,7 +68,7 @@ def _get_article_response(url: str) -> requests.Response:
     try:
         response.raise_for_status()
     except requests.RequestException:
-        print_error(f"Failed to read {url} due to status code {response.status_code}.")
+        print_error(f"Failed to read {url} due to status code {response.status_code}. {UNBLOCK_MESSAGE}")
         raise
     print(f"Read {url} with status code {response.status_code}.")
     return response

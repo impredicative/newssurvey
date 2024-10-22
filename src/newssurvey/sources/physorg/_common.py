@@ -5,5 +5,6 @@ _REQUEST_COOLDOWN = 5  # Applicable to default Mozilla Firefox user agent. Value
 REQUEST_HEADERS = REQUEST_HEADERS.copy()
 SOURCE_SITE_NAME = "PhysOrg"
 SOURCE_TYPE = "science"
+UNBLOCK_MESSAGE = "Consider visiting https://phys.org/ in a web browser to test and unblock it as relevant."
 
 request_cooldown_lock = CooldownLock(cooldown=_REQUEST_COOLDOWN, name=SOURCE_SITE_NAME)
