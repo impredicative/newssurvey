@@ -12,7 +12,7 @@
 -e file:.
 annotated-types==0.7.0
     # via pydantic
-anyio==4.6.0
+anyio==4.6.2.post1
     # via httpx
     # via openai
 certifi==2024.8.30
@@ -34,7 +34,7 @@ distro==1.9.0
     # via openai
 h11==0.14.0
     # via httpcore
-hext==1.0.9
+hext==1.0.11
     # via newssurvey
 httpcore==1.0.6
     # via httpx
@@ -51,11 +51,11 @@ locket==1.0.0
 numpy==2.1.2
     # via newssurvey
     # via scipy
-openai==1.51.2
+openai==1.52.0
     # via newssurvey
 pathvalidate==3.2.1
     # via newssurvey
-pillow==10.4.0
+pillow==11.0.0
     # via reportlab
 pydantic==2.9.2
     # via openai
