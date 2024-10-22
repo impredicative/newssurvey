@@ -37,7 +37,6 @@ def _remove_empty_sections(sections: list[str], articles_and_sections: list[Anal
     assert (len(remaining_sections) + len(removed_sections)) == len(sections)
     if removed_sections:
         print_warning(f"REMOVED SECTIONS ({len(removed_sections)}/{len(sections)}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(removed_sections, start=1)]))
-        input("Press Enter to continue...")  # TODO: Remove line.
     return remaining_sections
 
 
