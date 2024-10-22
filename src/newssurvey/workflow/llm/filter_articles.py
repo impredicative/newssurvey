@@ -15,7 +15,7 @@ from newssurvey.util.sys_ import print_warning, print_error
 from newssurvey.util.textwrap import tab_indent
 from newssurvey.util.tiktoken_ import fit_items_to_input_token_limit
 
-_MIN_FILTERING_THRESHOLD = 2
+_MIN_FILTERING_THRESHOLD = 1
 _MODEL_SIZE = [
     "small",  # Bad because it routinely returns invalid numbers which are higher than the number of articles. Example: Response #11 has a value of 337 which is invalid because it is greater than the number of articles (323): 'REMOVE: 4 28 68 177 206 245 256 276 305 311 337 368 404 419 428 445 463 477 487 580 589 601 611 617 665 688 698 708 719 792 802 809 819 830 847 872 875 887 895 906 911 917 924 929 948 959 963 979 997'
     "large",  # Good but very expensive due to multiple iterations per section when there are many articles.
@@ -76,9 +76,10 @@ def _is_response_valid(response: str, num_articles: int) -> bool:
         #     print_error(f"Response {count} is invalid because it is not in ascending order: {number}")
         #     return False
 
-    if seen == set(range(1, num_articles + 1)):
-        print_error(f"Response is invalid because it removes all {num_articles} articles: {response!r}")
-        return False
+    # Note: This is not enforced so as to allow for the possibility of removing all articles for a section.
+    # if seen == set(range(1, num_articles + 1)):
+    #     print_error(f"Response is invalid because it removes all {num_articles} articles: {response!r}")
+    #     return False
 
     return True
 
@@ -198,7 +199,9 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                 print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
                 break
 
-        assert article_section_pairs, section
+        if not article_section_pairs:
+            print_warning(f"No articles remain for section {section_num}/{num_sections} {section!r}.")
+
         return article_section_pairs
 
     max_workers = min(6, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # Limited to 6 because 8 resulted in an error of exceeding token usage.

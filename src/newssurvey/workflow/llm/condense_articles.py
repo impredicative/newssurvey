@@ -122,6 +122,7 @@ def condense_articles(user_query: str, source_module: ModuleType, *, articles: l
             result_key = (article_title, section_name)
             if result_key in article_section_results:
                 condensed_text = article_section_results[result_key]
+                assert condensed_text
                 condensed_section = AnalyzedSectionGen2(**section, text=condensed_text)
                 condensed_sections.append(condensed_section)
         if not condensed_sections:

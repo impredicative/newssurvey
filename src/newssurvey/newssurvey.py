@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Callable, Optional
 
 from newssurvey.config import NUM_SECTIONS_DEFAULT, NUM_SECTIONS_MIN, NUM_SECTIONS_MAX, OUTPUT_FORMAT_DEFAULT
 from newssurvey.exceptions import InputError
 from newssurvey.types import AnalyzedArticleGen1, AnalyzedArticleGen2, Response, SearchResult, SearchArticle, SectionGen1
 from newssurvey.util.input import get_confirmation
 from newssurvey.util.openai_ import ensure_openai_key, MODELS
+from newssurvey.util.sys_ import print_warning
 from newssurvey.workflow.user.output import format_text_output, format_output, SUPPORTED_OUTPUT_FORMATS
 from newssurvey.workflow.user.query import ensure_query_is_valid
 from newssurvey.workflow.user.source import ensure_source_is_valid, get_source_module
@@ -20,6 +21,24 @@ from newssurvey.workflow.llm.rate_articles import rate_articles
 from newssurvey.workflow.llm.refine_sections import refine_sections
 from newssurvey.workflow.source.get_articles import get_articles
 from newssurvey.workflow.source.map_citations import map_citations
+
+
+def _get_section_names_str(sections: list[str]) -> str:
+    return f"SECTIONS ({len(sections)}):\n" + "\n".join(f"{num}: {section}" for num, section in enumerate(sections, start=1))
+
+
+def _remove_empty_sections(sections: list[str], articles_and_sections: list[AnalyzedArticleGen1] | list[AnalyzedArticleGen2], *, keep_condition: Callable[[AnalyzedArticleGen1 | AnalyzedArticleGen2], bool]) -> list[str]:
+    """Return the remaining sections after removing the empty sections based on the given condition.
+
+    The removed sections, if any, are printed.
+    """
+    remaining_sections = [section for section in sections if any(((s["section"] == section) and keep_condition(s)) for a in articles_and_sections for s in a["sections"])]
+    removed_sections = [section for section in sections if section not in remaining_sections]
+    assert (len(remaining_sections) + len(removed_sections)) == len(sections)
+    if removed_sections:
+        print_warning(f"REMOVED SECTIONS ({len(removed_sections)}/{len(sections)}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(removed_sections, start=1)]))
+        input("Press Enter to continue...")  # TODO: Remove line.
+    return remaining_sections
 
 
 def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_DEFAULT, output_format: Optional[str] = OUTPUT_FORMAT_DEFAULT, confirm: bool = False) -> Response:
@@ -76,14 +95,18 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
     sections: list[str] = list_sections(user_query=query, source_module=source_module, titles=[r["title"] for r in articles], max_sections=max_sections)
     sections: list[str] = refine_sections(user_query=query, source_module=source_module, sections=sections, titles=[r["title"] for r in articles], max_sections=max_sections)
     num_sections = len(sections)
-    section_names_str = f"SECTIONS ({num_sections}):\n" + "\n".join([f"{num}: {section}" for num, section in enumerate(sections, start=1)])
+    section_names_str = _get_section_names_str(sections)
     print(section_names_str)
 
     if confirm:
         get_confirmation("rating articles")
     articles_and_sections: list[AnalyzedArticleGen1] = rate_articles(user_query=query, source_module=source_module, articles=articles, sections=sections)
-    print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    sections = _remove_empty_sections(sections=sections, articles_and_sections=articles_and_sections, keep_condition=lambda s: s["rating"] > 0)
+    assert sections
+    num_sections = len(sections)
+    section_names_str = _get_section_names_str(sections)
     print(section_names_str)
+    print(f"RATED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
     if confirm:
         get_confirmation("condensing articles")
@@ -99,14 +122,22 @@ def generate_response(source: str, query: str, max_sections: int = NUM_SECTIONS_
             article_section_pair_rating = next(s["rating"] for s in article["sections"] if section == s["section"])
             article_rating = sum(s["rating"] for s in article["sections"])
             print(f"\t{article_num}: {article['article']['title']} (r={article_section_pair_rating}/{article_rating})")
-    print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    sections = _remove_empty_sections(sections=sections, articles_and_sections=articles_and_sections, keep_condition=lambda s: s["text"])
+    assert sections
+    num_sections = len(sections)
+    section_names_str = _get_section_names_str(sections)
     print(section_names_str)
+    print(f"CONDENSED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
     if confirm:
         get_confirmation("filtering articles")
     articles_and_sections: list[AnalyzedArticleGen2] = filter_articles(user_query=query, source_module=source_module, articles=articles_and_sections, sections=sections)
-    print(f"FILTERED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
+    sections = _remove_empty_sections(sections=sections, articles_and_sections=articles_and_sections, keep_condition=lambda s: s["text"])
+    assert sections
+    num_sections = len(sections)
+    section_names_str = _get_section_names_str(sections)
     print(section_names_str)
+    print(f"FILTERED ARTICLES x SECTIONS PAIRS SUMMARY: {len(articles_and_sections)} articles x {num_sections} sections = {sum(len(a['sections']) for a in articles_and_sections):,} actual pairs / {len(articles_and_sections) * num_sections:,} possible pairs")
 
     if confirm:
         get_confirmation("generating section texts")

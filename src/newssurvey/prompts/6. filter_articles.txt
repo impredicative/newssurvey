@@ -43,7 +43,7 @@ Consider these examples of the output that is required:
 * If your response was "REMOVE: 8", only the numbered article will be removed, and all others will be kept.
 * Iff all articles were to be kept, just say "REMOVE: none" as a special case.
 
-Never remove all articles, or there will be nothing left to write the section with! In general, if given just a few input articles, the need to remove articles is somewhat lower. Conversely, if given many input articles, the need to remove irrelevant articles is somewhat higher.
+In general, if given just a few input articles, the need to remove articles is somewhat lower. Conversely, if given many input articles, the need to remove irrelevant articles is somewhat higher.
 
 ## Data
 The list of {num_sections} section names of the report is:
