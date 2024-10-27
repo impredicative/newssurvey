@@ -51,7 +51,7 @@ locket==1.0.0
 numpy==2.1.2
     # via newssurvey
     # via scipy
-openai==1.52.1
+openai==1.52.2
     # via newssurvey
 pathvalidate==3.2.1
     # via newssurvey
