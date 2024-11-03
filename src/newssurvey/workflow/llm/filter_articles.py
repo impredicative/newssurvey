@@ -28,7 +28,7 @@ _RESPONSE_PATTERN = re.compile(rf"{_RESPONSE_PREFIX}\d+(?: \d+)*")
 
 
 class TrackedArticleSectionPairGen2(ArticleSectionPairGen2):
-    status: Required[Literal['kept', 'removed', 'undetermined']]
+    status: Required[Literal["kept", "removed", "undetermined"]]
     iteration: Required[int]
 
 
@@ -150,15 +150,15 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
     removed_article_numbers = [int(s) for s in response.split(" ")] if response else []  # Note: "".split(" ") returns [''], so it is handled separately.
     removed_article_numbers = list(dict.fromkeys(removed_article_numbers))  # Remove duplicates as have been observed.
     removed_article_numbers.sort()
-    
+
     status_map = {True: "removed", False: "kept"}
     for a_num, a in enumerate(articles, start=1):
         assert a["status"] == "undetermined"
         if a_num <= num_articles_used:
             a["status"] = status_map[a_num in removed_article_numbers]
         a["iteration"] = batch_num
-    
-    print(f'Filtered batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt} with {len(removed_article_numbers)} removed articles: {removed_article_numbers}')
+
+    print(f"Filtered batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt} with {len(removed_article_numbers)} removed articles: {removed_article_numbers}")
 
 
 def filter_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[AnalyzedArticleGen2]:
@@ -221,14 +221,14 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
 
             num_article_section_pairs_curr = len(unfiltered_article_section_pairs)
             num_article_section_pairs_by_status = collections.Counter(a["status"] for a in unfiltered_article_section_pairs)
-            num_article_section_pairs_used = num_article_section_pairs_by_status['kept'] + num_article_section_pairs_by_status['removed']
-            num_article_section_pairs_unused = num_article_section_pairs_by_status['undetermined']
-            assert (num_article_section_pairs_used + num_article_section_pairs_unused == num_article_section_pairs_curr), (num_article_section_pairs_used, num_article_section_pairs_unused, num_article_section_pairs_curr)
+            num_article_section_pairs_used = num_article_section_pairs_by_status["kept"] + num_article_section_pairs_by_status["removed"]
+            num_article_section_pairs_unused = num_article_section_pairs_by_status["undetermined"]
+            assert num_article_section_pairs_used + num_article_section_pairs_unused == num_article_section_pairs_curr, (num_article_section_pairs_used, num_article_section_pairs_unused, num_article_section_pairs_curr)
 
             printable_samples = []
             sample_status = None
             for a_num, a in enumerate(tracked_article_section_pairs, start=1):
-                if (a['iteration'] != iteration) or (a["status"] == sample_status):
+                if (a["iteration"] != iteration) or (a["status"] == sample_status):
                     continue
                 sample_status = a["status"]
                 printable_sample = f"[{sample_status[0]}] s{section_num}.i{iteration}.a{a_num}: {a['article']['title']} (r={a["section"]["rating"]})"
@@ -239,7 +239,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
 
             if num_article_section_pairs_unused == 0:
                 break
-            if (num_article_section_pairs_by_status['removed'] == 0) and (num_article_section_pairs_unused > 0):
+            if (num_article_section_pairs_by_status["removed"] == 0) and (num_article_section_pairs_unused > 0):
                 print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
                 break
 
