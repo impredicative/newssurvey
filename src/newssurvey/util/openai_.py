@@ -140,25 +140,25 @@ def get_content(prompt: str, *, model_size: TextModelSizeType, completion: Optio
 
 
 @_DISKCACHE.memoize(expire=CACHE_EXPIRATION_BY_TAG["get_embedding"], tag="get_embedding")
-def get_embedding(text: str, model: str) -> CreateEmbeddingResponse:  # Note: `model` is explicitly specified to allow model-specific caching.
+def get_embedding(text: str, model: str, **kwargs) -> CreateEmbeddingResponse:  # Note: `model` is explicitly specified to allow model-specific caching.
     """Return the embedding response for the given text."""
     assert model in MODELS["embedding"].values(), model
     client = openai.OpenAI()
     text_log = text[:100] + "..." if (len(text) > 100) else text
-    print(f"Requesting embedding for text {text_log!r} of length {len(text):,} using model {model}.")
+    print(f"Requesting embedding for text {text_log!r} of length {len(text):,} using model {model} with keyword arguments: {dict_str(kwargs)}")
     # time_start = time.monotonic()
-    response = client.embeddings.create(input=text, model=model)
+    response = client.embeddings.create(input=text, model=model, **kwargs)
     # time_used = time.monotonic() - time_start
     # print(f"Received embedding for text {text_log!r} of length {len(text):,} using model {model} in {time_used:.1f}s.")
     return response
 
 
-def get_vector(text: str, *, model_size: str, embedding: Optional[CreateEmbeddingResponse] = None, log: bool = False) -> list[float]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
+def get_vector(text: str, *, model_size: str, embedding: Optional[CreateEmbeddingResponse] = None, log: bool = False, **kwargs) -> list[float]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the embedding vector for the given text."""
     assert model_size in MODELS["embedding"], model_size
     model = MODELS["embedding"][model_size]
     if not embedding:
-        embedding = get_embedding(text, model=model)
+        embedding = get_embedding(text, model=model, **kwargs)
     vector = embedding.data[0].embedding
     assert vector
     if log:
@@ -167,9 +167,9 @@ def get_vector(text: str, *, model_size: str, embedding: Optional[CreateEmbeddin
     return vector
 
 
-def get_vectors_concurrently(texts: list[str], *, model_size: str, log: bool = False) -> dict[str, list[float]]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
+def get_vectors_concurrently(texts: list[str], *, model_size: str, log: bool = False, **kwargs) -> dict[str, list[float]]:  # Note: `model_size` is explicitly required to avoid error with an unintended model size.
     """Return the embedding vectors for the given texts."""
     assert model_size in MODELS["embedding"], model_size
-    fn_get_vector = lambda text: (text, get_vector(text, model_size=model_size, log=log))
+    fn_get_vector = lambda text: (text, get_vector(text, model_size=model_size, log=log, **kwargs))
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_OPENAI_WORKERS) as executor:
         return dict(executor.map(fn_get_vector, texts))
