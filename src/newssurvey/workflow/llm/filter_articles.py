@@ -158,7 +158,7 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
             a["status"] = status_map[a_num in removed_article_numbers]
         a["iteration"] = batch_num
 
-    print(f"Filtered batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt} with {len(removed_article_numbers)} removed articles: {removed_article_numbers}")
+    print(f"Filtered batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt} with {len(removed_article_numbers)} articles removed.")
 
 
 def filter_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[AnalyzedArticleGen2]:
@@ -213,8 +213,6 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                 print(f"No unfiltered articles remain for section {section_num}/{num_sections} {section!r} in iteration {iteration}.")
                 break
             
-            if iteration > 1:
-                input(f"Press Enter before filtering section {section_num}/{num_sections} {section!r}...")  # TODO: Remove this line.
             _filter_articles(user_query, source_module, sections=sections, section=section, articles=unfiltered_article_section_pairs, batch_num=iteration)  # Note: This should effectively update tracked_article_section_pairs in-place.
             # Note: Previously filtered articles are not included in the call to _filter_articles because:
             # 1. They have already been filtered once.
@@ -240,17 +238,17 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
 
             if num_article_section_pairs_unused == 0:
                 break
-            if (num_article_section_pairs_by_status["removed"] == 0) and (num_article_section_pairs_unused > 0):
-                print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
-                break
+            # if (num_article_section_pairs_by_status["removed"] == 0) and (num_article_section_pairs_unused > 0):
+            #     print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
+            #     break  # Note: A premature break was observed.
 
         kept_article_section_pairs = [ArticleSectionPairGen2(article=a["article"], section=a["section"]) for a in tracked_article_section_pairs if a["status"] == "kept"]
-        msg = f"Section {section_num}/{num_sections} {section!r} has {len(kept_article_section_pairs)} out {num_article_section_pairs} articles that remain."
+        msg = f"Section {section_num}/{num_sections} {section!r} has {len(kept_article_section_pairs)} out {num_article_section_pairs} articles that remain after {iteration} iterations."
         printer = print if kept_article_section_pairs else print_warning
         printer(msg)
         return kept_article_section_pairs
 
-    max_workers = min(1, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # TODO: Remove 1.
+    max_workers = min(MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
