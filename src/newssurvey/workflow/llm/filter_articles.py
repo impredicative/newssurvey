@@ -1,9 +1,11 @@
+import collections
 import concurrent.futures
 import contextlib
 import copy
 import io
 import re
 from types import ModuleType
+from typing import Literal, Required
 
 from newssurvey.config import PROMPTS
 from newssurvey.exceptions import LanguageModelOutputStructureError, SourceInsufficiencyError
@@ -23,6 +25,11 @@ _MODEL_SIZE = [
 _MODEL = MODELS["text"][_MODEL_SIZE]
 _RESPONSE_PREFIX = "REMOVE: "
 _RESPONSE_PATTERN = re.compile(rf"{_RESPONSE_PREFIX}\d+(?: \d+)*")
+
+
+class TrackedArticleSectionPairGen2(ArticleSectionPairGen2):
+    status: Required[Literal['kept', 'removed', 'undetermined']]
+    iteration: Required[int]
 
 
 def _is_response_valid(response: str, num_articles: int) -> bool:
@@ -94,11 +101,12 @@ def join_article_texts(article_texts: list[str], /) -> str:  # Note: Also used i
     return "\n\n---\n\n".join(article_texts)
 
 
-def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[ArticleSectionPairGen2], max_attempts: int = 3) -> tuple[int, dict[int, str]]:
-    """Return the number of articles used and the articles that were removed."""
+def _filter_articles(user_query: str, source_module: ModuleType, *, sections: list[str], section: str, articles: list[TrackedArticleSectionPairGen2], batch_num: int, max_attempts: int = 3) -> None:
+    """Update the given articles in-place with their updated tracking status after filtering the ones that can be filtered."""
     assert user_query
     assert section
     assert articles
+    assert all((article["status"] == "undetermined") for article in articles)
 
     article_texts = get_article_texts(articles)
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
@@ -109,19 +117,21 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
     numbered_section = f"{section_number}. {section}"
 
     def prompt_formatter(article_texts_truncated: list[str]) -> str:
+        num_articles = len(article_texts_truncated)
         numbered_articles = join_article_texts(article_texts_truncated)
-        prompt_data["task"] = PROMPTS["6. filter_articles"].format(num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=len(article_texts_truncated), articles=numbered_articles)
+        prompt_data["task"] = PROMPTS["6. filter_articles"].format(num_sections=num_sections, sections=numbered_sections_str, section=numbered_section, num_articles=num_articles, batch_num=batch_num, articles=numbered_articles)
         prompt = PROMPTS["0. common"].format(**prompt_data)
         return prompt
 
     num_articles_used, prompt = fit_items_to_input_token_limit(article_texts, model=_MODEL, formatter=prompt_formatter, approach="rate")
 
     for num_attempt in range(1, max_attempts + 1):
-        print(f"Filtering section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt}.")
+        print(f"Filtering batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt}.")
         response = get_content(prompt, model_size=_MODEL_SIZE, log=(num_attempt > 1), read_cache=(num_attempt == 1))
 
         if is_none_response(response.removeprefix(_RESPONSE_PREFIX)):
-            return num_articles_used, {}
+            response = _RESPONSE_PREFIX
+            break
 
         error = io.StringIO()
         with contextlib.redirect_stderr(error):
@@ -136,11 +146,19 @@ def _filter_articles(user_query: str, source_module: ModuleType, *, sections: li
 
         break
 
-    removed_article_numbers = [int(s) for s in response.removeprefix(_RESPONSE_PREFIX).split(" ")]
+    response = response.removeprefix(_RESPONSE_PREFIX)
+    removed_article_numbers = [int(s) for s in response.split(" ")] if response else []  # Note: "".split(" ") returns [''], so it is handled separately.
     removed_article_numbers = list(dict.fromkeys(removed_article_numbers))  # Remove duplicates as have been observed.
     removed_article_numbers.sort()
-    removed_articles = {num: articles[num - 1] for num in removed_article_numbers}
-    return num_articles_used, removed_articles
+    
+    status_map = {True: "removed", False: "kept"}
+    for a_num, a in enumerate(articles, start=1):
+        assert a["status"] == "undetermined"
+        if a_num <= num_articles_used:
+            a["status"] = status_map[a_num in removed_article_numbers]
+        a["iteration"] = batch_num
+    
+    print(f'Filtered batch {batch_num} of section {section!r} using {num_articles_used} articles out of {len(articles)} supplied articles in attempt {num_attempt} with {len(removed_article_numbers)} removed articles: {removed_article_numbers}')
 
 
 def filter_articles(user_query: str, source_module: ModuleType, *, articles: list[AnalyzedArticleGen2], sections: list[str]) -> list[AnalyzedArticleGen2]:
@@ -171,40 +189,67 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                     break
         assert article_section_pairs, section
         article_section_pairs.sort(key=lambda a: (a["section"]["rating"], article_link_to_rating_map[a["article"]["link"]], a["article"]["link"]), reverse=True)  # Link is used as a unique tiebreaker for reproducibility to facilitate a cache hit. It is also used because it often contains the article's publication date.
+        num_article_section_pairs = len(article_section_pairs)
+        if num_article_section_pairs < _MIN_FILTERING_THRESHOLD:
+            print(f"Skipping filtering section {section_num}/{num_sections} {section!r} because it has {num_article_section_pairs} articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
+            return article_section_pairs
+        tracked_article_section_pairs = [TrackedArticleSectionPairGen2(**a, status="undetermined", iteration=0) for a in article_section_pairs]
+        del article_section_pairs
 
         iteration = 0
         while True:
             iteration += 1
-            num_article_section_pairs = len(article_section_pairs)
-            if num_article_section_pairs < _MIN_FILTERING_THRESHOLD:
-                print(f"Skipping filtering section {section_num}/{num_sections} {section!r} in iteration {iteration} because it has {num_article_section_pairs} articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
+
+            num_keepable_article_section_pairs = sum(1 for a in tracked_article_section_pairs if (a["status"] in ("kept", "undetermined")))
+            if num_keepable_article_section_pairs < _MIN_FILTERING_THRESHOLD:
+                print(f"Skipping filtering section {section_num}/{num_sections} {section!r} in iteration {iteration} because it has {num_keepable_article_section_pairs} keepable articles which is less than the minimum filtering threshold of {_MIN_FILTERING_THRESHOLD}.")
+                for a in tracked_article_section_pairs:
+                    if a["status"] == "undetermined":
+                        a.update({"status": "kept", "iteration": iteration})
                 break
 
-            num_article_section_pairs_used, numbered_removed_article_section_pairs = _filter_articles(user_query, source_module, sections=sections, section=section, articles=article_section_pairs)
-            removed_article_section_pairs = list(numbered_removed_article_section_pairs.values())
-            assert num_article_section_pairs_used <= num_article_section_pairs
-            num_article_section_pairs_unused = num_article_section_pairs - num_article_section_pairs_used
-            num_article_section_pairs_removed = len(removed_article_section_pairs)
-            for removed_article_section_pair in removed_article_section_pairs:
-                article_section_pairs.remove(removed_article_section_pair)
-            removed_articles_str = "\n".join([f"s{section_num}.i{iteration}.a{a_num}.{num}: {a['article']['title']} (r={a["section"]["rating"]})" for num, (a_num, a) in enumerate(numbered_removed_article_section_pairs.items(), start=1)])
-            removed_articles_suffix_str = f":\n{tab_indent(removed_articles_str)}" if removed_articles_str else "."
-            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, removing {num_article_section_pairs_removed} articles out of {num_article_section_pairs_used} used articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles{removed_articles_suffix_str}")
-            kept_articles_head_str = "\n".join([f"s{section_num}.i{iteration}.{num}: {a['article']['title']} (r={a['section']['rating']})" for num, a in enumerate(article_section_pairs[:num_article_section_pairs_used][:20], start=1)])
-            print(f"Top kept articles:\n{tab_indent(kept_articles_head_str)}")
+            unfiltered_article_section_pairs = [a for a in tracked_article_section_pairs if a["status"] == "undetermined"]
+            if not unfiltered_article_section_pairs:
+                print(f"No unfiltered articles remain for section {section_num}/{num_sections} {section!r} in iteration {iteration}.")
+                break
+
+            input(f"Press Enter before filtering section {section_num}/{num_sections} {section!r}...")  # TODO: Remove this line.
+            _filter_articles(user_query, source_module, sections=sections, section=section, articles=unfiltered_article_section_pairs, batch_num=iteration)  # Note: This should effectively update tracked_article_section_pairs in-place.
+            # Note: Previously filtered articles are not included in the call to _filter_articles because:
+            # 1. They have already been filtered once.
+            # 2. Filtering them again is very cost prohibitive. Only the big model can filter articles, and it can be very expensive to include the filtered articles repeatedly when there are many articles.
+
+            num_article_section_pairs_curr = len(unfiltered_article_section_pairs)
+            num_article_section_pairs_by_status = collections.Counter(a["status"] for a in unfiltered_article_section_pairs)
+            num_article_section_pairs_used = num_article_section_pairs_by_status['kept'] + num_article_section_pairs_by_status['removed']
+            num_article_section_pairs_unused = num_article_section_pairs_by_status['undetermined']
+            assert (num_article_section_pairs_used + num_article_section_pairs_unused == num_article_section_pairs_curr), (num_article_section_pairs_used, num_article_section_pairs_unused, num_article_section_pairs_curr)
+
+            printable_samples = []
+            sample_status = None
+            for a_num, a in enumerate(tracked_article_section_pairs, start=1):
+                if (a['iteration'] != iteration) or (a["status"] == sample_status):
+                    continue
+                sample_status = a["status"]
+                printable_sample = f"[{sample_status[0]}] s{section_num}.i{iteration}.a{a_num}: {a['article']['title']} (r={a["section"]["rating"]})"
+                printable_samples.append(printable_sample)
+            printable_samples_str = "\n".join([tab_indent(s) for s in printable_samples])
+
+            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, keeping {num_article_section_pairs_by_status['kept']} and removing {num_article_section_pairs_by_status['removed']} articles out of {num_article_section_pairs_used} used and {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs_curr} current articles out of {num_article_section_pairs} section articles out of {num_articles} total articles. Sample outputs ({len(printable_samples)}):\n{printable_samples_str}")
 
             if num_article_section_pairs_unused == 0:
                 break
-            if (num_article_section_pairs_removed == 0) and (num_article_section_pairs_unused > 0):
+            if (num_article_section_pairs_by_status['removed'] == 0) and (num_article_section_pairs_unused > 0):
                 print_warning(f"Aborting filtering section {section_num}/{num_sections} {section!r} after iteration {iteration} with {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs} supplied articles out of {num_articles} total articles.")
                 break
 
-        if not article_section_pairs:
-            print_warning(f"No articles remain for section {section_num}/{num_sections} {section!r}.")
+        kept_article_section_pairs = [ArticleSectionPairGen2(article=a["article"], section=a["section"]) for a in tracked_article_section_pairs if a["status"] == "kept"]
+        msg = f"Section {section_num}/{num_sections} {section!r} has {len(kept_article_section_pairs)} out {num_article_section_pairs} articles that remain."
+        printer = print if kept_article_section_pairs else print_warning
+        printer(msg)
+        return kept_article_section_pairs
 
-        return article_section_pairs
-
-    max_workers = min(6, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # Limited to 6 because 8 resulted in an error of exceeding token usage.
+    max_workers = min(1, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # TOOD: Replace 1 with 8.
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}

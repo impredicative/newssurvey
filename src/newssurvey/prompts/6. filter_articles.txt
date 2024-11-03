@@ -1,15 +1,15 @@
 In this step of the workflow, you are given:
 1. The list of section names of a research report which is to eventually be written in the context of the user's query.
 2. A single section name (from the above list) for which articles are to be filtered in the current step.
-3. The concatenated condensed texts of numerous relevant articles that you are to filter for the purpose of writing the aforementioned section in the context of the user's query. The condensed texts are sorted by their estimated relevance to the section name in descending order, implying that those with a higher estimated relevance are sorted higher.
+3. The concatenated condensed texts of numerous relevant articles that you are to filter for the purpose of writing the aforementioned section in the context of the user's query. The condensed texts are sorted by their estimated relevance to the section name in descending order, implying that those with a higher estimated relevance are sorted higher. If there are a lot of articles, you will be given a batch at a time.
 
-Your task is to filter the available articles, keeping those that you want to use for writing the aforementioned section, and removing those that will not contribute in any way to the section. If uncertain about an article, prefer to keep it for now, as there is no quota to meet. In a later step, you will be asked to actually write the named section using the kept article texts. The user's well-being may depend on the appropriateness of your filtering.
+Your task is to filter the given articles, keeping those that you want to use for writing the aforementioned section, and removing those that will not contribute in any way to the section. If uncertain about an article, prefer to keep it for now, as there is no removal quota to meet. In a later step, you will be asked to actually write the named section using the kept article texts. The user's well-being may depend on the appropriateness of your filtering.
 
 The purpose of this task is twofold:
 1. It is to focus the context that you will have to work with in a later step to what's useful.
 2. If there are a lot of articles, it is also to allow every article a consideration for inclusion in the aforesaid context.
 
-Be sure to have properly read and understood all article texts before you start filtering. This will allow you to consider them in a broader context, identifying which ones could be useful together and which aren't. Because the articles are already sorted by their estimated relevance from highest to lowest, it is expected that the higher ones are more likely to be kept, although it's up to you to make the decision for each article. When reading the article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to concrete evidence, data, and results instead.
+Be sure to have properly read and understood all article texts before you start filtering. This could allow you to consider them in a broader context, identifying which ones could be useful together and which aren't, albeit limited to what's visible in the current batch. Because the articles are already sorted by their estimated relevance from highest to lowest, it is expected that the higher ones are more likely to be kept, although it's up to you to make the decision for each article. When reading the article texts, do not be biased by mere opinions even if they are by so-called experts. Opinions are a dime a dozen, and even experts can have undeclared conflicts of interest. Objectively look to concrete evidence, data, and results instead.
 
 Additional considerations:
 1. Each article's text may optionally include its publication date which should inform you of its relative recency. All else being equal, newer articles could prove slightly more relevant than older ones, although this will typically be secondary to their content.
@@ -43,7 +43,7 @@ Consider these examples of the output that is required:
 * If your response was "REMOVE: 8", only the numbered article will be removed, and all others will be kept.
 * Iff all articles were to be kept, just say "REMOVE: none" as a special case.
 
-In general, if given just a few input articles, the need to remove articles is somewhat lower. Conversely, if given many input articles, the need to remove irrelevant articles is somewhat higher.
+In general, if there are just a few input articles, the need to remove articles is somewhat lower. Conversely, if there are many input articles, the need to remove irrelevant articles is somewhat higher.
 
 ## Data
 The list of {num_sections} section names of the report is:
@@ -52,6 +52,6 @@ The list of {num_sections} section names of the report is:
 
 The current section is: {section}
 
-The {num_articles} condensed article texts are below:
+The {num_articles} condensed article texts of batch #{batch_num} are below:
 
 {articles}
