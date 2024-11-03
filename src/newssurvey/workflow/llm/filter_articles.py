@@ -212,8 +212,9 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
             if not unfiltered_article_section_pairs:
                 print(f"No unfiltered articles remain for section {section_num}/{num_sections} {section!r} in iteration {iteration}.")
                 break
-
-            input(f"Press Enter before filtering section {section_num}/{num_sections} {section!r}...")  # TODO: Remove this line.
+            
+            if iteration > 1:
+                input(f"Press Enter before filtering section {section_num}/{num_sections} {section!r}...")  # TODO: Remove this line.
             _filter_articles(user_query, source_module, sections=sections, section=section, articles=unfiltered_article_section_pairs, batch_num=iteration)  # Note: This should effectively update tracked_article_section_pairs in-place.
             # Note: Previously filtered articles are not included in the call to _filter_articles because:
             # 1. They have already been filtered once.
@@ -235,7 +236,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
                 printable_samples.append(printable_sample)
             printable_samples_str = "\n".join([tab_indent(s) for s in printable_samples])
 
-            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, keeping {num_article_section_pairs_by_status['kept']} and removing {num_article_section_pairs_by_status['removed']} articles out of {num_article_section_pairs_used} used and {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs_curr} current articles out of {num_article_section_pairs} section articles out of {num_articles} total articles. Sample outputs ({len(printable_samples)}):\n{printable_samples_str}")
+            print(f"Filtered section {section_num}/{num_sections} {section!r} in iteration {iteration}, keeping {num_article_section_pairs_by_status['kept']} and removing {num_article_section_pairs_by_status['removed']} articles out of {num_article_section_pairs_used} used and {num_article_section_pairs_unused} unused articles out of {num_article_section_pairs_curr} current articles out of {num_article_section_pairs} section articles out of {num_articles} total articles. Sample statuses ({len(printable_samples)}):\n{printable_samples_str}")
 
             if num_article_section_pairs_unused == 0:
                 break
