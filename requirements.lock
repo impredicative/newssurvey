@@ -44,14 +44,14 @@ idna==3.10
     # via anyio
     # via httpx
     # via requests
-jiter==0.6.1
+jiter==0.7.0
     # via openai
 locket==1.0.0
     # via newssurvey
-numpy==2.1.2
+numpy==2.1.3
     # via newssurvey
     # via scipy
-openai==1.52.2
+openai==1.53.0
     # via newssurvey
 pathvalidate==3.2.1
     # via newssurvey
@@ -78,7 +78,7 @@ sniffio==1.3.1
     # via openai
 tiktoken==0.8.0
     # via newssurvey
-tqdm==4.66.5
+tqdm==4.66.6
     # via openai
 typing-extensions==4.12.2
     # via openai
