@@ -249,7 +249,7 @@ def filter_articles(user_query: str, source_module: ModuleType, *, articles: lis
         printer(msg)
         return kept_article_section_pairs
 
-    max_workers = min(1, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # TODO: Replace 1 with 8.
+    max_workers = min(1, MAX_DISKCACHE_WORKERS, MAX_OPENAI_WORKERS)  # TODO: Remove 1.
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         sections_to_futures = {section: executor.submit(process_section, section_num, section) for section_num, section in enumerate(sections, start=1)}
         sections_to_articles: dict[str, list[ArticleSectionPairGen2]] = {section: sections_to_futures[section].result() for section in sections}
