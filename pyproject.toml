@@ -1,6 +1,6 @@
 [project]
 name = "newssurvey"
-version = "0.7.2"
+version = "0.8.0"
 description = "Write a survey report using a supported news site and GPT-4 LLM "
 authors = [
     { name = "Ouroboros Chrysopoeia", email = "impredicative@users.noreply.github.com" }
