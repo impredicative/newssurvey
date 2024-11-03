@@ -49,9 +49,6 @@ These generated sample are available in HTML format.
 | physorg       | dark matter theories            | [Comprehensive Exploration of Dark Matter Theories and Alternatives](https://impredicative.github.io/newssurvey/samples/2024-09-17T15%3A36%3A56%20Comprehensive%20Exploration%20of%20Dark%20Matter%20Theories%20and%20Alternatives.html) |
 | physorg       | multiverse theories            | [Exploring Multiverse Theories: Concepts, Evidence, and Implications](https://impredicative.github.io/newssurvey/samples/2024-09-30T14%3A41%3A50%20Exploring%20Multiverse%20Theories%3A%20Concepts%2C%20Evidence%2C%20and%20Implications.html) |
 
-
-As additional news sources are supported, samples based on them are intended to be added.
-
 ## Setup
 
 ### Common setup
