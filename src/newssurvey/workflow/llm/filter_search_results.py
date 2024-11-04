@@ -43,7 +43,7 @@ def _is_response_valid(response: str, num_search_results: int) -> bool:
         print_error(f"Response is invalid because it has more entries ({num_responses}) than expected for the search results ({num_search_results}): {response!r}")
         return False
 
-    seen = set()
+    # seen = set()
     for count, response in enumerate(responses, start=1):
         assert response.isdigit()  # This is already checked by the regex.
         number = int(response)
@@ -52,10 +52,11 @@ def _is_response_valid(response: str, num_search_results: int) -> bool:
             print_error(f"Response #{count} has a value of {number} which is invalid because it is greater than the number of search results ({num_search_results}): {response!r}")
             return False
 
-        if number in seen:
-            print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {responses!r}")
-            return False
-        seen.add(number)
+        # Note: This fails sometimes with 0 when using the small gpt-4o-mini-2024-07-18 model. It is not strictly necessary.
+        # if number in seen:
+        #     print_error(f"Response #{count} has a value of {number} which is invalid because it is a duplicate: {responses!r}")
+        #     return False
+        # seen.add(number)
 
         # Note: This fails sometimes when using the small gpt-4o-mini-2024-07-18 model. It is not strictly necessary.
         # if number < max(seen):
@@ -104,6 +105,7 @@ def _filter_search_results(user_query: str, source_module: ModuleType, *, result
     responses = response.split(" ")
     responses = [int(r) for r in responses]
     responses = [r for r in responses if (r != 0)]
+    response = list(dict.fromkeys(responses))  # Removes duplicates.
     responses.sort()
     filtered_results = [results[r - 1] for r in responses]
     return filtered_results
