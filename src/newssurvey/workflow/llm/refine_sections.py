@@ -78,6 +78,7 @@ def refine_sections(user_query: str, source_module: ModuleType, *, sections: lis
         if iteration > max_iterations:
             raise LanguageModelOutputConvergenceError(f"Failed to converge refining section names after {max_iterations} iterations.")
         num_old_sections = len(sections)
+        print(f"Refining section names in {iteration=}/{max_iterations}.")
         new_sections = _refine_sections(user_query, source_module, sections=sections, titles=titles, max_sections=max_sections)
         assert new_sections
         num_new_sections = len(new_sections)
