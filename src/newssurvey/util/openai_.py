@@ -26,8 +26,8 @@ _DISKCACHE = get_diskcache(__file__, size_gib=CACHE_SIZES_GiB["medium"])
 MODELS = {  # Ref: https://platform.openai.com/docs/models/
     "text": {
         "deprecated": "gpt-4-0125-preview",  # Note: Can require more prompt tuning for successful use. gpt-4-turbo-2024-04-09 is worse.
-        "large": "gpt-4o-2024-08-06",
-        "large_previous": "gpt-4o-2024-05-13",  # For token measurement purposes.
+        "large": "gpt-4o-2024-11-20",
+        "large_previous": "gpt-4o-2024-08-06",  # For token measurement purposes.
         "small": "gpt-4o-mini-2024-07-18",
     },
     "embedding": {
@@ -40,14 +40,14 @@ EmbeddingModelSizeType = Literal["large", "small"]
 
 MAX_INPUT_TOKENS = {
     "gpt-4-0125-preview": 128_000,
+    "gpt-4o-2024-11-20": 128_000,
     "gpt-4o-2024-08-06": 128_000,
-    "gpt-4o-2024-05-13": 128_000,
     "gpt-4o-mini-2024-07-18": 128_000,
 }
 MAX_OUTPUT_TOKENS = {
     "gpt-4-0125-preview": 4096,
-    "gpt-4o-2024-08-06": 16_384,
-    "gpt-4o-2024-05-13": 4096,
+    "gpt-4o-2024-11-20": 16_384,
+    "gpt-4o-2024-08-06": 4096,
     "gpt-4o-mini-2024-07-18": 16_384,
 }
 MAX_OPENAI_WORKERS = 16
