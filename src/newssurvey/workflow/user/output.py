@@ -280,17 +280,17 @@ def format_pdf_output(title: str, sections: list[SectionGen2], citations: list[C
     def replace_citations(text):
         return CITATION_GROUP_PATTERN.sub(lambda match: "<super>" + "".join([f'[<a href="#citation_{num.strip()}">{num.strip()}</a>]' for num in match.group(1).split(",")]) + "</super>", text)
 
-    num_sections = len(sections)
     for section_num, section in enumerate(sections, start=1):
         story += [Paragraph(f'{section_num}. <a name="section_{section_num}"/>{section["title"]}', styles["Heading1"]), Spacer(1, 12)]
         paragraphs = replace_citations(section["text"]).split("\n\n")
         num_paragraphs = len(paragraphs)
         for para_num, para_text in enumerate(paragraphs, start=1):
             story.append(Paragraph(para_text, styles["Normal"]))
-            if (section_num != num_sections) or (para_num != num_paragraphs):
+            if para_num < num_paragraphs:
                 story.append(Spacer(1, 12))
+        story.append(PageBreak())
 
-    story += [PageBreak(), Paragraph('<a name="references"/>References', styles["Heading1"]), Spacer(1, 12)]
+    story += [Paragraph('<a name="references"/>References', styles["Heading1"]), Spacer(1, 12)]
 
     num_citations = len(citations)
     for citation_num, citation in enumerate(citations, start=1):
