@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 import tiktoken
 
-from newssurvey.util.openai_ import MAX_INPUT_TOKENS, MAX_OUTPUT_TOKENS
+from newssurvey.util.openai_ import MAX_CONTEXT_TOKENS, MAX_OUTPUT_TOKENS
 
 HEADER_TOKENS_PER_MESSAGE: int = 4  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.
 FOOTER_TOKENS: int = 2  # Estimate as per https://platform.openai.com/docs/advanced-usage/managing-tokens.
@@ -38,9 +38,9 @@ def calc_input_token_usage(text: str, *, model: str, num_output_tokens: Optional
     else:
         assert 1 <= num_output_tokens <= MAX_OUTPUT_TOKENS[model], (num_output_tokens, MAX_OUTPUT_TOKENS[model])
 
-    assert MAX_INPUT_TOKENS[model] >= num_output_tokens
+    assert MAX_CONTEXT_TOKENS[model] >= num_output_tokens
 
-    usable_tokens = max(0, MAX_INPUT_TOKENS[model] - num_output_tokens - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
+    usable_tokens = max(0, MAX_CONTEXT_TOKENS[model] - num_output_tokens - (HEADER_TOKENS_PER_MESSAGE * 2) - FOOTER_TOKENS)
     return {"used_tokens": used_tokens, "usable_tokens": usable_tokens}
 
 

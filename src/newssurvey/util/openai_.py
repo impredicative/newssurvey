@@ -38,7 +38,7 @@ MODELS = {  # Ref: https://platform.openai.com/docs/models/
 TextModelSizeType = Literal["large", "small"]
 EmbeddingModelSizeType = Literal["large", "small"]
 
-MAX_INPUT_TOKENS = {
+MAX_CONTEXT_TOKENS = {
     "gpt-4-0125-preview": 128_000,
     "gpt-4o-2024-11-20": 128_000,
     "gpt-4o-2024-08-06": 128_000,
