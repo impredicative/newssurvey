@@ -53,7 +53,7 @@ numpy==2.2.1
     # via scipy
 openai==1.58.1
     # via newssurvey
-pathvalidate==3.2.1
+pathvalidate==3.2.2
     # via newssurvey
 pillow==11.0.0
     # via reportlab
