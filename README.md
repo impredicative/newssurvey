@@ -41,11 +41,11 @@ Due to the LLM's context window limitation of 128K, only up to about 400 condens
 These generated sample are available in HTML format.
 
 
-| Source        | User query (simplified)               | Output title |
+| Source        | User query topic               | Output title |
 |---------------|---------------------------------------|--------------|
 | medicalxpress | nutrition for anxiety                 | [Nutritional Approaches and Supplements for Managing Anxiety in Adults: An Evidence-Based Review](https://impredicative.github.io/newssurvey/samples/outputs/2024-11-03T06%3A50%3A16%20Nutritional%20Approaches%20and%20Supplements%20for%20Managing%20Anxiety%20in%20Adults%3A%20An%20Evidence-Based%20Review.html) |
 | medicalxpress | daytime drowsiness                    | [Addressing Daytime Drowsiness: Causes, Effects, and Solutions for Improved Nighttime Sleep](https://impredicative.github.io/newssurvey/samples/outputs/2024-11-03T07%3A11%3A55%20Addressing%20Daytime%20Drowsiness%3A%20Causes%2C%20Effects%2C%20and%20Solutions%20for%20Improved%20Nighttime%20Sleep.html) |
-| medicalxpress | acid reflux treatments            | [Comprehensive Approaches to Managing GERD: Lifestyle, Diet, and Innovative Therapies](https://impredicative.github.io/newssurvey/samples/outputs/2024-11-03T07%3A39%3A10%20Comprehensive%20Approaches%20to%20Managing%20GERD%3A%20Lifestyle%2C%20Diet%2C%20and%20Innovative%20Therapies.html) |
+| medicalxpress | [acid reflux management](https://impredicative.github.io/newssurvey/samples/queries/acid%20reflux%20management.txt)            | [Comprehensive Approaches to Managing GERD: Lifestyle, Diet, and Innovative Therapies](https://impredicative.github.io/newssurvey/samples/outputs/2025-01-21T00%3A39%3A45%20Comprehensive%20Insights%20into%20Managing%20Acid%20Reflux%2C%20Esophageal%20Health%2C%20and%20GERD%20Prevention%20Strategies.html) |
 | physorg       | dark matter theories            | [Comprehensive Exploration of Dark Matter Theories and Detection Approaches](https://impredicative.github.io/newssurvey/samples/outputs/2024-11-03T17%3A02%3A59%20Comprehensive%20Exploration%20of%20Dark%20Matter%20Theories%20and%20Detection%20Approaches.html) |
 | physorg       | multiverse theories            | [Exploring Multiverse Theories: Concepts, Evidence, and Implications](https://impredicative.github.io/newssurvey/samples/outputs/2024-11-03T07%3A57%3A06%20Exploring%20Multiverse%20Theories%3A%20Concepts%2C%20Evidence%2C%20and%20Implications.html) |
 
