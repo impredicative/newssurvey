@@ -28,9 +28,11 @@ def is_search_terms_list_valid(terms: list[str]) -> bool:  # Also used by accumu
             print_error(f"Search term is invalid because it has a leading bullet prefix: {term}")
             return False
 
-        if term in seen:
-            print_error(f"Search term is invalid because it is a duplicate: {term}")
-            return False
+        # if term in seen:
+        #     print_error(f"Search term is invalid because it is a duplicate: {term}")
+        #     return False
+        # Note: This check is disabled because duplicates are handled in code.
+
         seen.add(term)
 
     return True
@@ -62,6 +64,7 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
         raise LanguageModelOutputRejectionError(response.removeprefix(error_prefix))
 
     terms = [t.strip() for t in response.splitlines()]
+    terms = list(dict.fromkeys(terms))  # Removes duplicates.
     error = io.StringIO()
     with contextlib.redirect_stderr(error):
         if not is_search_terms_list_valid(terms):
@@ -69,4 +72,5 @@ def list_search_terms(user_query: str, source_module: ModuleType) -> list[str]:
             raise LanguageModelOutputStructureError(error)
 
     assert terms
+    assert len(terms) == len(set(terms))  # Ensures no duplicates.
     return terms

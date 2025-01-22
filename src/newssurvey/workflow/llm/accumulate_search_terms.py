@@ -13,6 +13,7 @@ from newssurvey.workflow.llm.list_search_terms import is_search_terms_list_valid
 def _accumulate_search_terms(user_query: str, source_module: ModuleType, search_terms: list[str], max_attempts: int = 3) -> list[str]:
     """Return the accumulated search terms."""
     assert search_terms
+    assert len(search_terms) == len(set(search_terms))  # Ensures no duplicates.
 
     prompt_data = {"user_query": user_query, "source_site_name": source_module.SOURCE_SITE_NAME, "source_type": source_module.SOURCE_TYPE}
     prompt_data["task"] = PROMPTS["1.2. accumulate_search_terms"].format(**prompt_data, num_terms=len(search_terms), terms="\n".join(search_terms))
@@ -27,6 +28,7 @@ def _accumulate_search_terms(user_query: str, source_module: ModuleType, search_
         new_terms = [t.strip() for t in response.splitlines()]
         new_terms = [t for t in new_terms if t]
         new_terms = [t for t in new_terms if not is_none_response(t)]
+        new_terms = list(dict.fromkeys(new_terms))  # Removes duplicates.
         new_terms = [t for t in new_terms if t not in search_terms]
 
         if not new_terms:
@@ -46,6 +48,7 @@ def _accumulate_search_terms(user_query: str, source_module: ModuleType, search_
         break
 
     assert new_terms
+    assert len(new_terms) == len(set(new_terms))  # Ensures no duplicates.
     return new_terms
 
 
@@ -64,6 +67,7 @@ def accumulate_search_terms(user_query: str, source_module: ModuleType, search_t
         # Note: It is useful for the order of search_terms to be preserved as is.
         new_search_terms = _accumulate_search_terms(user_query, source_module, search_terms)
         search_terms.extend(new_search_terms)
+        assert len(search_terms) == len(set(search_terms))  # Ensures no duplicates.
         print(f"Search terms counts: {iteration=} original={num_original_search_terms} old={num_old_search_terms} new={len(new_search_terms)}, total={len(search_terms)}")
         if new_search_terms:
             print(f"New search terms ({len(new_search_terms)}) in iteration {iteration}: " + ", ".join(new_search_terms))
@@ -71,4 +75,5 @@ def accumulate_search_terms(user_query: str, source_module: ModuleType, search_t
             break
         iteration += 1
 
+    assert search_terms
     return search_terms
